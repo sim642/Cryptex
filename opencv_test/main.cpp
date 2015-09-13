@@ -1,5 +1,6 @@
 #include <iostream>
 #include <opencv2/opencv.hpp>
+#include <algorithm>
 
 using namespace std;
 using namespace cv;
@@ -33,6 +34,12 @@ int main()
     createTrackbar("vmin", "Video 1", &lower[2], 255);
     createTrackbar("vmax", "Video 1", &upper[2], 255);
 
+    SimpleBlobDetector::Params params;
+    params.filterByColor = true;
+    params.blobColor = 255;
+    params.filterByArea = false;
+    Ptr<SimpleBlobDetector> detector = SimpleBlobDetector::create(params);
+
     while (1)
     {
         Mat frame;
@@ -51,7 +58,24 @@ int main()
 
         Mat filtered;
         frame.copyTo(filtered, mask);
-        imshow("Video 1", filtered);
+
+        vector<KeyPoint> keypoints;
+        detector->detect(mask, keypoints);
+
+        auto largest = max_element(keypoints.begin(), keypoints.end(), [](const KeyPoint &lhs, const KeyPoint &rhs)
+        {
+            return lhs.size < rhs.size;
+        });
+
+        Mat keyImg;
+        filtered.copyTo(keyImg);
+
+        if (largest != keypoints.end())
+            circle(keyImg, largest->pt, largest->size / 2, Scalar(255, 0, 255), 5);
+
+        //drawKeypoints(filtered, keypoints, keyImg, Scalar(0, 0, 255), DrawMatchesFlags::DRAW_RICH_KEYPOINTS);
+
+        imshow("Video 1", keyImg);
 
         auto key = waitKey(30);
         switch (key)
