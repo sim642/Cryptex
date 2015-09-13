@@ -18,12 +18,12 @@ int main()
 
     bool mirror_h = false, mirror_v = false;
 
-    pair<int, int> hval(0, 255);
+    pair<int, int> hval(0, 179);
     pair<int, int> sval(0, 255);
     pair<int, int> vval(0, 255);
 
-    createTrackbar("hmin", "Video 1", &hval.first, 255);
-    createTrackbar("hmax", "Video 1", &hval.second, 255);
+    createTrackbar("hmin", "Video 1", &hval.first, 179);
+    createTrackbar("hmax", "Video 1", &hval.second, 179);
     createTrackbar("smin", "Video 1", &sval.first, 255);
     createTrackbar("smax", "Video 1", &sval.second, 255);
     createTrackbar("vmin", "Video 1", &vval.first, 255);
