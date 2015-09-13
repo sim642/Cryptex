@@ -34,10 +34,15 @@ int main()
     createTrackbar("vmin", "Video 1", &lower[2], 255);
     createTrackbar("vmax", "Video 1", &upper[2], 255);
 
+    namedWindow("Video 2");
+
     SimpleBlobDetector::Params params;
     params.filterByColor = true;
     params.blobColor = 255;
     params.filterByArea = false;
+    params.filterByCircularity = false;
+    params.filterByConvexity = false;
+    params.filterByInertia = true;
     Ptr<SimpleBlobDetector> detector = SimpleBlobDetector::create(params);
 
     while (1)
@@ -55,6 +60,11 @@ int main()
 
         Mat mask;
         inRange(hsv, Scalar(lower), Scalar(upper), mask);
+        auto structuring = getStructuringElement(MORPH_ELLIPSE, Size(7, 7));
+        dilate(mask, mask, structuring);
+        erode(mask, mask, structuring);
+
+        imshow("Video 2", mask);
 
         Mat filtered;
         frame.copyTo(filtered, mask);
