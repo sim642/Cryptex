@@ -16,11 +16,33 @@ int main()
 
     namedWindow("Video 1");
 
-    Mat frame;
-    cap >> frame;
-    imshow("Video 1", frame);
+    bool mirror_h = false, mirror_v = false;
 
-    waitKey(0);
+    while (1)
+    {
+        Mat frame;
+        cap >> frame;
+
+        if (mirror_h)
+            flip(frame, frame, 1);
+        if (mirror_v)
+            flip(frame, frame, 0);
+
+        imshow("Video 1", frame);
+
+        auto key = waitKey(30);
+        switch (key)
+        {
+            case 27: // ESC
+                return EXIT_SUCCESS;
+            case 'h':
+                mirror_h ^= 1;
+                break;
+            case 'v':
+                mirror_v ^= 1;
+                break;
+        }
+    }
 
     return EXIT_SUCCESS;
 }
