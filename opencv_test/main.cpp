@@ -41,14 +41,14 @@ int main()
 
         Mat hsv;
         cvtColor(frame, hsv, CV_BGR2HSV);
-        Mat lower(hsv.size(), CV_8UC3, Scalar(hval.first, sval.first, vval.first));
-        Mat upper(hsv.size(), CV_8UC3, Scalar(hval.second, sval.second, vval.second));
+        auto lower = Scalar(hval.first, sval.first, vval.first);
+        auto upper = Scalar(hval.second, sval.second, vval.second);
 
         Mat mask;
         inRange(hsv, lower, upper, mask);
 
         Mat filtered;
-        bitwise_and(frame, frame, filtered, mask);
+        frame.copyTo(filtered, mask);
         imshow("Video 1", filtered);
 
         auto key = waitKey(30);
