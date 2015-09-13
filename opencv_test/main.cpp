@@ -17,9 +17,17 @@ int main()
     namedWindow("Video 1");
 
     bool mirror_h = false, mirror_v = false;
-    int thres = 127;
 
-    createTrackbar("thres", "Video 1", &thres, 255);
+    pair<int, int> hval(0, 255);
+    pair<int, int> sval(0, 255);
+    pair<int, int> vval(0, 255);
+
+    createTrackbar("hmin", "Video 1", &hval.first, 255);
+    createTrackbar("hmax", "Video 1", &hval.second, 255);
+    createTrackbar("smin", "Video 1", &sval.first, 255);
+    createTrackbar("smax", "Video 1", &sval.second, 255);
+    createTrackbar("vmin", "Video 1", &vval.first, 255);
+    createTrackbar("vmax", "Video 1", &vval.second, 255);
 
     while (1)
     {
@@ -31,15 +39,23 @@ int main()
         if (mirror_v)
             flip(frame, frame, 0);
 
-        Mat gray(frame.size(), CV_8UC1);
-        cvtColor(frame, gray, CV_BGR2GRAY);
-        threshold(gray, gray, thres, 255, THRESH_BINARY);
-        imshow("Video 1", gray);
+        Mat hsv;
+        cvtColor(frame, hsv, CV_BGR2HSV);
+        Mat lower(hsv.size(), CV_8UC3, Scalar(hval.first, sval.first, vval.first));
+        Mat upper(hsv.size(), CV_8UC3, Scalar(hval.second, sval.second, vval.second));
+
+        Mat mask;
+        inRange(hsv, lower, upper, mask);
+
+        Mat filtered;
+        bitwise_and(frame, frame, filtered, mask);
+        imshow("Video 1", filtered);
 
         auto key = waitKey(30);
         switch (key)
         {
             case 27: // ESC
+            case 'q':
                 return EXIT_SUCCESS;
             case 'h':
                 mirror_h ^= 1;
