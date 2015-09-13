@@ -19,7 +19,7 @@ int main()
 
     bool mirror_h = false, mirror_v = false;
 
-    Scalar_<int> lower(0, 0, 0), upper(179, 255, 255);
+    Scalar_<int> lower(0, 0, 0), upper(179, 255, 255), maxs(179, 255, 255);
 
     {
         FileStorage fs("calib.yml", FileStorage::READ);
@@ -27,12 +27,12 @@ int main()
         fs["upper"] >> upper;
     }
 
-    createTrackbar("hmin", "Video 1", &lower[0], 179);
-    createTrackbar("hmax", "Video 1", &upper[0], 179);
-    createTrackbar("smin", "Video 1", &lower[1], 255);
-    createTrackbar("smax", "Video 1", &upper[1], 255);
-    createTrackbar("vmin", "Video 1", &lower[2], 255);
-    createTrackbar("vmax", "Video 1", &upper[2], 255);
+    string chans = "HSV";
+    for (int i = 0; i < chans.size(); i++)
+    {
+        createTrackbar(string(1, chans[i]) + string("min"), "Video 1", &lower[i], maxs[i]);
+        createTrackbar(string(1, chans[i]) + string("max"), "Video 1", &upper[i], maxs[i]);
+    }
 
     namedWindow("Video 2");
 
