@@ -37,7 +37,10 @@
 			<Add option="-lopencv_core" />
 			<Add option="-lopencv_highgui" />
 			<Add option="-lopencv_videoio" />
+			<Add option="-lopencv_imgproc" />
+			<Add option="-lopencv_features2d" />
 		</Linker>
+		<Unit filename="calib.yml" />
 		<Unit filename="main.cpp" />
 		<Extensions>
 			<code_completion />
