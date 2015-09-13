@@ -42,6 +42,9 @@ int main()
                 mirror_v ^= 1;
                 break;
         }
+
+        auto pixel = frame.at<Vec3b>(0, 0);
+        cout << int(pixel[0]) << "\t" << int(pixel[1]) << "\t" << int(pixel[2]) << endl;
     }
 
     return EXIT_SUCCESS;
