@@ -17,6 +17,9 @@ int main()
     namedWindow("Video 1");
 
     bool mirror_h = false, mirror_v = false;
+    int thres = 127;
+
+    createTrackbar("thres", "Video 1", &thres, 255);
 
     while (1)
     {
@@ -28,7 +31,10 @@ int main()
         if (mirror_v)
             flip(frame, frame, 0);
 
-        imshow("Video 1", frame);
+        Mat gray(frame.size(), CV_8UC1);
+        cvtColor(frame, gray, CV_BGR2GRAY);
+        threshold(gray, gray, thres, 255, THRESH_BINARY);
+        imshow("Video 1", gray);
 
         auto key = waitKey(30);
         switch (key)
