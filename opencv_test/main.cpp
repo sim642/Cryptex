@@ -60,7 +60,8 @@ int main()
 
         Mat mask;
         inRange(hsv, Scalar(lower), Scalar(upper), mask);
-        auto structuring = getStructuringElement(MORPH_ELLIPSE, Size(7, 7));
+        // closing
+        auto structuring = getStructuringElement(MORPH_ELLIPSE, Size(11, 11));
         dilate(mask, mask, structuring);
         erode(mask, mask, structuring);
 
@@ -87,7 +88,7 @@ int main()
 
         imshow("Video 1", keyImg);
 
-        auto key = waitKey(30);
+        auto key = waitKey(1000 / 60);
         switch (key)
         {
             case 27: // ESC
