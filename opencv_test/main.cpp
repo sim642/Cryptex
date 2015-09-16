@@ -39,7 +39,9 @@ int main()
     SimpleBlobDetector::Params params;
     params.filterByColor = true;
     params.blobColor = 255;
-    params.filterByArea = false;
+    params.filterByArea = true;
+    params.minArea = 100.f;
+    params.maxArea = numeric_limits<float>::max();
     params.filterByCircularity = false;
     params.filterByConvexity = false;
     params.filterByInertia = true;
@@ -88,7 +90,7 @@ int main()
 
         imshow("Video 1", keyImg);
 
-        auto key = waitKey(1000 / 60);
+        char key = waitKey(1000 / 60);
         switch (key)
         {
             case 27: // ESC
