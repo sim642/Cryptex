@@ -36,6 +36,8 @@
 			<Add option="-lboost_system" />
 		</Linker>
 		<Unit filename="main.cpp" />
+		<Unit filename="serial_device.cpp" />
+		<Unit filename="serial_device.hpp" />
 		<Extensions>
 			<code_completion />
 			<debugger />
