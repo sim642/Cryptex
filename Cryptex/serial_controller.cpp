@@ -2,7 +2,7 @@
 
 using namespace std;
 
-serial_controller::serial_controller(boost::asio::serial_port &port) : serial_stream(port)
+serial_controller::serial_controller(boost::asio::io_service &io, const std::string &dev) : port(io, dev), stream(port)
 {
 	port.set_option(boost::asio::serial_port_base::baud_rate(115200));
 }
@@ -14,12 +14,12 @@ serial_controller::~serial_controller()
 
 void serial_controller::send(const std::string &cmd)
 {
-	*this << cmd << endl;
+	stream << cmd << endl;
 }
 
 void serial_controller::send(const std::string &cmd, const int &val)
 {
-	*this << cmd << val << endl;
+	stream << cmd << val << endl;
 }
 
 serial_controller::recv_t serial_controller::send_recv(const std::string &cmd)
@@ -27,7 +27,7 @@ serial_controller::recv_t serial_controller::send_recv(const std::string &cmd)
 	send(cmd);
 
 	std::string line;
-	*this >> line;
+	stream >> line;
 	return parse_recv(line);
 }
 
@@ -36,7 +36,7 @@ serial_controller::recv_t serial_controller::send_recv(const std::string &cmd, c
 	send(cmd, val);
 
 	std::string line;
-	*this >> line;
+	stream >> line;
 	return parse_recv(line);
 }
 

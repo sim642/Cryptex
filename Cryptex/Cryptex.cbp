@@ -30,12 +30,15 @@
 		</Build>
 		<Compiler>
 			<Add option="-std=c++11" />
+			<Add option="-Wextra" />
 			<Add option="-Wall" />
 			<Add option="-fexceptions" />
 		</Compiler>
 		<Linker>
 			<Add option="-lboost_system" />
 		</Linker>
+		<Unit filename="driver.cpp" />
+		<Unit filename="driver.hpp" />
 		<Unit filename="main.cpp" />
 		<Unit filename="motor.cpp" />
 		<Unit filename="motor.hpp" />
@@ -43,6 +46,9 @@
 		<Unit filename="serial_controller.hpp" />
 		<Unit filename="serial_device.cpp" />
 		<Unit filename="serial_device.hpp" />
+		<Unit filename="serial_id.hpp" />
+		<Unit filename="serial_prober.cpp" />
+		<Unit filename="serial_prober.hpp" />
 		<Extensions>
 			<code_completion />
 			<debugger />
