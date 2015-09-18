@@ -29,10 +29,20 @@
 			</Target>
 		</Build>
 		<Compiler>
+			<Add option="-std=c++11" />
 			<Add option="-Wall" />
 			<Add option="-fexceptions" />
 		</Compiler>
+		<Linker>
+			<Add option="-lboost_system" />
+		</Linker>
 		<Unit filename="main.cpp" />
+		<Unit filename="motor.cpp" />
+		<Unit filename="motor.hpp" />
+		<Unit filename="serial_controller.cpp" />
+		<Unit filename="serial_controller.hpp" />
+		<Unit filename="serial_device.cpp" />
+		<Unit filename="serial_device.hpp" />
 		<Extensions>
 			<code_completion />
 			<debugger />
