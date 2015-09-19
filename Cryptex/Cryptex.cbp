@@ -41,6 +41,7 @@
 		<Unit filename="driver.cpp" />
 		<Unit filename="driver.hpp" />
 		<Unit filename="main.cpp" />
+		<Unit filename="math.hpp" />
 		<Unit filename="motor.cpp" />
 		<Unit filename="motor.hpp" />
 		<Unit filename="serial_controller.cpp" />
