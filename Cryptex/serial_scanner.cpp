@@ -36,7 +36,7 @@ void serial_scanner::scan_devices()
 		if (boost::algorithm::starts_with(it->path().filename().string(), "ttyACM"))
 		{
 			cout << it->path().string() << endl;
-			//add_device(it->path().string());
+			add_device(it->path().string());
 		}
 	}
 }

@@ -14,6 +14,7 @@ class driver
 		void straight(const int &speed);
 		void rotate(const int &speed);
 		void omni(const int &speed, const int &angle);
+		void stop();
 
 	private:
 		std::vector<motor> motors;
