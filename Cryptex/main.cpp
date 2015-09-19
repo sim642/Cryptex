@@ -3,7 +3,7 @@
 #include "motor.hpp"
 #include <vector>
 #include <boost/ptr_container/ptr_vector.hpp>
-#include "serial_prober.hpp"
+#include "serial_scanner.hpp"
 #include "driver.hpp"
 
 using namespace std;
@@ -12,10 +12,13 @@ int main()
 {
 	boost::asio::io_service io;
 
-	serial_prober prober(io);
-	prober.add_device("/dev/ttyACM3");
-	prober.add_device("/dev/ttyACM4");
-	prober.add_device("/dev/ttyACM5");
+	serial_scanner scanner(io);
+	scanner.scan_devices();
+
+	return 0;
+	scanner.add_device("/dev/ttyACM3");
+	scanner.add_device("/dev/ttyACM4");
+	scanner.add_device("/dev/ttyACM5");
 
 	/*vector<boost::asio::serial_port> ports;
 	ports.emplace_back(io, "/dev/ttyACM4");
@@ -32,13 +35,13 @@ int main()
 
 	for (int i = 1; i <= 3; i++)
 	{
-		cout << "id " << prober[i]->send_recv("?").second << endl;
+		cout << "id " << scanner[i]->send_recv("?").second << endl;
 	}
 
 	/*vector<motor> motors;
-	motors.emplace_back(*prober[1]);
-	motors.emplace_back(*prober[2]);
-	motors.emplace_back(*prober[3]);*/
+	motors.emplace_back(*scanner[1]);
+	motors.emplace_back(*scanner[2]);
+	motors.emplace_back(*scanner[3]);*/
 
 	/*for (auto &motor : motors)
 	{
@@ -50,7 +53,7 @@ int main()
 	motors[1].drive(0);
 	motors[2].drive(30);*/
 
-	driver d(prober);
+	driver d(scanner);
 	d.straight(30);
 	return 0;
 }

@@ -1,4 +1,5 @@
 #include "serial_controller.hpp"
+#include <string>
 
 using namespace std;
 
@@ -38,6 +39,17 @@ serial_controller::recv_t serial_controller::send_recv(const std::string &cmd, c
 	std::string line;
 	stream >> line;
 	return parse_recv(line);
+}
+
+int serial_controller::id()
+{
+	return stoi(send_recv("?").second);
+}
+
+int serial_controller::id(const int &new_id)
+{
+	send("id", new_id);
+	return id();
 }
 
 serial_controller::recv_t serial_controller::parse_recv(const std::string &line)

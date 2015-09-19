@@ -1,11 +1,11 @@
 #include "driver.hpp"
 #include "serial_id.hpp"
 
-driver::driver(serial_prober &prober)
+driver::driver(serial_scanner &scanner)
 {
-	motors.emplace_back(*prober[motor_left]);
-	motors.emplace_back(*prober[motor_back]);
-	motors.emplace_back(*prober[motor_right]);
+	motors.emplace_back(*scanner[serial_id::motor_left]);
+	motors.emplace_back(*scanner[serial_id::motor_back]);
+	motors.emplace_back(*scanner[serial_id::motor_right]);
 }
 
 driver::~driver()

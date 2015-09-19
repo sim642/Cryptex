@@ -19,6 +19,9 @@ class serial_controller
 		recv_t send_recv(const std::string &cmd);
 		recv_t send_recv(const std::string &cmd, const int &val);
 
+		int id();
+		int id(const int &new_id);
+
 	private:
 		static recv_t parse_recv(const std::string &line);
 

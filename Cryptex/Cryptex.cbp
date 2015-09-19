@@ -36,6 +36,7 @@
 		</Compiler>
 		<Linker>
 			<Add option="-lboost_system" />
+			<Add option="-lboost_filesystem" />
 		</Linker>
 		<Unit filename="driver.cpp" />
 		<Unit filename="driver.hpp" />
@@ -47,8 +48,8 @@
 		<Unit filename="serial_device.cpp" />
 		<Unit filename="serial_device.hpp" />
 		<Unit filename="serial_id.hpp" />
-		<Unit filename="serial_prober.cpp" />
-		<Unit filename="serial_prober.hpp" />
+		<Unit filename="serial_scanner.cpp" />
+		<Unit filename="serial_scanner.hpp" />
 		<Extensions>
 			<code_completion />
 			<debugger />
