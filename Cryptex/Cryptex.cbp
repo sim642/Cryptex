@@ -37,7 +37,14 @@
 		<Linker>
 			<Add option="-lboost_system" />
 			<Add option="-lboost_filesystem" />
+			<Add option="-lopencv_core" />
+			<Add option="-lopencv_highgui" />
+			<Add option="-lopencv_videoio" />
+			<Add option="-lopencv_imgproc" />
+			<Add option="-lopencv_features2d" />
 		</Linker>
+		<Unit filename="blob_finder.cpp" />
+		<Unit filename="blob_finder.hpp" />
 		<Unit filename="driver.cpp" />
 		<Unit filename="driver.hpp" />
 		<Unit filename="main.cpp" />
