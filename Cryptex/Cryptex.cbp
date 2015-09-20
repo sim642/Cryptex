@@ -45,6 +45,8 @@
 		</Linker>
 		<Unit filename="blob_finder.cpp" />
 		<Unit filename="blob_finder.hpp" />
+		<Unit filename="calibrator_window.cpp" />
+		<Unit filename="calibrator_window.hpp" />
 		<Unit filename="driver.cpp" />
 		<Unit filename="driver.hpp" />
 		<Unit filename="main.cpp" />

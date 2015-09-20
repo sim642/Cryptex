@@ -8,6 +8,7 @@
 #include <opencv2/highgui.hpp>
 #include <opencv2/video.hpp>
 #include "blob_finder.hpp"
+#include "calibrator_window.hpp"
 
 using namespace std;
 
@@ -18,14 +19,22 @@ int main()
 	serial_scanner scanner(io);
 	scanner.scan_devices();
 
-	driver d(scanner);
-
-	cv::VideoCapture capture(1);
+	cv::VideoCapture capture(0);
 	if (!capture.isOpened())
 	{
 		cerr << "Failed to open capture" << endl;
 		return EXIT_FAILURE;
 	}
+
+	calibrator_window calibrator(capture, "test");
+	for (string color; (cout << "color: ", cin >> color) && color != "q";)
+	{
+		calibrator.calibrate(color);
+	}
+
+	return 0;
+
+	driver d(scanner);
 
 	blob_finder blobber("oranz.yml");
 	cv::SimpleBlobDetector::Params params;

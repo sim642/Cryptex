@@ -32,17 +32,29 @@ void blob_finder::load_file(const std::string &filename)
 	fs["upper"] >> upper;
 }
 
-cv::KeyPoint blob_finder::largest(const cv::Mat &frame)
+void blob_finder::save_file(const std::string &filename)
+{
+	cv::FileStorage fs(filename, cv::FileStorage::WRITE);
+	fs << "lower" << lower;
+	fs << "upper" << upper;
+}
+
+void blob_finder::threshold(const cv::Mat &frame, cv::Mat &mask)
 {
 	cv::Mat hsv;
 	cv::cvtColor(frame, hsv, CV_BGR2HSV);
 
-	cv::Mat mask;
 	cv::inRange(hsv, cv::Scalar(lower), cv::Scalar(upper), mask);
 
 	auto structuring = cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(11, 11));
 	cv::dilate(mask, mask, structuring);
 	cv::erode(mask, mask, structuring);
+}
+
+cv::KeyPoint blob_finder::largest(const cv::Mat &frame)
+{
+	cv::Mat mask;
+	threshold(frame, mask);
 
 	vector<cv::KeyPoint> keypoints;
 	detector->detect(mask, keypoints);

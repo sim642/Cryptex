@@ -4,6 +4,8 @@
 #include <opencv2/opencv.hpp>
 #include <string>
 
+class calibrator_window;
+
 class blob_finder
 {
 	public:
@@ -16,8 +18,12 @@ class blob_finder
 
 		void init_detector(const cv::SimpleBlobDetector::Params &params);
 		void load_file(const std::string &filename);
+		void save_file(const std::string &filename);
 
+		void threshold(const cv::Mat &frame, cv::Mat &mask);
 		cv::KeyPoint largest(const cv::Mat &frame);
+
+		friend class calibrator_window;
 	private:
 		bounds_t lower, upper;
 		cv::Ptr<cv::SimpleBlobDetector> detector;
