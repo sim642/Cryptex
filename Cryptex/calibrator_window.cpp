@@ -57,5 +57,5 @@ calibrate_quit:
 
 	cv::destroyWindow(window); // BUG: doesn't die immediately
 
-	blobber.save_file(filename);
+	blobber.save_color(filename);
 }

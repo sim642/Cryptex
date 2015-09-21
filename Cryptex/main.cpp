@@ -19,34 +19,26 @@ int main()
 	serial_scanner scanner(io);
 	scanner.scan_devices();
 
-	cv::VideoCapture capture(0);
+	cv::VideoCapture capture(1);
 	if (!capture.isOpened())
 	{
 		cerr << "Failed to open capture" << endl;
 		return EXIT_FAILURE;
 	}
 
-	calibrator_window calibrator(capture, "test");
+	/*calibrator_window calibrator(capture, "test");
 	for (string color; (cout << "color: ", cin >> color) && color != "q";)
 	{
 		calibrator.calibrate(color);
 	}
 
+	return 0;*/
+
+	blob_finder blobber("oranz.yml", "ball.yml");
+
 	return 0;
 
 	driver d(scanner);
-
-	blob_finder blobber("oranz.yml");
-	cv::SimpleBlobDetector::Params params;
-	params.filterByColor = true;
-	params.blobColor = 255;
-	params.filterByArea = true;
-	params.minArea = 5.f;
-	params.maxArea = numeric_limits<float>::max();
-	params.filterByCircularity = false;
-	params.filterByConvexity = false;
-	params.filterByInertia = true;
-	blobber.init_detector(params);
 
 	bool find = false;
 
