@@ -3,6 +3,7 @@
 
 #include <opencv2/opencv.hpp>
 #include <string>
+#include <vector>
 
 class calibrator_window;
 
@@ -26,6 +27,7 @@ class blob_finder
 		void set_params(const cv::SimpleBlobDetector::Params &new_params);
 
 		void threshold(const cv::Mat &frame, cv::Mat &mask);
+		void detect(const cv::Mat &mask, std::vector<cv::KeyPoint> &keypoints);
 		cv::KeyPoint largest(const cv::Mat &frame);
 
 		friend class calibrator_window;

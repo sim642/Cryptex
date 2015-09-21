@@ -13,23 +13,34 @@ calibrator_window::~calibrator_window()
 
 }
 
-void calibrator_window::calibrate(const std::string &color)
+void calibrator_window::calibrate(const std::string &color, const std::string &params)
 {
+	bool param = !params.empty();
+
 	string env_color = env + "/" + color;
-	string window = "calibrate " + env_color;
-	string filename = "./calibs/" + env_color + ".yml";
+	string win_color = "calibrate " + env_color;
+	string filename_color = "./calibs/" + env_color + ".yml";
 
-	cv::namedWindow(window);
+	string win_params = "calibrate " + params;
+	string filename_params = "./calibs/" + params + ".yml";
 
-	blob_finder blobber(filename);
+	cv::namedWindow(win_color);
+	if (param)
+		cv::namedWindow(win_params);
+
+	blob_finder blobber(filename_color);
+	if (param)
+		blobber.load_params(filename_params);
 
 	string channels = "HSV";
 	blob_finder::bounds_t limits(179, 255, 255);
 	for (size_t i = 0; i < channels.size(); i++)
 	{
-		cv::createTrackbar(string(1, channels[i]) + "min", window, &blobber.lower[i], limits[i]);
-		cv::createTrackbar(string(1, channels[i]) + "max", window, &blobber.upper[i], limits[i]);
+		cv::createTrackbar(string(1, channels[i]) + "min", win_color, &blobber.lower[i], limits[i]);
+		cv::createTrackbar(string(1, channels[i]) + "max", win_color, &blobber.upper[i], limits[i]);
 	}
+
+	// TODO: params trackbars
 
 	while (1)
 	{
@@ -42,7 +53,16 @@ void calibrator_window::calibrate(const std::string &color)
 		cv::Mat masked;
 		frame.copyTo(masked, mask);
 
-		cv::imshow(window, masked);
+		cv::imshow(win_color, masked);
+		if (param)
+		{
+			vector<cv::KeyPoint> keypoints;
+			blobber.detect(mask, keypoints);
+
+			cv::Mat key_img;
+			cv::drawKeypoints(mask, keypoints, key_img, cv::Scalar(255, 0, 255), cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS);
+			cv::imshow(win_params, key_img);
+		}
 
 		char key = cv::waitKey(1000 / 60);
 		switch (key)
@@ -55,7 +75,11 @@ void calibrator_window::calibrate(const std::string &color)
 
 calibrate_quit:
 
-	cv::destroyWindow(window); // BUG: doesn't die immediately
+	cv::destroyWindow(win_color); // BUG: doesn't die immediately
+	if (param)
+		cv::destroyWindow(win_params);
 
-	blobber.save_color(filename);
+	blobber.save_color(filename_color);
+	if (param)
+		blobber.save_params(filename_params);
 }

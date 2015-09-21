@@ -11,7 +11,7 @@ class calibrator_window
 		calibrator_window(cv::VideoCapture &new_capture, const std::string &new_env);
 		virtual ~calibrator_window();
 
-		void calibrate(const std::string &color);
+		void calibrate(const std::string &color, const std::string &params);
 	private:
 		cv::VideoCapture capture;
 		std::string env;

@@ -26,18 +26,22 @@ int main()
 		return EXIT_FAILURE;
 	}
 
-	/*calibrator_window calibrator(capture, "test");
-	for (string color; (cout << "color: ", cin >> color) && color != "q";)
+	calibrator_window calibrator(capture, "test");
+	string color, params;
+	while (cout << "calib: ", cin >> color >> params)
 	{
-		calibrator.calibrate(color);
+		if (color == "_")
+			break;
+
+		if (params == "_")
+			params = "";
+
+		calibrator.calibrate(color, params);
 	}
-
-	return 0;*/
-
-	blob_finder blobber("oranz.yml", "ball.yml");
 
 	return 0;
 
+	blob_finder blobber("./calibs/test/oranz.yml", "./calibs/ball.yml");
 	driver d(scanner);
 
 	bool find = false;

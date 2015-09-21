@@ -77,13 +77,18 @@ void blob_finder::threshold(const cv::Mat &frame, cv::Mat &mask)
 	cv::erode(mask, mask, structuring);
 }
 
+void blob_finder::detect(const cv::Mat &mask, std::vector<cv::KeyPoint> &keypoints)
+{
+	detector->detect(mask, keypoints);
+}
+
 cv::KeyPoint blob_finder::largest(const cv::Mat &frame)
 {
 	cv::Mat mask;
 	threshold(frame, mask);
 
 	vector<cv::KeyPoint> keypoints;
-	detector->detect(mask, keypoints);
+	detect(mask, keypoints);
 
 	auto largest = max_element(keypoints.begin(), keypoints.end(), [](const cv::KeyPoint &lhs, const cv::KeyPoint &rhs)
 	{
