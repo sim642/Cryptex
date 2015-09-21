@@ -1,5 +1,6 @@
 #include "calibrator_window.hpp"
 #include <opencv2/opencv.hpp>
+#include <utility>
 
 using namespace std;
 
@@ -42,6 +43,11 @@ void calibrator_window::calibrate(const std::string &color, const std::string &p
 	cv::createTrackbar("struct_size", win_color, &blobber.struct_size, 25);
 
 	// TODO: params trackbars
+	int minArea = blobber.params.minArea;
+	if (param)
+	{
+		cv::createTrackbar("areamin", win_params, &minArea, 1000);
+	}
 
 	while (1)
 	{
@@ -57,6 +63,9 @@ void calibrator_window::calibrate(const std::string &color, const std::string &p
 		cv::imshow(win_color, masked);
 		if (param)
 		{
+			blobber.params.minArea = minArea;
+			blobber.init_detector();
+
 			vector<cv::KeyPoint> keypoints;
 			blobber.detect(mask, keypoints);
 

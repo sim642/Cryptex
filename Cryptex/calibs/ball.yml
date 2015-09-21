@@ -7,8 +7,8 @@ minDistBetweenBlobs: 10.
 filterByColor: 1
 blobColor: 255
 filterByArea: 1
-minArea: 5.
-maxArea: 3.4028234663852886e+38
+minArea: 15.
+maxArea: 20000.
 filterByCircularity: 0
 minCircularity: 8.0000001192092896e-01
 maxCircularity: 3.4028234663852886e+38
