@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="Cryptex" />
+		<Option pch_mode="2" />
+		<Option compiler="gcc" />
+		<Build>
+			<Target title="Debug">
+				<Option output="bin/Debug/Cryptex" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Debug/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-g" />
+				</Compiler>
+			</Target>
+			<Target title="Release">
+				<Option output="bin/Release/Cryptex" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Release/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-O2" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+				</Linker>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-std=c++11" />
+			<Add option="-Wextra" />
+			<Add option="-Wall" />
+			<Add option="-fexceptions" />
+		</Compiler>
+		<Linker>
+			<Add option="-lboost_system" />
+			<Add option="-lboost_filesystem" />
+			<Add option="-lopencv_core" />
+			<Add option="-lopencv_highgui" />
+			<Add option="-lopencv_videoio" />
+			<Add option="-lopencv_imgproc" />
+			<Add option="-lopencv_features2d" />
+		</Linker>
+		<Unit filename="blob_finder.cpp" />
+		<Unit filename="blob_finder.hpp" />
+		<Unit filename="driver.cpp" />
+		<Unit filename="driver.hpp" />
+		<Unit filename="main.cpp" />
+		<Unit filename="math.hpp" />
+		<Unit filename="motor.cpp" />
+		<Unit filename="motor.hpp" />
+		<Unit filename="serial_controller.cpp" />
+		<Unit filename="serial_controller.hpp" />
+		<Unit filename="serial_device.cpp" />
+		<Unit filename="serial_device.hpp" />
+		<Unit filename="serial_id.hpp" />
+		<Unit filename="serial_scanner.cpp" />
+		<Unit filename="serial_scanner.hpp" />
+		<Extensions>
+			<code_completion />
+			<debugger />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>
