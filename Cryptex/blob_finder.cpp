@@ -31,6 +31,7 @@ void blob_finder::load_color(const std::string &filename)
 	cv::FileStorage fs(filename, cv::FileStorage::READ);
 	fs["lower"] >> lower;
 	fs["upper"] >> upper;
+	cv::read(fs["struct_size"], struct_size, 11);
 }
 
 void blob_finder::save_color(const std::string &filename)
@@ -38,6 +39,7 @@ void blob_finder::save_color(const std::string &filename)
 	cv::FileStorage fs(filename, cv::FileStorage::WRITE);
 	fs << "lower" << lower;
 	fs << "upper" << upper;
+	fs << "struct_size" << struct_size;
 }
 
 void blob_finder::set_color(const bounds_t &new_lower, const bounds_t &new_upper)
@@ -72,7 +74,7 @@ void blob_finder::threshold(const cv::Mat &frame, cv::Mat &mask)
 
 	cv::inRange(hsv, cv::Scalar(lower), cv::Scalar(upper), mask);
 
-	auto structuring = cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(11, 11));
+	auto structuring = cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(struct_size, struct_size));
 	cv::dilate(mask, mask, structuring);
 	cv::erode(mask, mask, structuring);
 }

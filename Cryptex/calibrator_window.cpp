@@ -39,6 +39,7 @@ void calibrator_window::calibrate(const std::string &color, const std::string &p
 		cv::createTrackbar(string(1, channels[i]) + "min", win_color, &blobber.lower[i], limits[i]);
 		cv::createTrackbar(string(1, channels[i]) + "max", win_color, &blobber.upper[i], limits[i]);
 	}
+	cv::createTrackbar("struct_size", win_color, &blobber.struct_size, 25);
 
 	// TODO: params trackbars
 

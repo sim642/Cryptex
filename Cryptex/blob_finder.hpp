@@ -35,6 +35,7 @@ class blob_finder
 		void init_detector();
 
 		bounds_t lower, upper;
+		int struct_size;
 		cv::SimpleBlobDetector::Params params;
 
 		cv::Ptr<cv::SimpleBlobDetector> detector;
