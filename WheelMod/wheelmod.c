@@ -79,7 +79,7 @@ uint8_t stallLevel = 0;
 uint8_t stallChanged = 0;
 int16_t currentPWM = 0;
 
-char response[16];
+char response[16], reply[16];
 
 void forward(uint8_t pwm)
 {
@@ -342,25 +342,70 @@ ISR(USART1_RX_vect)
 	}
 }
 
-void parse_and_execute_command(char *buf)
+void usb_reply_raw(const char *str)
+{
+	sprintf(reply, "%s\n", str);
+	usb_write(reply);
+}
+
+void usart_reply_raw(const char *str)
 {
 	uint8_t id = eeprom_read_byte((uint8_t*)2);
+	sprintf(reply, "%d:%s\n", id, str);
+	usart_write(reply);
+}
+
+void usb_reply(const char *str)
+{
+	sprintf(reply, "<%s>\n", str);
+	usb_write(reply);
+}
+
+void usart_reply(const char *str)
+{
+	uint8_t id = eeprom_read_byte((uint8_t*)2);
+	sprintf(reply, "<%d:%s>\n", id, str);
+	usart_write(reply);
+}
+
+void parse_and_execute_command(char *buf, uint8_t usart)
+{
 	char *command;
 	int16_t par1;
 	command = buf;
-	par1 = atoi(command);
-	if(par1 != id)
+
+	void (*reply_func)(const char*);
+	void (*reply_raw_func)(const char*);
+
+	if (usart == 1)
 	{
-		return;
+		reply_func = usart_reply;
+		reply_raw_func = usart_reply_raw;
 	}
 	else
 	{
-		while (*command != ':')
+		reply_func = usb_reply;
+		reply_raw_func = usb_reply_raw;
+	}
+
+	if (usart == 1)
+	{
+		uint8_t id = eeprom_read_byte((uint8_t*)2);
+		par1 = atoi(command);
+		if(par1 != id)
 		{
+			return;
+		}
+		else
+		{
+			while (*command != ':')
+			{
+				command++;
+			}
 			command++;
 		}
-		command++;
 	}
+
 	if ((command[0] == 's') && (command[1] == 'd'))
 	{
 		//set motor speed with pid setpoint
@@ -390,8 +435,8 @@ void parse_and_execute_command(char *buf)
 	else if ((command[0] == 'g') && (command[1] == 'b'))
 	{
 		//get ball
-		sprintf(response, "<%d:b:%d>\n", id, ball);
-		usb_write(response);
+		sprintf(response, "b:%d", ball);
+		reply_func(response);
 	}
 	else if ((command[0] == 'd') && (command[1] == 'r'))
 	{
@@ -436,8 +481,8 @@ void parse_and_execute_command(char *buf)
 	else if (command[0] == 's')
 	{
 		//get speed
-		sprintf(response, "<%d:s:%d>\n", id, speed);
-		usb_write(response);
+		sprintf(response, "s:%d", speed);
+		reply_func(response);
 	}
 	else if ((command[0] == 'i') && (command[1] == 'd'))
 	{
@@ -449,8 +494,8 @@ void parse_and_execute_command(char *buf)
 	{
 		//get info: id
 		par1 = eeprom_read_byte((uint8_t*)2);
-		sprintf(response, "<%d:id:%d>\n", id, par1);
-		usb_write(response);
+		sprintf(response, "id:%d", par1);
+		reply_func(response);
 	}
 	else if ((command[0] == 'p') && (command[1] == 'g'))
 	{
@@ -476,8 +521,8 @@ void parse_and_execute_command(char *buf)
 	else if ((command[0] == 'g') && (command[1] == 'g'))
 	{
 		//get pid gains
-		sprintf(response, "<%d:pid:%d,%d>\n", id, pgain, igain);
-		usb_write(response);
+		sprintf(response, "pid:%d,%d", pgain, igain);
+		reply_func(response);
 	}
 	else if ((command[0] == 't') && (command[1] == 'l'))
 	{
@@ -493,8 +538,7 @@ void parse_and_execute_command(char *buf)
 	else
 	{
 		//bit_flip(PORTC, BIT(LED1));
-		sprintf(response, "%d:%s\n", id, command);
-		usb_write(response);
+		reply_raw_func(command);
 	}
 }
 
@@ -609,8 +653,9 @@ int main(void)
 			}
 			if (send_speed)
 			{
-				sprintf(response, "<s:%d>\n", speed);
-				usb_write(response);
+				sprintf(response, "s:%d", speed);
+				usb_reply(response);
+				usart_reply(response);
 			}
 			if ((speed < 10) && (pwm > 250))
 			{
@@ -641,12 +686,12 @@ int main(void)
 			n = usb_recv_str(buf, sizeof(buf));
 			if (n == sizeof(buf))
 			{
-				parse_and_execute_command(buf);
+				parse_and_execute_command(buf, 0);
 			}
 		}
 		else if (usart_data_ready == 1)
 		{
-			parse_and_execute_command(usart_buf);
+			parse_and_execute_command(usart_buf, 1);
 			usart_data_ready = 0;
 		}
 	}
