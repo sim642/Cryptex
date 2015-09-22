@@ -1,17 +1,17 @@
 /* USB Serial Example for Teensy USB Development Board
  * http://www.pjrc.com/teensy/usb_serial.html
  * Copyright (c) 2008,2010,2011 PJRC.COM, LLC
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -42,8 +42,8 @@
 
 // You can change these to give your code its own name.  On Windows,
 // these are only used before an INF file (driver install) is loaded.
-#define STR_MANUFACTURER	L"Lauri Mihkels"
-#define STR_PRODUCT		L"TestBench"
+#define STR_MANUFACTURER	L"Simmo Saan"
+#define STR_PRODUCT		L"WheelMod"
 
 // All USB serial devices are supposed to have a serial number
 // (according to Microsoft).  On windows, a new COM port is created
@@ -110,14 +110,14 @@
 #define CDC_ACM_ENDPOINT	2
 #define CDC_RX_ENDPOINT		3
 #define CDC_TX_ENDPOINT		4
-#if defined(__AVR_AT90USB162__) 
+#if defined(__AVR_AT90USB162__)
 #define CDC_ACM_SIZE		16
 #define CDC_ACM_BUFFER		EP_SINGLE_BUFFER
 #define CDC_RX_SIZE		32
 #define CDC_RX_BUFFER 		EP_DOUBLE_BUFFER
 #define CDC_TX_SIZE		32
 #define CDC_TX_BUFFER		EP_DOUBLE_BUFFER
-#elif defined(__AVR_ATmega16U2__) 
+#elif defined(__AVR_ATmega16U2__)
 #define CDC_ACM_SIZE		16
 #define CDC_ACM_BUFFER		EP_SINGLE_BUFFER
 #define CDC_RX_SIZE		32
@@ -371,7 +371,7 @@ int16_t usb_serial_getchar(void)
 		if (c & (1<<RXOUTI)) {
 			UEINTX = 0x6B;
 			goto retry;
-		}	
+		}
 		SREG = intr_state;
 		return -1;
 	}
@@ -412,7 +412,7 @@ void usb_serial_flush_input(void)
 		cli();
 		UENUM = CDC_RX_ENDPOINT;
 		while ((UEINTX & (1<<RWAL))) {
-			UEINTX = 0x6B; 
+			UEINTX = 0x6B;
 		}
 		SREG = intr_state;
 	}
@@ -435,7 +435,7 @@ int8_t usb_serial_putchar(uint8_t c)
 	if (transmit_previous_timeout) {
 		if (!(UEINTX & (1<<RWAL))) {
 			SREG = intr_state;
-			
+
 			return -1;
 		}
 		transmit_previous_timeout = 0;
@@ -470,7 +470,7 @@ int8_t usb_serial_putchar(uint8_t c)
 
 
 // transmit a character, but do not wait if the buffer is full,
-//   0 returned on success, -1 on buffer full or error 
+//   0 returned on success, -1 on buffer full or error
 int8_t usb_serial_putchar_nowait(uint8_t c)
 {
 	uint8_t intr_state;
