@@ -79,24 +79,7 @@ uint8_t stallLevel = 0;
 uint8_t stallChanged = 0;
 int16_t currentPWM = 0;
 
-
 char response[16];
-
-void USART_send(unsigned char* data)
-{
-	PORTB |= 0b00001100;
-	PORTD |= 0b00010000;
-	//data = "derp\n\0";
-	while(*data)
-	{
-		while(!( UCSR1A & (1<<UDRE1)));
-		UDR1 = *data;
-		data++;
-	}
-	_delay_ms(5);
-	PORTB &= 0b11110011;
-	PORTD &= 0b11101111;
-}
 
 void forward(uint8_t pwm)
 {
@@ -216,16 +199,30 @@ void reset_pid()
 //TODO implement UART
 void usb_write(const char *str)
 {
-	USART_send(str);
+	usart_write(str);
 	while (*str)
 	{
 		usb_serial_putchar(*str);
 		str++;
 	}
-
 }
 
-uint8_t recv_str(char *buf, uint8_t size)
+void usart_write(unsigned char* data)
+{
+	PORTB |= 0b00001100;
+	PORTD |= 0b00010000;
+	while(*data)
+	{
+		while(!( UCSR1A & (1<<UDRE1)));
+		UDR1 = *data;
+		data++;
+	}
+	_delay_ms(5);
+	PORTB &= 0b11110011;
+	PORTD &= 0b11101111;
+}
+
+uint8_t usb_recv_str(char *buf, uint8_t size)
 {
 	char data;
 	uint8_t count=0;
@@ -322,9 +319,9 @@ ISR(PCINT0_vect)
 	}
 }
 
-volatile unsigned char input_buf[16];
-volatile uint8_t i = 0;
-volatile uint8_t newData = 0;
+volatile unsigned char usart_buf[16];
+volatile uint8_t usart_i = 0;
+volatile uint8_t usart_data_ready = 0;
 
 ISR(USART1_RX_vect)
 {
@@ -332,15 +329,15 @@ ISR(USART1_RX_vect)
 
 	if(ch >= ' ' && ch <= '~')
 	{
-		input_buf[i] = ch;
-		i++;
+		usart_buf[usart_i] = ch;
+		usart_i++;
 	}
 
 	if(ch == '\n' || ch == '\r')
 	{
-		input_buf[i] = '\0';
-		i = 0;
-		newData = 1;
+		usart_buf[usart_i] = '\0';
+		usart_i = 0;
+		usart_data_ready = 1;
 		return;
 	}
 }
@@ -641,16 +638,16 @@ int main(void)
 		//TODO implement UART read
 		if (usb_serial_available())
 		{
-			n = recv_str(buf, sizeof(buf));
+			n = usb_recv_str(buf, sizeof(buf));
 			if (n == sizeof(buf))
 			{
 				parse_and_execute_command(buf);
 			}
 		}
-		else if (newData == 1)
+		else if (usart_data_ready == 1)
 		{
-			parse_and_execute_command(input_buf);
-			newData = 0;
+			parse_and_execute_command(usart_buf);
+			usart_data_ready = 0;
 		}
 	}
 }
