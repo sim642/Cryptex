@@ -12,6 +12,7 @@
 
 #define F_CPU 16000000UL
 #include <avr/io.h>
+#define __DELAY_BACKWARD_COMPATIBLE__
 #include <util/delay.h>
 #include <avr/interrupt.h>
 #include <avr/eeprom.h>
@@ -199,7 +200,6 @@ void reset_pid()
 //TODO implement UART
 void usb_write(const char *str)
 {
-	usart_write(str);
 	while (*str)
 	{
 		usb_serial_putchar(*str);
