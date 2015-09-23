@@ -12,7 +12,7 @@
 
 #define F_CPU 16000000UL
 #include <avr/io.h>
-#define __DELAY_BACKWARD_COMPATIBLE__
+#define __DELAY_BACKWARD_COMPATIBLE__ // http://lists.gnu.org/archive/html/avr-gcc-list/2012-05/msg00030.html
 #include <util/delay.h>
 #include <avr/interrupt.h>
 #include <avr/eeprom.h>
@@ -342,6 +342,8 @@ ISR(USART1_RX_vect)
 	}
 }
 
+typedef void (*reply_func_t)(const char*);
+
 void usb_reply_raw(const char *str)
 {
 	sprintf(reply, "%s\n", str);
@@ -374,9 +376,7 @@ void parse_and_execute_command(char *buf, uint8_t usart)
 	int16_t par1;
 	command = buf;
 
-	void (*reply_func)(const char*);
-	void (*reply_raw_func)(const char*);
-
+	reply_func_t reply_func, reply_raw_func;
 	if (usart == 1)
 	{
 		reply_func = usart_reply;
