@@ -690,8 +690,9 @@ int main(void)
 		}
 		if (stallChanged)
 		{
-			sprintf(response, "<stall:%d>\n", stallLevel);
-			usb_write(response);
+			sprintf(response, "stall:%d", stallLevel);
+			usb_reply(response);
+			usart_reply(response);
 			stallChanged = 0;
 		}
 		//TODO implement UART read
