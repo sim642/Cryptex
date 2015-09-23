@@ -297,7 +297,7 @@ ISR(INT1_vect)
 ISR(TIMER0_COMPA_vect)
 {
 	if (leds_on) bit_flip(PORTC, BIT(LED1));
-	decoder_count.value = wcount.value;
+	decoder_count.value += wcount.value;
 	speed = wcount.value;
 	wcount.value = 0;
 	update_pid = 1;
@@ -484,6 +484,17 @@ void parse_and_execute_command(char *buf, uint8_t usart)
 		sprintf(response, "s:%d", speed);
 		reply_func(response);
 	}
+	else if (command[0] == 'e')
+	{
+		//get encoder
+		sprintf(response, "e:%d", decoder_count.value);
+		reply_func(response);
+	}
+	else if ((command[0] == 'r') && (command[1] == 'e'))
+	{
+		//reset encoder
+		decoder_count.value = 0;
+	}
 	else if ((command[0] == 'i') && (command[1] == 'd'))
 	{
 		//set id
@@ -587,6 +598,9 @@ int main(void)
 	//Wait for USB to be configured
 	//while (!usb_configured()) /* wait */ ;
 	_delay_ms(1000);
+
+	//encoder
+	decoder_count.value = 0;
 
 	//PID
 	pid_multi = 32;
