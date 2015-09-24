@@ -8,12 +8,19 @@
 #include <opencv2/highgui.hpp>
 #include <opencv2/video.hpp>
 #include "blob_finder.hpp"
+#include "rs485_dongle.hpp"
 
 using namespace std;
 
 int main()
 {
 	boost::asio::io_service io;
+
+	rs485_dongle dongle(io, "/dev/ttyUSB0");
+	rs485_controller *motor = dongle[1];
+	cout << motor->send_recv("?").second << endl;
+
+	return 0;
 
 	serial_scanner scanner(io);
 	scanner.scan_devices();

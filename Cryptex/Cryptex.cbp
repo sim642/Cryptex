@@ -51,6 +51,10 @@
 		<Unit filename="math.hpp" />
 		<Unit filename="motor.cpp" />
 		<Unit filename="motor.hpp" />
+		<Unit filename="rs485_controller.cpp" />
+		<Unit filename="rs485_controller.hpp" />
+		<Unit filename="rs485_dongle.cpp" />
+		<Unit filename="rs485_dongle.hpp" />
 		<Unit filename="serial_controller.cpp" />
 		<Unit filename="serial_controller.hpp" />
 		<Unit filename="serial_device.cpp" />
