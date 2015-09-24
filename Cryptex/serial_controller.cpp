@@ -51,15 +51,3 @@ int serial_controller::id(const int &new_id)
 	send("id", new_id);
 	return id();
 }
-
-serial_controller::recv_t serial_controller::parse_recv(const std::string &line)
-{
-	recv_t recv;
-	if (line.front() == '<' && line.back() == '>')
-	{
-		auto it = std::find(line.begin(), line.end(), ':');
-		recv.first = std::string(line.begin() + 1, it);
-		recv.second = std::string(it + 1, line.end() - 1);
-	}
-	return recv;
-}
