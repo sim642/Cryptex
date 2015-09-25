@@ -3,7 +3,6 @@
 
 #include "device_controller.hpp"
 #include <string>
-#include <utility>
 
 class rs485_dongle;
 

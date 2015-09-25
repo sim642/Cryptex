@@ -1,4 +1,5 @@
 #include "serial_scanner.hpp"
+#include "serial_controller.hpp"
 #include <boost/filesystem.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 #include <iostream>

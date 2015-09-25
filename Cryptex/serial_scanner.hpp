@@ -3,8 +3,6 @@
 
 #include "device_manager.hpp"
 #include <boost/asio.hpp>
-#include "serial_controller.hpp"
-#include <array>
 
 class serial_scanner : public device_manager
 {
