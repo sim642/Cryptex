@@ -23,31 +23,20 @@ void serial_controller::send(const std::string &cmd, const int &val)
 	stream << cmd << val << endl;
 }
 
-serial_controller::recv_t serial_controller::send_recv(const std::string &cmd)
-{
-	send(cmd);
-
-	std::string line;
-	stream >> line;
-	return parse_recv(line);
-}
-
-serial_controller::recv_t serial_controller::send_recv(const std::string &cmd, const int &val)
-{
-	send(cmd, val);
-
-	std::string line;
-	stream >> line;
-	return parse_recv(line);
-}
-
 int serial_controller::id()
 {
-	return stoi(send_recv("?").second);
+	return stoi(send_recv("?", "id").second);
 }
 
 int serial_controller::id(const int &new_id)
 {
 	send("id", new_id);
 	return id();
+}
+
+std::string serial_controller::read_line()
+{
+	std::string line;
+	stream >> line;
+	return line;
 }

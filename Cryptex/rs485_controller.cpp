@@ -22,12 +22,7 @@ void rs485_controller::send(const std::string &cmd, const int &val)
 	dongle->send(id, cmd, val);
 }
 
-rs485_controller::recv_t rs485_controller::send_recv(const std::string &cmd)
+std::string rs485_controller::read_line()
 {
-	return dongle->send_recv(id, cmd);
-}
-
-rs485_controller::recv_t rs485_controller::send_recv(const std::string &cmd, const int &val)
-{
-	return dongle->send_recv(id, cmd, val);
+	return dongle->read_line(id);
 }

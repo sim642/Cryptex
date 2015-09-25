@@ -30,8 +30,7 @@ int main()
 	return 0;
 
 
-	serial_scanner scanner(io);
-	scanner.scan_devices("ttyACM");
+	serial_scanner scanner(io, "ttyACM");
 
 	driver d(scanner);
 

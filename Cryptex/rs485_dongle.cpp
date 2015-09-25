@@ -2,6 +2,7 @@
 #include "rs485_controller.hpp"
 #include <string>
 #include <boost/algorithm/string/split.hpp>
+#include <boost/algorithm/string/join.hpp>
 #include <boost/algorithm/string/classification.hpp>
 
 using namespace std;
@@ -26,22 +27,16 @@ void rs485_dongle::send(const int &id, const std::string &cmd, const int &val)
 	stream << id << ":" << cmd << val << endl;
 }
 
-device_controller::recv_t rs485_dongle::send_recv(const int &id, const std::string &cmd)
+std::string rs485_dongle::read_line(const int &id)
 {
-	send(id, cmd);
+	device_controller::recv_t recv;
+	do
+	{
+		recv = parse_recv(read_line());
+	}
+	while (recv.first != to_string(id));
 
-	std::string line;
-	stream >> line;
-	return parse_recv(line);
-}
-
-device_controller::recv_t rs485_dongle::send_recv(const int &id, const std::string &cmd, const int &val)
-{
-	send(id, cmd, val);
-
-	std::string line;
-	stream >> line;
-	return parse_recv(line);
+	return recv.second;
 }
 
 device_controller* rs485_dongle::request(const int &id)
@@ -57,9 +52,15 @@ device_controller::recv_t rs485_dongle::parse_recv(const std::string &line)
 		string inner(line.begin() + 1, line.end() - 1);
 		vector<string> parts;
 		boost::algorithm::split(parts, inner, boost::algorithm::is_any_of(":"));
-		// TODO: check id
-		recv.first = parts[1];
-		recv.second = parts[2];
+		recv.first = parts[0];
+		recv.second = boost::algorithm::join(vector<string>(parts.begin() + 1, parts.end()), ":"); // TODO: only one split
 	}
 	return recv;
+}
+
+std::string rs485_dongle::read_line()
+{
+	std::string line;
+	stream >> line;
+	return line;
 }

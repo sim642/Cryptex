@@ -16,6 +16,30 @@ device_controller::~device_controller()
 
 }
 
+device_controller::recv_t device_controller::recv(const std::string &reply)
+{
+	recv_t recv;
+	do
+	{
+		recv = parse_recv(read_line());
+	}
+	while (recv.first != reply);
+
+	return recv;
+}
+
+device_controller::recv_t device_controller::send_recv(const std::string &cmd, const std::string &reply)
+{
+	send(cmd);
+	return recv(reply);
+}
+
+device_controller::recv_t device_controller::send_recv(const std::string &cmd, const std::string &reply, const int &val)
+{
+	send(cmd, val);
+	return recv(reply);
+}
+
 device_controller::recv_t device_controller::parse_recv(const std::string &line)
 {
 	recv_t recv;

@@ -13,13 +13,12 @@ class serial_controller : public device_controller
 		virtual void send(const std::string &cmd);
 		virtual void send(const std::string &cmd, const int &val);
 
-		virtual recv_t send_recv(const std::string &cmd);
-		virtual recv_t send_recv(const std::string &cmd, const int &val);
-
 		int id();
 		int id(const int &new_id);
 
 	private:
+		virtual std::string read_line();
+
 		boost::asio::serial_port port;
 		serial_stream stream;
 };

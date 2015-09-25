@@ -15,11 +15,11 @@ class rs485_dongle : public device_manager
 		void send(const int &id, const std::string &cmd);
 		void send(const int &id, const std::string &cmd, const int &val);
 
-		device_controller::recv_t send_recv(const int &id, const std::string &cmd);
-		device_controller::recv_t send_recv(const int &id, const std::string &cmd, const int &val);
+		std::string read_line(const int &id);
 
 	private:
 		virtual device_controller* request(const int &id);
+		std::string read_line();
 		static device_controller::recv_t parse_recv(const std::string &line);
 
 		boost::asio::io_service &io;

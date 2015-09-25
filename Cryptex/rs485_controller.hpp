@@ -15,10 +15,9 @@ class rs485_controller : public device_controller
 		virtual void send(const std::string &cmd);
 		virtual void send(const std::string &cmd, const int &val);
 
-		virtual recv_t send_recv(const std::string &cmd);
-		virtual recv_t send_recv(const std::string &cmd, const int &val);
-
 	private:
+		virtual std::string read_line();
+
 		rs485_dongle *dongle;
 		const int id;
 };
