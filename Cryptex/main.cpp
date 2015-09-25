@@ -23,7 +23,7 @@ int main()
 	motor mot(control);
 	while (1)
 	{
-		cout << control->send_recv("e").second << endl;
+		cout << mot.encoder() << endl;
 		this_thread::sleep_for(chrono::milliseconds(2));
 	}
 

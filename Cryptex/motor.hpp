@@ -11,6 +11,9 @@ class motor
 
 		void drive(const int &speed);
 
+		int encoder();
+		void reset_encoder();
+
 	private:
 		device_controller *controller;
 };
