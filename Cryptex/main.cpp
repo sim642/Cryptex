@@ -18,15 +18,20 @@ int main()
 
 	rs485_dongle dongle(io, "/dev/ttyUSB0");
 	device_controller *control = dongle[1];
+	/*serial_scanner dongle(io, "ttyACM");
+	device_controller *control = dongle[1];*/
 	motor mot(control);
-	mot.drive(30);
-
-	delete control;
+	while (1)
+	{
+		cout << control->send_recv("e").second << endl;
+		this_thread::sleep_for(chrono::milliseconds(2));
+	}
 
 	return 0;
 
+
 	serial_scanner scanner(io);
-	scanner.scan_devices();
+	scanner.scan_devices("ttyACM");
 
 	driver d(scanner);
 

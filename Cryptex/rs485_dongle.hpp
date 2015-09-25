@@ -4,6 +4,7 @@
 #include "device_manager.hpp"
 #include <boost/asio.hpp>
 #include "serial_device.hpp"
+#include <string>
 
 class rs485_dongle : public device_manager
 {
