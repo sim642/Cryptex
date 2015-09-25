@@ -7,15 +7,12 @@ using namespace std;
 
 serial_scanner::serial_scanner(boost::asio::io_service &new_io) : io(new_io)
 {
-	for (auto &ptr : controllers)
-		ptr = nullptr;
+
 }
 
 serial_scanner::~serial_scanner()
 {
-	for (auto &ptr : controllers)
-		if (ptr)
-			delete ptr;
+
 }
 
 
@@ -41,7 +38,3 @@ void serial_scanner::scan_devices()
 	}
 }
 
-serial_controller* serial_scanner::operator[] (const int &id)
-{
-	return controllers[id];
-}

@@ -17,7 +17,7 @@ int main()
 	boost::asio::io_service io;
 
 	rs485_dongle dongle(io, "/dev/ttyUSB0");
-	rs485_controller *control = dongle[1];
+	device_controller *control = dongle[1];
 	motor mot(control);
 	mot.drive(30);
 

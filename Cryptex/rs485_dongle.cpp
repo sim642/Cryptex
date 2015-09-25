@@ -9,24 +9,11 @@ using namespace std;
 rs485_dongle::rs485_dongle(boost::asio::io_service &new_io, const std::string &dev) : io(new_io), port(io, dev), stream(port)
 {
 	port.set_option(boost::asio::serial_port_base::baud_rate(19200));
-
-	for (auto &ptr : controllers)
-		ptr = nullptr;
 }
 
 rs485_dongle::~rs485_dongle()
 {
-	for (auto &ptr : controllers)
-		if (ptr)
-			delete ptr;
-}
 
-rs485_controller* rs485_dongle::operator[] (const int &id)
-{
-	if (!controllers[id])
-		controllers[id] = new rs485_controller(this, id);
-
-	return controllers[id];
 }
 
 void rs485_dongle::send(const int &id, const std::string &cmd)
@@ -39,7 +26,7 @@ void rs485_dongle::send(const int &id, const std::string &cmd, const int &val)
 	stream << id << ":" << cmd << val << endl;
 }
 
-rs485_dongle::recv_t rs485_dongle::send_recv(const int &id, const std::string &cmd)
+device_controller::recv_t rs485_dongle::send_recv(const int &id, const std::string &cmd)
 {
 	send(id, cmd);
 
@@ -48,7 +35,7 @@ rs485_dongle::recv_t rs485_dongle::send_recv(const int &id, const std::string &c
 	return parse_recv(line);
 }
 
-rs485_dongle::recv_t rs485_dongle::send_recv(const int &id, const std::string &cmd, const int &val)
+device_controller::recv_t rs485_dongle::send_recv(const int &id, const std::string &cmd, const int &val)
 {
 	send(id, cmd, val);
 
@@ -57,9 +44,14 @@ rs485_dongle::recv_t rs485_dongle::send_recv(const int &id, const std::string &c
 	return parse_recv(line);
 }
 
-rs485_dongle::recv_t rs485_dongle::parse_recv(const std::string &line)
+device_controller* rs485_dongle::request(const int &id)
 {
-	recv_t recv;
+	return new rs485_controller(this, id);
+}
+
+device_controller::recv_t rs485_dongle::parse_recv(const std::string &line)
+{
+	device_controller::recv_t recv;
 	if (line.front() == '<' && line.back() == '>')
 	{
 		string inner(line.begin() + 1, line.end() - 1);

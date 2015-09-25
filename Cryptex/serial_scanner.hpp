@@ -15,12 +15,8 @@ class serial_scanner : public device_manager
 		void add_device(const std::string &dev);
 		void scan_devices();
 
-		virtual serial_controller* operator[] (const int &id);
-
 	private:
 		boost::asio::io_service &io;
-
-		std::array<serial_controller*, 256> controllers;
 };
 
 #endif // SERIAL_SCANNER_H
