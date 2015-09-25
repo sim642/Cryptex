@@ -1,4 +1,4 @@
-#include "controller.hpp"
+#include "device_controller.hpp"
 #include <string>
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/classification.hpp>
@@ -6,17 +6,17 @@
 using namespace std;
 
 
-controller::controller()
+device_controller::device_controller()
 {
 
 }
 
-controller::~controller()
+device_controller::~device_controller()
 {
 
 }
 
-controller::recv_t controller::parse_recv(const std::string &line)
+device_controller::recv_t device_controller::parse_recv(const std::string &line)
 {
 	recv_t recv;
 	if (line.front() == '<' && line.back() == '>')

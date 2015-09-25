@@ -1,10 +1,10 @@
 #ifndef SERIAL_CONTROLLER_H
 #define SERIAL_CONTROLLER_H
 
-#include "controller.hpp"
+#include "device_controller.hpp"
 #include "serial_device.hpp"
 
-class serial_controller : public controller
+class serial_controller : public device_controller
 {
 	public:
 		serial_controller(boost::asio::io_service &io, const std::string &dev);

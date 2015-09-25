@@ -18,8 +18,10 @@ int main()
 
 	rs485_dongle dongle(io, "/dev/ttyUSB0");
 	rs485_controller *control = dongle[1];
-	motor mot(*control);
+	motor mot(control);
 	mot.drive(30);
+
+	delete control;
 
 	return 0;
 

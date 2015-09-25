@@ -1,18 +1,18 @@
 #ifndef MOTOR_H
 #define MOTOR_H
 
-#include "controller.hpp"
+#include "device_controller.hpp"
 
 class motor
 {
 	public:
-		motor(controller &controler);
+		motor(device_controller *new_controller);
 		virtual ~motor();
 
 		void drive(const int &speed);
 
 	private:
-		controller &control;
+		device_controller *controller;
 };
 
 #endif // MOTOR_H

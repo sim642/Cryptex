@@ -1,8 +1,8 @@
 #include "motor.hpp"
 
-motor::motor(controller &new_controller) : control(new_controller)
+motor::motor(device_controller *new_controller) : controller(new_controller)
 {
-	control.send("dr", 0); // set motor polarity
+	controller->send("dr", 0); // set motor polarity
 }
 
 motor::~motor()
@@ -12,5 +12,5 @@ motor::~motor()
 
 void motor::drive(const int &speed)
 {
-	control.send("sd", speed);
+	controller->send("sd", speed);
 }

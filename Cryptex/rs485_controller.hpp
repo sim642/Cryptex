@@ -1,13 +1,13 @@
 #ifndef RS485_CONTROLLER_H
 #define RS485_CONTROLLER_H
 
-#include "controller.hpp"
+#include "device_controller.hpp"
 #include <string>
 #include <utility>
 
 class rs485_dongle;
 
-class rs485_controller : public controller
+class rs485_controller : public device_controller
 {
 	public:
 		rs485_controller(rs485_dongle *new_dongle, const int &new_id);

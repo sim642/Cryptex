@@ -4,11 +4,11 @@
 
 driver::driver(serial_scanner &scanner)
 {
-	motors.emplace_back(*scanner[serial_id::motor_left]);
+	motors.emplace_back(scanner[serial_id::motor_left]);
 	angles.push_back(60);
-	motors.emplace_back(*scanner[serial_id::motor_back]);
+	motors.emplace_back(scanner[serial_id::motor_back]);
 	angles.push_back(180);
-	motors.emplace_back(*scanner[serial_id::motor_right]);
+	motors.emplace_back(scanner[serial_id::motor_right]);
 	angles.push_back(-60);
 }
 
