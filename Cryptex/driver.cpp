@@ -1,14 +1,14 @@
 #include "driver.hpp"
-#include "serial_id.hpp"
+#include "device_id.hpp"
 #include "math.hpp"
 
-driver::driver(serial_scanner &scanner)
+driver::driver(device_manager &manager)
 {
-	motors.emplace_back(scanner[serial_id::motor_left]);
+	motors.emplace_back(manager[device_id::motor_left]);
 	angles.push_back(60);
-	motors.emplace_back(scanner[serial_id::motor_back]);
+	motors.emplace_back(manager[device_id::motor_back]);
 	angles.push_back(180);
-	motors.emplace_back(scanner[serial_id::motor_right]);
+	motors.emplace_back(manager[device_id::motor_right]);
 	angles.push_back(-60);
 }
 
