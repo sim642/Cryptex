@@ -47,6 +47,7 @@
 		<Unit filename="blob_finder.hpp" />
 		<Unit filename="device_controller.cpp" />
 		<Unit filename="device_controller.hpp" />
+		<Unit filename="device_id.hpp" />
 		<Unit filename="device_manager.cpp" />
 		<Unit filename="device_manager.hpp" />
 		<Unit filename="driver.cpp" />
@@ -63,7 +64,6 @@
 		<Unit filename="serial_controller.hpp" />
 		<Unit filename="serial_device.cpp" />
 		<Unit filename="serial_device.hpp" />
-		<Unit filename="serial_id.hpp" />
 		<Unit filename="serial_scanner.cpp" />
 		<Unit filename="serial_scanner.hpp" />
 		<Extensions>
