@@ -21,6 +21,11 @@ device_controller* device_manager::operator[] (const int &id)
 	return controllers[id];
 }
 
+device_controller* device_manager::operator[] (const device_id& dev_id)
+{
+	return operator[](static_cast<int>(dev_id));
+}
+
 device_controller* device_manager::request(const int &id)
 {
 	return nullptr;

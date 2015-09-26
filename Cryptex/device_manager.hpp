@@ -3,6 +3,7 @@
 
 #include "device_controller.hpp"
 #include <array>
+#include "device_id.hpp"
 
 class device_manager
 {
@@ -11,6 +12,7 @@ class device_manager
 		virtual ~device_manager();
 
 		virtual device_controller* operator[] (const int &id);
+		virtual device_controller* operator[] (const device_id &dev_id);
 
 	protected:
 		virtual device_controller* request(const int &id);
