@@ -45,6 +45,10 @@
 		</Linker>
 		<Unit filename="blob_finder.cpp" />
 		<Unit filename="blob_finder.hpp" />
+		<Unit filename="calibrator_module.cpp" />
+		<Unit filename="calibrator_module.hpp" />
+		<Unit filename="calibrator_window.cpp" />
+		<Unit filename="calibrator_window.hpp" />
 		<Unit filename="device_controller.cpp" />
 		<Unit filename="device_controller.hpp" />
 		<Unit filename="device_id.hpp" />
@@ -52,6 +56,8 @@
 		<Unit filename="device_manager.hpp" />
 		<Unit filename="driver.cpp" />
 		<Unit filename="driver.hpp" />
+		<Unit filename="global.cpp" />
+		<Unit filename="global.hpp" />
 		<Unit filename="main.cpp" />
 		<Unit filename="math.hpp" />
 		<Unit filename="menu_module.cpp" />

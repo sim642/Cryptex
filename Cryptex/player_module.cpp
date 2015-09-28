@@ -36,17 +36,7 @@ module::type player_module::run(const module::type &prev_module)
 		return module::type::exit;
 	}
 
-	blob_finder blobber("oranz.yml");
-	cv::SimpleBlobDetector::Params params;
-	params.filterByColor = true;
-	params.blobColor = 255;
-	params.filterByArea = true;
-	params.minArea = 5.f;
-	params.maxArea = numeric_limits<float>::max();
-	params.filterByCircularity = false;
-	params.filterByConvexity = false;
-	params.filterByInertia = true;
-	blobber.init_detector(params);
+	blob_finder blobber("oranz", "ball");
 
 	bool find = false;
 
