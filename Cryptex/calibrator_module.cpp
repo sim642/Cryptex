@@ -1,8 +1,10 @@
 #include "calibrator_module.hpp"
 
 #include <iostream>
+#include <stdexcept>
 #include <opencv2/video.hpp>
 #include "calibrator_window.hpp"
+#include "global.hpp"
 
 using namespace std;
 
@@ -18,12 +20,9 @@ calibrator_module::~calibrator_module()
 
 module::type calibrator_module::run(const module::type &prev_module)
 {
-	cv::VideoCapture capture(0);
+	cv::VideoCapture capture(global::video_id);
 	if (!capture.isOpened())
-	{
-		cerr << "Failed to open capture" << endl;
-		return module::type::exit;
-	}
+		throw runtime_error("capture could not be opened");
 
 	calibrator_window calibrator(capture);
 	string color, params;
@@ -38,5 +37,5 @@ module::type calibrator_module::run(const module::type &prev_module)
 		calibrator.calibrate(color, params);
 	}
 
-	return module::type::exit;
+	return module::type::menu;
 }

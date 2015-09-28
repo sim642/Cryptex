@@ -6,6 +6,7 @@
 namespace global
 {
 	extern std::string env;
+	extern int video_id;
 
 	std::string calib_filename(const std::string &name, const std::string &ext = "yml");
 	std::string env_filename(const std::string &name, const std::string &ext = "yml");

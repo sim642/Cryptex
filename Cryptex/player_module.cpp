@@ -10,6 +10,8 @@
 #include <opencv2/video.hpp>
 #include "blob_finder.hpp"
 
+#include "global.hpp"
+
 using namespace std;
 
 player_module::player_module()
@@ -29,12 +31,9 @@ module::type player_module::run(const module::type &prev_module)
 
 	driver d(scanner);
 
-	cv::VideoCapture capture(1);
+	cv::VideoCapture capture(global::video_id);
 	if (!capture.isOpened())
-	{
-		cerr << "Failed to open capture" << endl;
-		return module::type::exit;
-	}
+		throw runtime_error("capture could not be opened");
 
 	blob_finder blobber("oranz", "ball");
 

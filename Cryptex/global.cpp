@@ -3,6 +3,7 @@
 namespace global
 {
 	std::string env;
+	int video_id;
 
 	std::string calib_filename(const std::string &name, const std::string &ext)
 	{
