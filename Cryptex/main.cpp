@@ -10,10 +10,32 @@
 #include "blob_finder.hpp"
 #include "rs485_dongle.hpp"
 
+#include "module.hpp"
+#include "menu_module.hpp"
+#include <map>
+
 using namespace std;
 
 int main()
 {
+	map<module::type, module*> modules;
+	modules[module::type::menu] = new menu_module();
+
+	module::type next_module = module::type::menu;
+	module::type prev_module = module::type::exit;
+
+	while (next_module != module::type::exit)
+	{
+		auto cur_module = next_module;
+		next_module = modules[cur_module]->run(prev_module);
+		prev_module = cur_module;
+	}
+
+	for (auto &p : modules)
+		delete p.second;
+
+	return 0;
+
 	boost::asio::io_service io;
 
 	rs485_dongle dongle(io, "/dev/ttyUSB0");

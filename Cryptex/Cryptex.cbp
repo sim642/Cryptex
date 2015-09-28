@@ -54,6 +54,10 @@
 		<Unit filename="driver.hpp" />
 		<Unit filename="main.cpp" />
 		<Unit filename="math.hpp" />
+		<Unit filename="menu_module.cpp" />
+		<Unit filename="menu_module.hpp" />
+		<Unit filename="module.cpp" />
+		<Unit filename="module.hpp" />
 		<Unit filename="motor.cpp" />
 		<Unit filename="motor.hpp" />
 		<Unit filename="rs485_controller.cpp" />
