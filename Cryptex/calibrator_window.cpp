@@ -1,10 +1,11 @@
 #include "calibrator_window.hpp"
 #include <opencv2/opencv.hpp>
 #include <utility>
+#include "global.hpp"
 
 using namespace std;
 
-calibrator_window::calibrator_window(cv::VideoCapture &new_capture, const std::string &new_env) : capture(new_capture), env(new_env)
+calibrator_window::calibrator_window(cv::VideoCapture &new_capture) : capture(new_capture)
 {
 
 }
@@ -18,20 +19,18 @@ void calibrator_window::calibrate(const std::string &color, const std::string &p
 {
 	bool param = !params.empty();
 
-	string env_color = env + "/" + color;
+	string env_color = global::env + "/" + color;
 	string win_color = "calibrate " + env_color;
-	string filename_color = "./calibs/" + env_color + ".yml";
 
 	string win_params = "calibrate " + params;
-	string filename_params = "./calibs/" + params + ".yml";
 
 	cv::namedWindow(win_color);
 	if (param)
 		cv::namedWindow(win_params);
 
-	blob_finder blobber(filename_color);
+	blob_finder blobber(color);
 	if (param)
-		blobber.load_params(filename_params);
+		blobber.load_params(params);
 
 	string channels = "HSV";
 	blob_finder::bounds_t limits(179, 255, 255);
@@ -89,7 +88,7 @@ calibrate_quit:
 	if (param)
 		cv::destroyWindow(win_params);
 
-	blobber.save_color(filename_color);
+	blobber.save_color(color);
 	if (param)
-		blobber.save_params(filename_params);
+		blobber.save_params(params);
 }

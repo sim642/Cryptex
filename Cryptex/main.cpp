@@ -9,24 +9,27 @@
 #include <opencv2/video.hpp>
 #include "blob_finder.hpp"
 #include "calibrator_window.hpp"
+#include "global.hpp"
 
 using namespace std;
 
 int main()
 {
+	global::env = "test";
+
 	boost::asio::io_service io;
 
 	serial_scanner scanner(io);
 	scanner.scan_devices();
 
-	cv::VideoCapture capture(1);
+	cv::VideoCapture capture(0);
 	if (!capture.isOpened())
 	{
 		cerr << "Failed to open capture" << endl;
 		return EXIT_FAILURE;
 	}
 
-	calibrator_window calibrator(capture, "test");
+	calibrator_window calibrator(capture);
 	string color, params;
 	while (cout << "calib: ", cin >> color >> params)
 	{
@@ -41,7 +44,7 @@ int main()
 
 	return 0;
 
-	blob_finder blobber("./calibs/test/oranz.yml", "./calibs/ball.yml");
+	blob_finder blobber("oranz", "ball");
 	driver d(scanner);
 
 	bool find = false;

@@ -1,5 +1,6 @@
 #include "blob_finder.hpp"
 #include <vector>
+#include "global.hpp"
 
 using namespace std;
 
@@ -10,15 +11,15 @@ blob_finder::blob_finder()
 
 }
 
-blob_finder::blob_finder(const std::string &filename) : blob_finder()
+blob_finder::blob_finder(const std::string &color_name) : blob_finder()
 {
-	load_color(filename);
+	load_color(color_name);
 }
 
-blob_finder::blob_finder(const std::string &filename1, const std::string &filename2) : blob_finder()
+blob_finder::blob_finder(const std::string &color_name, const std::string &params_name) : blob_finder()
 {
-	load_color(filename1);
-	load_params(filename2);
+	load_color(color_name);
+	load_params(params_name);
 }
 
 blob_finder::~blob_finder()
@@ -26,17 +27,17 @@ blob_finder::~blob_finder()
 
 }
 
-void blob_finder::load_color(const std::string &filename)
+void blob_finder::load_color(const std::string &color_name)
 {
-	cv::FileStorage fs(filename, cv::FileStorage::READ);
+	cv::FileStorage fs(global::env_filename(color_name), cv::FileStorage::READ);
 	fs["lower"] >> lower;
 	fs["upper"] >> upper;
 	cv::read(fs["struct_size"], struct_size, 11);
 }
 
-void blob_finder::save_color(const std::string &filename)
+void blob_finder::save_color(const std::string &color_name)
 {
-	cv::FileStorage fs(filename, cv::FileStorage::WRITE);
+	cv::FileStorage fs(global::env_filename(color_name), cv::FileStorage::WRITE);
 	fs << "lower" << lower;
 	fs << "upper" << upper;
 	fs << "struct_size" << struct_size;
@@ -48,16 +49,16 @@ void blob_finder::set_color(const bounds_t &new_lower, const bounds_t &new_upper
 	upper = new_upper;
 }
 
-void blob_finder::load_params(const std::string &filename)
+void blob_finder::load_params(const std::string &params_name)
 {
-	cv::FileStorage fs(filename, cv::FileStorage::READ);
+	cv::FileStorage fs(global::calib_filename(params_name), cv::FileStorage::READ);
 	params.read(fs.root());
 	init_detector();
 }
 
-void blob_finder::save_params(const std::string &filename)
+void blob_finder::save_params(const std::string &params_name)
 {
-	cv::FileStorage fs(filename, cv::FileStorage::WRITE);
+	cv::FileStorage fs(global::calib_filename(params_name), cv::FileStorage::WRITE);
 	params.write(fs);
 }
 

@@ -49,6 +49,8 @@
 		<Unit filename="calibrator_window.hpp" />
 		<Unit filename="driver.cpp" />
 		<Unit filename="driver.hpp" />
+		<Unit filename="global.cpp" />
+		<Unit filename="global.hpp" />
 		<Unit filename="main.cpp" />
 		<Unit filename="math.hpp" />
 		<Unit filename="motor.cpp" />

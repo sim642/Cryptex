@@ -14,16 +14,16 @@ class blob_finder
 		static const cv::KeyPoint none;
 
 		blob_finder();
-		blob_finder(const std::string &filename);
-		blob_finder(const std::string &filename1, const std::string &filename2);
+		blob_finder(const std::string &color_name);
+		blob_finder(const std::string &color_name, const std::string &params_name);
 		virtual ~blob_finder();
 
-		void load_color(const std::string &filename);
-		void save_color(const std::string &filename);
+		void load_color(const std::string &color_name);
+		void save_color(const std::string &color_name);
 		void set_color(const bounds_t &new_lower, const bounds_t &new_upper);
 
-		void load_params(const std::string &filename);
-		void save_params(const std::string &filename);
+		void load_params(const std::string &params_name);
+		void save_params(const std::string &params_name);
 		void set_params(const cv::SimpleBlobDetector::Params &new_params);
 
 		void threshold(const cv::Mat &frame, cv::Mat &mask);
