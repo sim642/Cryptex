@@ -24,10 +24,10 @@ module::type test_module::run(const module::type &prev_module)
 {
 	boost::asio::io_service io;
 
-	/*rs485_dongle dongle(io, "/dev/ttyUSB0");
-	device_controller *control = dongle[1];*/
-	serial_scanner dongle(io, "ttyACM");
+	rs485_dongle dongle(io, "/dev/ttyUSB0");
 	device_controller *control = dongle[1];
+	/*serial_scanner dongle(io, "ttyACM");
+	device_controller *control = dongle[1];*/
 	motor mot(control);
 	while (1)
 	{

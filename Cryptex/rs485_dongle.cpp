@@ -36,7 +36,10 @@ std::string rs485_dongle::read_line(const int &id)
 	}
 	while (recv.first != to_string(id));
 
-	return recv.second;
+	if (!recv.second.empty())
+		return "<" + recv.second + ">"; // imitate serial brackets
+	else
+		return recv.second;
 }
 
 device_controller* rs485_dongle::request(const int &id)
