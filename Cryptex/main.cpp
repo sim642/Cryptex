@@ -5,6 +5,7 @@
 #include "calibrator_module.hpp"
 #include "player_module.hpp"
 #include "test_module.hpp"
+#include "psmove_module.hpp"
 
 using namespace std;
 
@@ -17,6 +18,7 @@ int main()
 	modules[module::type::calibrator] = new calibrator_module();
 	modules[module::type::player] = new player_module();
 	modules[module::type::test] = new test_module();
+	modules[module::type::psmove] = new psmove_module();
 
 	module::type next_module = module::type::menu;
 	module::type prev_module = module::type::exit;
