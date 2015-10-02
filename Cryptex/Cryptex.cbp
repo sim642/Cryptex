@@ -42,22 +42,47 @@
 			<Add option="-lopencv_videoio" />
 			<Add option="-lopencv_imgproc" />
 			<Add option="-lopencv_features2d" />
+			<Add option="-lpsmoveapi" />
 		</Linker>
 		<Unit filename="blob_finder.cpp" />
 		<Unit filename="blob_finder.hpp" />
+		<Unit filename="calibrator_module.cpp" />
+		<Unit filename="calibrator_module.hpp" />
+		<Unit filename="calibrator_window.cpp" />
+		<Unit filename="calibrator_window.hpp" />
+		<Unit filename="device_controller.cpp" />
+		<Unit filename="device_controller.hpp" />
+		<Unit filename="device_id.hpp" />
+		<Unit filename="device_manager.cpp" />
+		<Unit filename="device_manager.hpp" />
 		<Unit filename="driver.cpp" />
 		<Unit filename="driver.hpp" />
+		<Unit filename="global.cpp" />
+		<Unit filename="global.hpp" />
 		<Unit filename="main.cpp" />
 		<Unit filename="math.hpp" />
+		<Unit filename="menu_module.cpp" />
+		<Unit filename="menu_module.hpp" />
+		<Unit filename="module.cpp" />
+		<Unit filename="module.hpp" />
 		<Unit filename="motor.cpp" />
 		<Unit filename="motor.hpp" />
+		<Unit filename="player_module.cpp" />
+		<Unit filename="player_module.hpp" />
+		<Unit filename="psmove_module.cpp" />
+		<Unit filename="psmove_module.hpp" />
+		<Unit filename="rs485_controller.cpp" />
+		<Unit filename="rs485_controller.hpp" />
+		<Unit filename="rs485_dongle.cpp" />
+		<Unit filename="rs485_dongle.hpp" />
 		<Unit filename="serial_controller.cpp" />
 		<Unit filename="serial_controller.hpp" />
 		<Unit filename="serial_device.cpp" />
 		<Unit filename="serial_device.hpp" />
-		<Unit filename="serial_id.hpp" />
 		<Unit filename="serial_scanner.cpp" />
 		<Unit filename="serial_scanner.hpp" />
+		<Unit filename="test_module.cpp" />
+		<Unit filename="test_module.hpp" />
 		<Extensions>
 			<code_completion />
 			<debugger />

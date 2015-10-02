@@ -1,5 +1,6 @@
 #include "blob_finder.hpp"
 #include <vector>
+#include "global.hpp"
 
 using namespace std;
 
@@ -10,9 +11,15 @@ blob_finder::blob_finder()
 
 }
 
-blob_finder::blob_finder(const std::string &filename) : blob_finder()
+blob_finder::blob_finder(const std::string &color_name) : blob_finder()
 {
-	load_file(filename);
+	load_color(color_name);
+}
+
+blob_finder::blob_finder(const std::string &color_name, const std::string &params_name) : blob_finder()
+{
+	load_color(color_name);
+	load_params(params_name);
 }
 
 blob_finder::~blob_finder()
@@ -20,32 +27,71 @@ blob_finder::~blob_finder()
 
 }
 
-void blob_finder::init_detector(const cv::SimpleBlobDetector::Params &params)
+void blob_finder::load_color(const std::string &color_name)
 {
-	detector = cv::SimpleBlobDetector::create(params);
-}
-
-void blob_finder::load_file(const std::string &filename)
-{
-	cv::FileStorage fs(filename, cv::FileStorage::READ);
+	cv::FileStorage fs(global::env_filename(color_name), cv::FileStorage::READ);
 	fs["lower"] >> lower;
 	fs["upper"] >> upper;
+	cv::read(fs["struct_size"], struct_size, 11);
 }
 
-cv::KeyPoint blob_finder::largest(const cv::Mat &frame)
+void blob_finder::save_color(const std::string &color_name)
+{
+	cv::FileStorage fs(global::env_filename(color_name), cv::FileStorage::WRITE);
+	fs << "lower" << lower;
+	fs << "upper" << upper;
+	fs << "struct_size" << struct_size;
+}
+
+void blob_finder::set_color(const bounds_t &new_lower, const bounds_t &new_upper)
+{
+	lower = new_lower;
+	upper = new_upper;
+}
+
+void blob_finder::load_params(const std::string &params_name)
+{
+	cv::FileStorage fs(global::calib_filename(params_name), cv::FileStorage::READ);
+	params.read(fs.root());
+	init_detector();
+}
+
+void blob_finder::save_params(const std::string &params_name)
+{
+	cv::FileStorage fs(global::calib_filename(params_name), cv::FileStorage::WRITE);
+	params.write(fs);
+}
+
+void blob_finder::set_params(const cv::SimpleBlobDetector::Params &new_params)
+{
+	params = new_params;
+	init_detector();
+}
+
+void blob_finder::threshold(const cv::Mat &frame, cv::Mat &mask)
 {
 	cv::Mat hsv;
 	cv::cvtColor(frame, hsv, CV_BGR2HSV);
 
-	cv::Mat mask;
 	cv::inRange(hsv, cv::Scalar(lower), cv::Scalar(upper), mask);
 
-	auto structuring = cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(11, 11));
+	auto structuring = cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(struct_size, struct_size));
 	cv::dilate(mask, mask, structuring);
 	cv::erode(mask, mask, structuring);
+}
+
+void blob_finder::detect(const cv::Mat &mask, std::vector<cv::KeyPoint> &keypoints)
+{
+	detector->detect(mask, keypoints);
+}
+
+cv::KeyPoint blob_finder::largest(const cv::Mat &frame)
+{
+	cv::Mat mask;
+	threshold(frame, mask);
 
 	vector<cv::KeyPoint> keypoints;
-	detector->detect(mask, keypoints);
+	detect(mask, keypoints);
 
 	auto largest = max_element(keypoints.begin(), keypoints.end(), [](const cv::KeyPoint &lhs, const cv::KeyPoint &rhs)
 	{
@@ -56,4 +102,9 @@ cv::KeyPoint blob_finder::largest(const cv::Mat &frame)
 		return *largest;
 	else
 		return none;
+}
+
+void blob_finder::init_detector()
+{
+	detector = cv::SimpleBlobDetector::create(params);
 }

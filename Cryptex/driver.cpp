@@ -1,14 +1,14 @@
 #include "driver.hpp"
-#include "serial_id.hpp"
+#include "device_id.hpp"
 #include "math.hpp"
 
-driver::driver(serial_scanner &scanner)
+driver::driver(device_manager &manager)
 {
-	motors.emplace_back(*scanner[serial_id::motor_left]);
+	motors.emplace_back(manager[device_id::motor_left]);
 	angles.push_back(60);
-	motors.emplace_back(*scanner[serial_id::motor_back]);
+	motors.emplace_back(manager[device_id::motor_back]);
 	angles.push_back(180);
-	motors.emplace_back(*scanner[serial_id::motor_right]);
+	motors.emplace_back(manager[device_id::motor_right]);
 	angles.push_back(-60);
 }
 
@@ -30,10 +30,10 @@ void driver::rotate(const int &speed)
 		motors[i].drive(speed);
 }
 
-void driver::omni(const int &speed, const int &angle)
+void driver::omni(const int &speed, const int &angle, const int &rot)
 {
 	for (size_t i = 0; i < motors.size(); i++)
-		motors[i].drive(speed * -sin(deg2rad(angles[i] - angle)));
+		motors[i].drive(speed * -sin(deg2rad(angles[i] - angle)) + rot);
 }
 
 void driver::stop()

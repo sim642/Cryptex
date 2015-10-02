@@ -23,27 +23,9 @@ void serial_controller::send(const std::string &cmd, const int &val)
 	stream << cmd << val << endl;
 }
 
-serial_controller::recv_t serial_controller::send_recv(const std::string &cmd)
-{
-	send(cmd);
-
-	std::string line;
-	stream >> line;
-	return parse_recv(line);
-}
-
-serial_controller::recv_t serial_controller::send_recv(const std::string &cmd, const int &val)
-{
-	send(cmd, val);
-
-	std::string line;
-	stream >> line;
-	return parse_recv(line);
-}
-
 int serial_controller::id()
 {
-	return stoi(send_recv("?").second);
+	return stoi(send_recv("?", "id").second);
 }
 
 int serial_controller::id(const int &new_id)
@@ -52,14 +34,9 @@ int serial_controller::id(const int &new_id)
 	return id();
 }
 
-serial_controller::recv_t serial_controller::parse_recv(const std::string &line)
+std::string serial_controller::read_line()
 {
-	recv_t recv;
-	if (line.front() == '<' && line.back() == '>')
-	{
-		auto it = std::find(line.begin(), line.end(), ':');
-		recv.first = std::string(line.begin() + 1, it);
-		recv.second = std::string(it + 1, line.end() - 1);
-	}
-	return recv;
+	std::string line;
+	stream >> line;
+	return line;
 }
