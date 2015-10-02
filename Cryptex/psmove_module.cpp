@@ -69,7 +69,7 @@ module::type psmove_module::run(const module::type &prev_module)
 		cout << phi << "\t" << the << "\t" << psi << endl;
 
 		//d.rotate(psi * 25);
-		d.omni(psmove_get_trigger(move) * 0.3, rad2deg(phi), psi * 25);
+		d.omni(psmove_get_trigger(move) * 0.3, rad2deg(phi), psi * 15);
 
 		/*int t = psmove_get_trigger(move);
 		psmove_set_leds(move, 0, t, 0);
