@@ -20,7 +20,8 @@ module::type menu_module::run(const module::type &prev_module)
 		cout << "1. calibrator" << endl;
 		cout << "2. player" << endl;
 		cout << "3. test" << endl;
-		cout << "4. exit" << endl;
+		cout << "4. psmove" << endl;
+		cout << "5. exit" << endl;
 
 		cout << "> ";
 		int selection;
@@ -38,6 +39,9 @@ module::type menu_module::run(const module::type &prev_module)
 				return module::type::test;
 
 			case 4:
+				return module::type::psmove;
+
+			case 5:
 				return module::type::exit;
 
 			default:

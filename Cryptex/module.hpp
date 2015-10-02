@@ -10,7 +10,8 @@ class module
 			menu = 0,
 			calibrator,
 			player,
-			test
+			test,
+			psmove
 		};
 
 		module();

@@ -30,10 +30,10 @@ void driver::rotate(const int &speed)
 		motors[i].drive(speed);
 }
 
-void driver::omni(const int &speed, const int &angle)
+void driver::omni(const int &speed, const int &angle, const int &rot)
 {
 	for (size_t i = 0; i < motors.size(); i++)
-		motors[i].drive(speed * -sin(deg2rad(angles[i] - angle)));
+		motors[i].drive(speed * -sin(deg2rad(angles[i] - angle)) + rot);
 }
 
 void driver::stop()
