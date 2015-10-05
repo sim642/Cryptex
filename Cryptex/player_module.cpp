@@ -10,6 +10,8 @@
 #include <opencv2/video.hpp>
 #include "blob_finder.hpp"
 
+#include "pid_controller.hpp"
+
 #include "global.hpp"
 
 using namespace std;
@@ -39,6 +41,11 @@ module::type player_module::run(const module::type &prev_module)
 
 	bool find = false;
 
+	pid_controller speed_controller, rotate_controller;
+	speed_controller.Kp = 30;
+	rotate_controller.Kp = 50;
+
+
 	cv::namedWindow("Remote");
 	while (1)
 	{
@@ -58,16 +65,8 @@ module::type player_module::run(const module::type &prev_module)
 				int diff = frame.cols / 2 - largest.pt.x;
 				float factor = float(diff) / (frame.cols / 2);
 
-
-				if (abs(factor) < 0.25)
-				{
-					float dist = (frame.rows - largest.pt.y) / float(frame.rows);
-					d.straight(dist * 30);
-				}
-				else
-				{
-					d.rotate(factor * 50);
-				}
+				float dist = (frame.rows - largest.pt.y) / float(frame.rows);
+				d.omni(speed_controller.step(dist), 0, rotate_controller.step(factor));
 			}
 		}
 
