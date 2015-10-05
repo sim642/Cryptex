@@ -69,6 +69,8 @@
 		<Unit filename="motor.hpp" />
 		<Unit filename="player_module.cpp" />
 		<Unit filename="player_module.hpp" />
+		<Unit filename="psmove.cpp" />
+		<Unit filename="psmove.hpp" />
 		<Unit filename="psmove_module.cpp" />
 		<Unit filename="psmove_module.hpp" />
 		<Unit filename="rs485_controller.cpp" />
