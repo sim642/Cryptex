@@ -57,6 +57,8 @@
 		<Unit filename="device_manager.hpp" />
 		<Unit filename="driver.cpp" />
 		<Unit filename="driver.hpp" />
+		<Unit filename="error_controller.cpp" />
+		<Unit filename="error_controller.hpp" />
 		<Unit filename="global.cpp" />
 		<Unit filename="global.hpp" />
 		<Unit filename="main.cpp" />
@@ -67,6 +69,8 @@
 		<Unit filename="module.hpp" />
 		<Unit filename="motor.cpp" />
 		<Unit filename="motor.hpp" />
+		<Unit filename="pid_controller.cpp" />
+		<Unit filename="pid_controller.hpp" />
 		<Unit filename="player_module.cpp" />
 		<Unit filename="player_module.hpp" />
 		<Unit filename="psmove_module.cpp" />
