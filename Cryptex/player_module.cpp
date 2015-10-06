@@ -3,8 +3,10 @@
 #include <iostream>
 
 #include <boost/asio.hpp>
-#include "serial_scanner.hpp"
+#include "rs485_dongle.hpp"
 #include "driver.hpp"
+
+#include "psmove.hpp"
 
 #include <opencv2/highgui.hpp>
 #include <opencv2/video.hpp>
@@ -29,22 +31,31 @@ player_module::~player_module()
 module::type player_module::run(const module::type &prev_module)
 {
 	boost::asio::io_service io;
-	serial_scanner scanner(io, "ttyACM");
+	rs485_dongle dongle(io, "/dev/ttyUSB0");
 
-	driver d(scanner);
+	driver d(dongle);
 
 	cv::VideoCapture capture(global::video_id);
 	if (!capture.isOpened())
 		throw runtime_error("capture could not be opened");
 
+	if (!psmove_init(PSMOVE_CURRENT_VERSION))
+		throw runtime_error("PSMove API init failed");
+
+	psmove move;
+
 	blob_finder blobber("oranz", "ball");
 
-	bool find = false;
+	enum State
+	{
+		Start,
+		Manual,
+		Automatic,
+	} state = Manual;
 
 	pid_controller speed_controller, rotate_controller;
-	speed_controller.Kp = 30;
-	rotate_controller.Kp = 50;
-
+	speed_controller.Kp = 80;
+	rotate_controller.Kp = 30;
 
 	cv::namedWindow("Remote");
 	while (1)
@@ -55,7 +66,7 @@ module::type player_module::run(const module::type &prev_module)
 		cv::Mat keyframe;
 		frame.copyTo(keyframe);
 
-		if (find)
+		if (state == Automatic)
 		{
 			auto largest = blobber.largest(frame);
 			if (largest.size >= 0.f) // if blob found
@@ -100,8 +111,25 @@ module::type player_module::run(const module::type &prev_module)
 				break;
 
 			case 'e':
-				find ^= 1;
+				if (state == Manual)
+					state = Automatic;
+				else if (state == Automatic)
+					state = Manual;
+
 				break;
+		}
+
+		bool polled = move.poll();
+		if (!polled)
+			continue;
+
+		if (state == Start && move.pressed(Btn_START))
+			state = Manual;
+
+		if (move.pressed(Btn_MOVE))
+		{
+			state = Manual;
+			d.stop();
 		}
 	}
 }
