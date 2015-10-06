@@ -3,12 +3,16 @@
 #include <iostream>
 
 #include <boost/asio.hpp>
-#include "serial_scanner.hpp"
+#include "rs485_dongle.hpp"
 #include "driver.hpp"
+
+#include "psmove.hpp"
 
 #include <opencv2/highgui.hpp>
 #include <opencv2/video.hpp>
 #include "blob_finder.hpp"
+
+#include "pid_controller.hpp"
 
 #include "global.hpp"
 
@@ -27,17 +31,34 @@ player_module::~player_module()
 module::type player_module::run(const module::type &prev_module)
 {
 	boost::asio::io_service io;
-	serial_scanner scanner(io, "ttyACM");
+	rs485_dongle dongle(io, "/dev/ttyUSB0");
 
-	driver d(scanner);
+	driver d(dongle);
 
 	cv::VideoCapture capture(global::video_id);
 	if (!capture.isOpened())
 		throw runtime_error("capture could not be opened");
 
-	blob_finder blobber("oranz", "ball");
+	if (!psmove_init(PSMOVE_CURRENT_VERSION))
+		throw runtime_error("PSMove API init failed");
 
-	bool find = false;
+	psmove move;
+
+	blob_finder baller("oranz", "ball");
+	blob_finder goaler("kollane", "goal");
+
+	enum State
+	{
+		Start,
+		Manual,
+		Ball,
+		GoalFind,
+		Goal
+	} state = Manual;
+
+	pid_controller speed_controller, rotate_controller;
+	speed_controller.Kp = 80;
+	rotate_controller.Kp = 30;
 
 	cv::namedWindow("Remote");
 	while (1)
@@ -48,9 +69,9 @@ module::type player_module::run(const module::type &prev_module)
 		cv::Mat keyframe;
 		frame.copyTo(keyframe);
 
-		if (find)
+		if (state == Ball)
 		{
-			auto largest = blobber.largest(frame);
+			auto largest = baller.largest(frame);
 			if (largest.size >= 0.f) // if blob found
 			{
 				cv::circle(keyframe, largest.pt, largest.size / 2, cv::Scalar(255, 0, 255), 5);
@@ -58,17 +79,41 @@ module::type player_module::run(const module::type &prev_module)
 				int diff = frame.cols / 2 - largest.pt.x;
 				float factor = float(diff) / (frame.cols / 2);
 
+				float dist = (frame.rows - largest.pt.y) / float(frame.rows);
+				d.omni(speed_controller.step(dist), 0, rotate_controller.step(factor));
 
-				if (abs(factor) < 0.25)
-				{
-					float dist = (frame.rows - largest.pt.y) / float(frame.rows);
-					d.straight(dist * 30);
-				}
-				else
-				{
-					d.rotate(factor * 50);
-				}
+				if (dist < 0.1)
+					state = GoalFind;
 			}
+			else
+				d.rotate(20);
+		}
+		else if (state == GoalFind)
+		{
+			auto largest = goaler.largest(frame);
+			if (largest.size >= 0.f) // if blob found
+			{
+				cv::circle(keyframe, largest.pt, largest.size / 2, cv::Scalar(255, 0, 255), 5);
+
+				int diff = frame.cols / 2 - largest.pt.x;
+				float factor = float(diff) / (frame.cols / 2);
+
+				float dist = (frame.rows - largest.pt.y) / float(frame.rows);
+				//d.omni(speed_controller.step(dist), 0, rotate_controller.step(factor));
+
+				if (abs(factor) < 0.2)
+					state = Goal;
+				if (factor > 0)
+					d.omni(17 * fabs(factor), -90, 13 * fabs(factor));
+				else
+					d.omni(17 * fabs(factor), 90, -13 * fabs(factor));
+			}
+			else
+				d.omni(17, -90, 13);
+		}
+		else if (state == Goal)
+		{
+			d.straight(30);
 		}
 
 		imshow("Remote", keyframe);
@@ -101,8 +146,25 @@ module::type player_module::run(const module::type &prev_module)
 				break;
 
 			case 'e':
-				find ^= 1;
+				if (state == Manual)
+					state = Ball;
+				else
+					state = Manual;
+
 				break;
+		}
+
+		bool polled = move.poll();
+		if (!polled)
+			continue;
+
+		if (state == Start && move.pressed(Btn_START))
+			state = Manual;
+
+		if (move.pressed(Btn_MOVE))
+		{
+			state = Manual;
+			d.stop();
 		}
 	}
 }

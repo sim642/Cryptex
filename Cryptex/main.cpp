@@ -12,7 +12,7 @@ using namespace std;
 
 int main()
 {
-	global::env = "test";
+	global::env = "301";
 	global::video_id = 0;
 
 	map<module::type, module*> modules;

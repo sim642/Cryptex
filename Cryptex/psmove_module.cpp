@@ -2,7 +2,7 @@
 
 #include <iostream>
 #include <stdexcept>
-#include <psmoveapi/psmove.h>
+#include "psmove.hpp"
 
 #include <boost/asio.hpp>
 #include "rs485_dongle.hpp"
@@ -28,16 +28,14 @@ psmove_module::~psmove_module()
 
 module::type psmove_module::run(const module::type &prev_module)
 {
-    PSMove *move;
-
     if (!psmove_init(PSMOVE_CURRENT_VERSION))
 		throw runtime_error("PSMove API init failed");
 
-	cout << "PSMove count: " << psmove_count_connected() << endl;
+	cout << "PSMove count: " << psmove::connected_count() << endl;
 
-	move = psmove_connect();
-	if (move == NULL)
-		throw runtime_error("PSMove controller not found");
+	psmove move;
+
+	cout << "PSMove battery: " << move.battery() << endl;
 
 	//psmove_set_rate_limiting(move, PSMove_True);
 
@@ -45,46 +43,36 @@ module::type psmove_module::run(const module::type &prev_module)
 	rs485_dongle dongle(io, "/dev/ttyUSB0");
 	driver d(dongle);
 
-	psmove_enable_orientation(move, PSMove_True);
-	if (!psmove_has_orientation(move))
+	if (!move.orientation(true))
 		throw runtime_error("PSMove no orientation");
 
-	int prev_seq = 0;
+	bool running = false;
+
 	while (1)
 	{
-		int seq = psmove_poll(move);
-		if ((prev_seq > 0) && ((prev_seq % 16) != (seq - 1)))
+		bool polled = move.poll();
+
+		if (move.pressed(Btn_START))
+			running = true;
+
+		if (move.pressed(Btn_MOVE))
+			return module::type::menu;
+
+
+		if (!polled)
 			continue;
 
-		float w, x, y, z;
-		psmove_get_orientation(move, &w, &x, &y, &z);
+		auto orientation = move.orientation();
 
-		/*float phi = atan2(y*z+w*x, 0.5f-(x*x+y*y));
-		float the = asin(-2*(x*z-w*y));
-		float psi = atan2(x*y+w*z, 0.5f-(y*y+z*z));*/
-		float phi = atan2(x*z+y*w, x*w-y*z);
-		float the = acos(-x*x-y*y+z*z+w*w);
-		float psi = atan2(x*z-y*w, y*z+x*w);
-		//cout << w << "\t" << x << "\t" << y << "\t" << z << endl;
-		cout << phi << "\t" << the << "\t" << psi << endl;
+		cout << orientation[0] << "\t" << orientation[1] << "\t" << orientation[2] << endl;
 
-		//d.rotate(psi * 25);
-		d.omni(psmove_get_trigger(move) * 0.3, rad2deg(phi), psi * 15);
+		move.leds(cv::Scalar_<int>(running * 255, 0, 0));
 
-		/*int t = psmove_get_trigger(move);
-		psmove_set_leds(move, 0, t, 0);
-		psmove_set_rumble(move, t);
-		psmove_update_leds(move);
-
-		cout << t << endl;
-		d.omni(t * 0.5, 0);*/
+		if (running)
+			d.omni(move.trigger() * 0.3, rad2deg(orientation[0]), orientation[2] * 15);
 
 		this_thread::sleep_for(chrono::milliseconds(1000 / 60));
-
-		prev_seq = seq;
 	}
-
-	psmove_disconnect(move);
 
 	return module::type::menu;
 }
