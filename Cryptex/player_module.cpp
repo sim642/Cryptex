@@ -44,13 +44,16 @@ module::type player_module::run(const module::type &prev_module)
 
 	psmove move;
 
-	blob_finder blobber("oranz", "ball");
+	blob_finder baller("oranz", "ball");
+	blob_finder goaler("kollane", "goal");
 
 	enum State
 	{
 		Start,
 		Manual,
-		Automatic,
+		Ball,
+		GoalFind,
+		Goal
 	} state = Manual;
 
 	pid_controller speed_controller, rotate_controller;
@@ -66,9 +69,9 @@ module::type player_module::run(const module::type &prev_module)
 		cv::Mat keyframe;
 		frame.copyTo(keyframe);
 
-		if (state == Automatic)
+		if (state == Ball)
 		{
-			auto largest = blobber.largest(frame);
+			auto largest = baller.largest(frame);
 			if (largest.size >= 0.f) // if blob found
 			{
 				cv::circle(keyframe, largest.pt, largest.size / 2, cv::Scalar(255, 0, 255), 5);
@@ -78,7 +81,39 @@ module::type player_module::run(const module::type &prev_module)
 
 				float dist = (frame.rows - largest.pt.y) / float(frame.rows);
 				d.omni(speed_controller.step(dist), 0, rotate_controller.step(factor));
+
+				if (dist < 0.1)
+					state = GoalFind;
 			}
+			else
+				d.rotate(20);
+		}
+		else if (state == GoalFind)
+		{
+			auto largest = goaler.largest(frame);
+			if (largest.size >= 0.f) // if blob found
+			{
+				cv::circle(keyframe, largest.pt, largest.size / 2, cv::Scalar(255, 0, 255), 5);
+
+				int diff = frame.cols / 2 - largest.pt.x;
+				float factor = float(diff) / (frame.cols / 2);
+
+				float dist = (frame.rows - largest.pt.y) / float(frame.rows);
+				//d.omni(speed_controller.step(dist), 0, rotate_controller.step(factor));
+
+				if (abs(factor) < 0.2)
+					state = Goal;
+				if (factor > 0)
+					d.omni(17 * fabs(factor), -90, 13 * fabs(factor));
+				else
+					d.omni(17 * fabs(factor), 90, -13 * fabs(factor));
+			}
+			else
+				d.omni(17, -90, 13);
+		}
+		else if (state == Goal)
+		{
+			d.straight(30);
 		}
 
 		imshow("Remote", keyframe);
@@ -112,8 +147,8 @@ module::type player_module::run(const module::type &prev_module)
 
 			case 'e':
 				if (state == Manual)
-					state = Automatic;
-				else if (state == Automatic)
+					state = Ball;
+				else
 					state = Manual;
 
 				break;
