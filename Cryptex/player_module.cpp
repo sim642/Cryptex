@@ -18,7 +18,7 @@
 
 using namespace std;
 
-player_module::player_module()
+player_module::player_module() : state(Start)
 {
 
 }
@@ -46,15 +46,6 @@ module::type player_module::run(const module::type &prev_module)
 
 	blob_finder baller("oranz", "ball");
 	blob_finder goaler("kollane", "goal");
-
-	enum State
-	{
-		Start,
-		Manual,
-		Ball,
-		GoalFind,
-		Goal
-	} state = Manual;
 
 	pid_controller speed_controller, rotate_controller;
 	speed_controller.Kp = 80;
@@ -88,7 +79,7 @@ module::type player_module::run(const module::type &prev_module)
 			else
 				d.rotate(20);
 		}
-		else if (state == GoalFind)
+		else if (state == GoalFind || state == Goal)
 		{
 			auto largest = goaler.largest(frame);
 			if (largest.size >= 0.f) // if blob found
@@ -101,19 +92,27 @@ module::type player_module::run(const module::type &prev_module)
 				float dist = (frame.rows - largest.pt.y) / float(frame.rows);
 				//d.omni(speed_controller.step(dist), 0, rotate_controller.step(factor));
 
-				if (abs(factor) < 0.2)
-					state = Goal;
-				if (factor > 0)
-					d.omni(17 * fabs(factor), -90, 13 * fabs(factor));
+				if (state == GoalFind)
+				{
+					if (abs(factor) < 0.2)
+						state = Goal;
+					if (factor > 0)
+						d.omni(17 * fabs(factor), -90, 13 * fabs(factor));
+					else
+						d.omni(17 * fabs(factor), 90, -13 * fabs(factor));
+				}
 				else
-					d.omni(17 * fabs(factor), 90, -13 * fabs(factor));
+				{
+					d.omni(30, 0, 13 * factor);
+				}
 			}
 			else
-				d.omni(17, -90, 13);
-		}
-		else if (state == Goal)
-		{
-			d.straight(30);
+			{
+				if (state == GoalFind)
+					d.omni(17, -90, 13);
+				else
+					d.straight(30);
+			}
 		}
 
 		imshow("Remote", keyframe);
