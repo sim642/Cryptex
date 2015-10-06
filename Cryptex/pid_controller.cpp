@@ -1,13 +1,20 @@
 #include "pid_controller.hpp"
 
-pid_controller::pid_controller() : Kp(0), Ki(0), Kd(0), prev_t(clock::now()), prev_error(0), integral(0)
+pid_controller::pid_controller() : Kp(0), Ki(0), Kd(0)
 {
-
+	reset();
 }
 
 pid_controller::~pid_controller()
 {
 
+}
+
+void pid_controller::reset()
+{
+	prev_t = clock::now();
+	prev_error = 0;
+	integral = 0;
 }
 
 double pid_controller::step(double error)

@@ -13,6 +13,7 @@
 #include "blob_finder.hpp"
 
 #include "pid_controller.hpp"
+#include "math.hpp"
 
 #include "global.hpp"
 
@@ -48,8 +49,6 @@ module::type player_module::run(const module::type &prev_module)
 	blob_finder goaler("kollane", "goal");
 
 	pid_controller speed_controller, rotate_controller;
-	speed_controller.Kp = 80;
-	rotate_controller.Kp = 30;
 
 	cv::namedWindow("Remote");
 	while (1)
@@ -74,7 +73,13 @@ module::type player_module::run(const module::type &prev_module)
 				d.omni(speed_controller.step(dist), 0, rotate_controller.step(factor));
 
 				if (dist < 0.1)
+				{
 					state = GoalFind;
+					speed_controller.reset();
+					rotate_controller.reset();
+					speed_controller.Kp = 17;
+					rotate_controller.Kp = 13;
+				}
 			}
 			else
 				d.rotate(20);
@@ -90,20 +95,17 @@ module::type player_module::run(const module::type &prev_module)
 				float factor = float(diff) / (frame.cols / 2);
 
 				float dist = (frame.rows - largest.pt.y) / float(frame.rows);
-				//d.omni(speed_controller.step(dist), 0, rotate_controller.step(factor));
 
 				if (state == GoalFind)
 				{
 					if (abs(factor) < 0.2)
 						state = Goal;
-					if (factor > 0)
-						d.omni(17 * fabs(factor), -90, 13 * fabs(factor));
 					else
-						d.omni(17 * fabs(factor), 90, -13 * fabs(factor));
+						d.omni(speed_controller.step(fabs(factor)), sign(factor) * (-90), rotate_controller.step(factor));
 				}
 				else
 				{
-					d.omni(30, 0, 13 * factor);
+					d.omni(40, 0, rotate_controller.step(factor));
 				}
 			}
 			else
@@ -146,7 +148,13 @@ module::type player_module::run(const module::type &prev_module)
 
 			case 'e':
 				if (state == Manual)
+				{
 					state = Ball;
+					speed_controller.reset();
+					rotate_controller.reset();
+					speed_controller.Kp = 80;
+					rotate_controller.Kp = 30;
+				}
 				else
 					state = Manual;
 

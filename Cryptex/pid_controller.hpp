@@ -10,6 +10,7 @@ class pid_controller : public error_controller
 		pid_controller();
 		virtual ~pid_controller();
 
+		virtual void reset();
 		virtual double step(double error);
 
 		double Kp, Ki, Kd;

@@ -7,6 +7,7 @@ class error_controller
 		error_controller();
 		virtual ~error_controller();
 
+		virtual void reset();
 		virtual double step(double error) = 0;
 };
 

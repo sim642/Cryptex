@@ -9,3 +9,8 @@ error_controller::~error_controller()
 {
 
 }
+
+void error_controller::reset()
+{
+
+}
