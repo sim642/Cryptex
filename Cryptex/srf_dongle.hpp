@@ -2,8 +2,6 @@
 #define SRF_DONGLE_H
 
 #include "serial_device.hpp"
-#include <thread>
-#include <mutex>
 #include <string>
 #include <queue>
 #include <tuple>
@@ -22,16 +20,10 @@ class srf_dongle
 		std::tuple<char, char, std::string> recv_parsed();
 
 	private:
-		void receiver();
-
 		boost::asio::serial_port port;
 		serial_stream stream;
-		std::mutex stream_mut;
 
-		std::thread thr;
-
-		std::queue<std::string> recvd;
-		std::mutex recvd_mut;
+		std::string buffer;
 };
 
 #endif // SRF_DONGLE_H

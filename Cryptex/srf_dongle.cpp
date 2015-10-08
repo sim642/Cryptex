@@ -17,7 +17,6 @@ srf_dongle::~srf_dongle()
 
 void srf_dongle::send(char start, std::string id, std::string cmd)
 {
-	lock_guard<mutex> lock(stream_mut);
 	stream << setw(1) << start << setw(2) << id << setw(9) << setfill('-') << left << cmd << flush;
 }
 
@@ -28,15 +27,24 @@ void srf_dongle::send(char field, char target, std::string cmd)
 
 std::string srf_dongle::recv_raw()
 {
-	lock_guard<mutex> lock(recvd_mut);
-	if (recvd.empty())
-		return string("");
-	else
+	int cnt;
+
+	do
 	{
-		string ret = recvd.front();
-		recvd.pop();
-		return ret;
+		string buf(12, '\0');
+		cnt = stream.readsome(&*buf.begin(), 12);
+		buffer += buf.substr(0, cnt);
 	}
+	while (cnt > 0);
+
+	if (buffer.size() >= 12)
+	{
+		string buf = buffer.substr(0, 12);
+		buffer.erase(0, 12);
+		return buf;
+	}
+	else
+		return "";
 }
 
 std::tuple<char, std::string, std::string> srf_dongle::recv()
@@ -55,22 +63,4 @@ std::tuple<char, char, std::string> srf_dongle::recv_parsed()
 		return make_tuple('\0', '\0', "");
 	else
 		return make_tuple(get<1>(r)[0], get<1>(r)[1], get<2>(r));
-}
-
-void srf_dongle::receiver()
-{
-	while (1)
-	{
-		std::string buf(12, '\0');
-
-		{
-			lock_guard<mutex> lock(stream_mut);
-			stream.read(&*buf.begin(), buf.length());
-		}
-
-		{
-			lock_guard<mutex> lock(recvd_mut);
-			recvd.push(buf);
-		}
-	}
 }
