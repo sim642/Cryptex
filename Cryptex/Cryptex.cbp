@@ -87,6 +87,8 @@
 		<Unit filename="serial_device.hpp" />
 		<Unit filename="serial_scanner.cpp" />
 		<Unit filename="serial_scanner.hpp" />
+		<Unit filename="srf_dongle.cpp" />
+		<Unit filename="srf_dongle.hpp" />
 		<Unit filename="test_module.cpp" />
 		<Unit filename="test_module.hpp" />
 		<Extensions>

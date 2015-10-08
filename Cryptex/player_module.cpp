@@ -13,12 +13,15 @@
 #include "blob_finder.hpp"
 
 #include "pid_controller.hpp"
+#include "math.hpp"
+
+#include <chrono>
 
 #include "global.hpp"
 
 using namespace std;
 
-player_module::player_module()
+player_module::player_module() : state(Start)
 {
 
 }
@@ -47,18 +50,9 @@ module::type player_module::run(const module::type &prev_module)
 	blob_finder baller("oranz", "ball");
 	blob_finder goaler("kollane", "goal");
 
-	enum State
-	{
-		Start,
-		Manual,
-		Ball,
-		GoalFind,
-		Goal
-	} state = Manual;
-
 	pid_controller speed_controller, rotate_controller;
-	speed_controller.Kp = 80;
-	rotate_controller.Kp = 30;
+
+	chrono::high_resolution_clock::time_point ballstart;
 
 	cv::namedWindow("Remote");
 	while (1)
@@ -83,14 +77,21 @@ module::type player_module::run(const module::type &prev_module)
 				d.omni(speed_controller.step(dist), 0, rotate_controller.step(factor));
 
 				if (dist < 0.1)
+				{
 					state = GoalFind;
+					speed_controller.reset();
+					rotate_controller.reset();
+					speed_controller.Kp = 17;
+					rotate_controller.Kp = 13;
+				}
 			}
 			else
-				d.rotate(20);
+				d.rotate(max(5.f, 25 - float(chrono::duration_cast<chrono::milliseconds>(chrono::high_resolution_clock::now() - ballstart).count()) / 2000.f * 10));
 		}
-		else if (state == GoalFind)
+		else if (state == GoalFind || state == Goal)
 		{
 			auto largest = goaler.largest(frame);
+			cout << largest.size << endl;
 			if (largest.size >= 0.f) // if blob found
 			{
 				cv::circle(keyframe, largest.pt, largest.size / 2, cv::Scalar(255, 0, 255), 5);
@@ -99,21 +100,36 @@ module::type player_module::run(const module::type &prev_module)
 				float factor = float(diff) / (frame.cols / 2);
 
 				float dist = (frame.rows - largest.pt.y) / float(frame.rows);
-				//d.omni(speed_controller.step(dist), 0, rotate_controller.step(factor));
 
-				if (abs(factor) < 0.2)
-					state = Goal;
-				if (factor > 0)
-					d.omni(17 * fabs(factor), -90, 13 * fabs(factor));
+				if (state == GoalFind)
+				{
+					if (abs(factor) < 0.2)
+						state = Goal;
+					else
+						d.omni(speed_controller.step(fabs(factor)), sign(factor) * (-90), rotate_controller.step(factor));
+				}
 				else
-					d.omni(17 * fabs(factor), 90, -13 * fabs(factor));
+				{
+					d.omni(100, 0, rotate_controller.step(factor));
+
+					if (largest.size > 485.f)
+					{
+						state = Ball;
+						speed_controller.reset();
+						rotate_controller.reset();
+						speed_controller.Kp = 100;
+						rotate_controller.Kp = 30;
+						ballstart = chrono::high_resolution_clock::now();
+					}
+				}
 			}
 			else
-				d.omni(17, -90, 13);
-		}
-		else if (state == Goal)
-		{
-			d.straight(30);
+			{
+				if (state == GoalFind)
+					d.omni(17, -90, 13);
+				else
+					d.straight(30);
+			}
 		}
 
 		imshow("Remote", keyframe);
@@ -147,7 +163,14 @@ module::type player_module::run(const module::type &prev_module)
 
 			case 'e':
 				if (state == Manual)
+				{
 					state = Ball;
+					speed_controller.reset();
+					rotate_controller.reset();
+					speed_controller.Kp = 100;
+					rotate_controller.Kp = 30;
+					ballstart = chrono::high_resolution_clock::now();
+				}
 				else
 					state = Manual;
 

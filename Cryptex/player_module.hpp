@@ -10,6 +10,16 @@ class player_module : public module
 		virtual ~player_module();
 
 		virtual type run(const type &prev_module);
+
+	private:
+		enum
+		{
+			Start,
+			Manual,
+			Ball,
+			GoalFind,
+			Goal
+		} state;
 };
 
 #endif // PLAYER_MODULE_H
