@@ -15,6 +15,8 @@
 #include "pid_controller.hpp"
 #include "math.hpp"
 
+#include <chrono>
+
 #include "global.hpp"
 
 using namespace std;
@@ -50,6 +52,8 @@ module::type player_module::run(const module::type &prev_module)
 
 	pid_controller speed_controller, rotate_controller;
 
+	chrono::high_resolution_clock::time_point ballstart;
+
 	cv::namedWindow("Remote");
 	while (1)
 	{
@@ -82,11 +86,12 @@ module::type player_module::run(const module::type &prev_module)
 				}
 			}
 			else
-				d.rotate(20);
+				d.rotate(max(5.f, 25 - float(chrono::duration_cast<chrono::milliseconds>(chrono::high_resolution_clock::now() - ballstart).count()) / 2000.f * 10));
 		}
 		else if (state == GoalFind || state == Goal)
 		{
 			auto largest = goaler.largest(frame);
+			cout << largest.size << endl;
 			if (largest.size >= 0.f) // if blob found
 			{
 				cv::circle(keyframe, largest.pt, largest.size / 2, cv::Scalar(255, 0, 255), 5);
@@ -105,7 +110,17 @@ module::type player_module::run(const module::type &prev_module)
 				}
 				else
 				{
-					d.omni(40, 0, rotate_controller.step(factor));
+					d.omni(100, 0, rotate_controller.step(factor));
+
+					if (largest.size > 485.f)
+					{
+						state = Ball;
+						speed_controller.reset();
+						rotate_controller.reset();
+						speed_controller.Kp = 100;
+						rotate_controller.Kp = 30;
+						ballstart = chrono::high_resolution_clock::now();
+					}
 				}
 			}
 			else
@@ -152,8 +167,9 @@ module::type player_module::run(const module::type &prev_module)
 					state = Ball;
 					speed_controller.reset();
 					rotate_controller.reset();
-					speed_controller.Kp = 80;
+					speed_controller.Kp = 100;
 					rotate_controller.Kp = 30;
+					ballstart = chrono::high_resolution_clock::now();
 				}
 				else
 					state = Manual;
