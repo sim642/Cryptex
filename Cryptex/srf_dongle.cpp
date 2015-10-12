@@ -2,10 +2,11 @@
 #include <iomanip>
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/algorithm/string/classification.hpp>
+#include <functional>
 
 using namespace std;
 
-srf_dongle::srf_dongle(boost::asio::io_service &io, const std::string &dev) : port(io, dev), stream(port)
+srf_dongle::srf_dongle(boost::asio::io_service &io, const std::string &dev) : port(io, dev), stream(port), thr(bind(&srf_dongle::receiver, this))
 {
 	port.set_option(boost::asio::serial_port_base::baud_rate(9600));
 }
@@ -13,6 +14,12 @@ srf_dongle::srf_dongle(boost::asio::io_service &io, const std::string &dev) : po
 srf_dongle::~srf_dongle()
 {
 
+}
+
+void srf_dongle::send(std::string raw)
+{
+	lock_guard<mutex> lock(stream_mut);
+	stream << raw << flush;
 }
 
 void srf_dongle::send(char start, std::string id, std::string cmd)
@@ -30,13 +37,15 @@ std::string srf_dongle::recv_raw()
 {
 	lock_guard<mutex> lock(recvd_mut);
 	if (recvd.empty())
-		return string("");
-	else
+		return "";
+	else if (recvd.front().size() >= 12)
 	{
-		string ret = recvd.front();
-		recvd.pop();
+		string ret = recvd.front().substr(0, 12);
+		recvd.erase(recvd.begin()); // pop
 		return ret;
 	}
+
+	return "";
 }
 
 std::tuple<char, std::string, std::string> srf_dongle::recv()
@@ -61,16 +70,27 @@ void srf_dongle::receiver()
 {
 	while (1)
 	{
-		std::string buf(12, '\0');
+		char ch;
 
 		{
 			lock_guard<mutex> lock(stream_mut);
-			stream.read(&*buf.begin(), buf.length());
+			ch = stream.get();
 		}
 
 		{
 			lock_guard<mutex> lock(recvd_mut);
-			recvd.push(buf);
+
+			if (ch == 'a') // packet start
+			{
+				if (!recvd.empty() && recvd.back().size() < 12)
+					recvd.back().append(12 - recvd.back().size(), '-');
+
+				recvd.push_back("a");
+			}
+			else if (!recvd.empty())
+			{
+				recvd.back().append(1, ch);
+			}
 		}
 	}
 }
