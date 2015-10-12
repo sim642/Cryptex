@@ -2,10 +2,11 @@
 #include <iomanip>
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/algorithm/string/classification.hpp>
+#include <functional>
 
 using namespace std;
 
-srf_dongle::srf_dongle(boost::asio::io_service &io, const std::string &dev) : port(io, dev), stream(port)
+srf_dongle::srf_dongle(boost::asio::io_service &io, const std::string &dev) : port(io, dev), stream(port), thr(bind(&srf_dongle::receiver, this))
 {
 	port.set_option(boost::asio::serial_port_base::baud_rate(9600));
 }
@@ -15,8 +16,15 @@ srf_dongle::~srf_dongle()
 
 }
 
+void srf_dongle::send(std::string raw)
+{
+	lock_guard<mutex> lock(stream_mut);
+	stream << raw << flush;
+}
+
 void srf_dongle::send(char start, std::string id, std::string cmd)
 {
+	lock_guard<mutex> lock(stream_mut);
 	stream << setw(1) << start << setw(2) << id << setw(9) << setfill('-') << left << cmd << flush;
 }
 
@@ -27,24 +35,17 @@ void srf_dongle::send(char field, char target, std::string cmd)
 
 std::string srf_dongle::recv_raw()
 {
-	int cnt;
-
-	do
-	{
-		string buf(12, '\0');
-		cnt = stream.readsome(&*buf.begin(), 12);
-		buffer += buf.substr(0, cnt);
-	}
-	while (cnt > 0);
-
-	if (buffer.size() >= 12)
-	{
-		string buf = buffer.substr(0, 12);
-		buffer.erase(0, 12);
-		return buf;
-	}
-	else
+	lock_guard<mutex> lock(recvd_mut);
+	if (recvd.empty())
 		return "";
+	else if (recvd.front().size() >= 12)
+	{
+		string ret = recvd.front().substr(0, 12);
+		recvd.erase(recvd.begin()); // pop
+		return ret;
+	}
+
+	return "";
 }
 
 std::tuple<char, std::string, std::string> srf_dongle::recv()
@@ -63,4 +64,33 @@ std::tuple<char, char, std::string> srf_dongle::recv_parsed()
 		return make_tuple('\0', '\0', "");
 	else
 		return make_tuple(get<1>(r)[0], get<1>(r)[1], get<2>(r));
+}
+
+void srf_dongle::receiver()
+{
+	while (1)
+	{
+		char ch;
+
+		{
+			lock_guard<mutex> lock(stream_mut);
+			ch = stream.get();
+		}
+
+		{
+			lock_guard<mutex> lock(recvd_mut);
+
+			if (ch == 'a') // packet start
+			{
+				if (!recvd.empty() && recvd.back().size() < 12)
+					recvd.back().append(12 - recvd.back().size(), '-');
+
+				recvd.push_back("a");
+			}
+			else if (!recvd.empty())
+			{
+				recvd.back().append(1, ch);
+			}
+		}
+	}
 }

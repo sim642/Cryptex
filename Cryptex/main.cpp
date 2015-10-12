@@ -14,6 +14,8 @@ int main()
 {
 	global::env = "301";
 	global::video_id = 0;
+	global::field = 'A';
+	global::id = 'A';
 
 	map<module::type, module*> modules;
 	modules[module::type::menu] = new menu_module();
