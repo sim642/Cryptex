@@ -43,6 +43,7 @@
 			<Add option="-lopencv_imgproc" />
 			<Add option="-lopencv_features2d" />
 			<Add option="-lpsmoveapi" />
+			<Add option="-lpthread" />
 		</Linker>
 		<Unit filename="blob_finder.cpp" />
 		<Unit filename="blob_finder.hpp" />
