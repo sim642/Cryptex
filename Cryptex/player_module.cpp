@@ -89,8 +89,6 @@ module::type player_module::run(const module::type &prev_module)
 	blob_finder baller("oranz", "ball");
 	blob_finder goaler("kollane", "goal");
 
-	pid_controller speed_controller, rotate_controller;
-
 	chrono::high_resolution_clock::time_point ballstart;
 
 	cv::namedWindow("Remote");
