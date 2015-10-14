@@ -5,5 +5,6 @@
 		<Project filename="opencv_test/opencv_test.cbp" />
 		<Project filename="motor_test/motor_test.cbp" />
 		<Project filename="WheelMod/WheelMod.cbp" />
+		<Project filename="MainMod/MainMod.cbp" />
 	</Workspace>
 </CodeBlocks_workspace_file>
