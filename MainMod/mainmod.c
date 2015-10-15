@@ -19,6 +19,7 @@
 #define LED2R PF1
 #define LED2G PF0
 #define LED2B PF4
+#define LEDS 0b11110011
 
 
 int atoi(const char * str);
@@ -81,7 +82,8 @@ void parse_and_execute_command(char *buf, bool usart)
 
 ISR(TIMER0_COMPA_vect)
 {
-	bit_flip(PORTF, BIT(LED1G)); // visualize heartbeat
+	bit_flip(PORTF, BIT(LED1B)); // visualize heartbeat
+	bit_flip(PORTF, BIT(LED2R));
 }
 
 int main(void)
@@ -95,7 +97,8 @@ int main(void)
 	MCUCR = BIT(JTD);
 
 	// LED outputs
-	bit_set(DDRF, 0b11110011);
+	bit_set(DDRF, LEDS);
+	bit_set(PORTF, LEDS);
 
 
 	// initialize comms
@@ -116,8 +119,8 @@ int main(void)
 	sei(); // enable interrupts
 
 	// LED test
-	bit_set(PORTF, BIT(LED1R));
-	bit_set(PORTF, BIT(LED2B));
+	bit_clear(PORTF, BIT(LED2R));
+
 
 	uint8_t n;
 	char buf[16];
