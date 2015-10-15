@@ -20,6 +20,7 @@
 #define bit_write(c,p,m) (c ? bit_set(p,m) : bit_clear(p,m))
 #define BIT(x) (0x01 << (x))
 #define LONGBIT(x) ((unsigned long)0x00000001 << (x))
+#define BITS(b, x) ((b) << (x))
 
 #define LED1R PF6
 #define LED1G PF5
@@ -49,8 +50,6 @@ void usb_write(const char *str)
 
 void usart_write(unsigned char* data)
 {
-	PORTB |= 0b00001100;
-	PORTD |= 0b00010000;
 	while(*data)
 	{
 		while(!(UCSR1A & (1 << UDRE1)));
@@ -58,8 +57,6 @@ void usart_write(unsigned char* data)
 		data++;
 	}
 	_delay_ms(5);
-	PORTB &= 0b11110011;
-	PORTD &= 0b11101111;
 }
 
 uint8_t usb_recv_str(char *buf, uint8_t size)
@@ -190,9 +187,9 @@ void parse_and_execute_command(char *buf, bool usart)
 
 int main(void)
 {
-	// remove CLKDIV8
-	CLKPR = 0x80;
-	CLKPR = 0x00;
+	// clock prescaler
+	CLKPR = BIT(CLKPCE); // enable prescaler change
+	CLKPR = BITS(0b0000, CLKPS0); // divider 1
 
 	// disable JTAG - control F port
 	MCUCR = BIT(JTD);
@@ -206,8 +203,8 @@ int main(void)
 
 	// initialize RS485
 	UBRR1 = 51; // 19200, 8
-	UCSR1B = (1 << RXEN1) | (1 << TXEN1) | (1 << RXCIE1); // enable Tx, Rx
-	UCSR1C = (1 << USBS1) | (3 << UCSZ10); // 2-bit stop, 8-bit character
+	UCSR1B = BIT(RXEN1) | BIT(TXEN1) | BIT(RXCIE1); // enable Tx, Rx
+	UCSR1C = BIT(USBS1) | BITS(0b11, UCSZ10); // 2-bit stop, 8-bit character
 
 	// wait for USB configuration
 	// while (!usb_configured());
