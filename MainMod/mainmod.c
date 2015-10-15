@@ -8,6 +8,8 @@
 #include <util/delay.h>
 #include <avr/interrupt.h>
 #include <avr/eeprom.h>
+
+#include <stdbool.h>
 //#include <string.h>
 #include "usb_serial.h"
 
@@ -21,9 +23,14 @@
 
 int atoi(const char * str);
 
+bool strpref(const char *str, const char *pre)
+{
+	return strncmp(str, pre, strlen(pre)) == 0;
+}
+
+
 char response[16], reply[16];
 
-//TODO implement UART
 void usb_write(const char *str)
 {
 	while (*str)
@@ -39,7 +46,7 @@ void usart_write(unsigned char* data)
 	PORTD |= 0b00010000;
 	while(*data)
 	{
-		while(!( UCSR1A & (1<<UDRE1)));
+		while(!(UCSR1A & (1 << UDRE1)));
 		UDR1 = *data;
 		data++;
 	}
@@ -51,12 +58,11 @@ void usart_write(unsigned char* data)
 uint8_t usb_recv_str(char *buf, uint8_t size)
 {
 	char data;
-	uint8_t count=0;
+	uint8_t count = 0;
 
 	while (count < size)
 	{
 		data = usb_serial_getchar();
-		//usb_serial_putchar(data);
 		if (data == '\r' || data == '\n')
 		{
 			*buf = '\0';
@@ -73,7 +79,7 @@ uint8_t usb_recv_str(char *buf, uint8_t size)
 
 volatile unsigned char usart_buf[16];
 volatile uint8_t usart_i = 0;
-volatile uint8_t usart_data_ready = 0;
+volatile bool usart_data_ready = false;
 
 ISR(USART1_RX_vect)
 {
@@ -89,7 +95,7 @@ ISR(USART1_RX_vect)
 	{
 		usart_buf[usart_i] = '\0';
 		usart_i = 0;
-		usart_data_ready = 1;
+		usart_data_ready = true;
 		return;
 	}
 }
@@ -122,7 +128,7 @@ void usart_reply(const char *str)
 	usart_write(reply);
 }
 
-void parse_and_execute_command(char *buf, uint8_t usart)
+void parse_and_execute_command(char *buf, bool usart)
 {
 	char *command;
 	int16_t par1;
@@ -151,20 +157,18 @@ void parse_and_execute_command(char *buf, uint8_t usart)
 		else
 		{
 			while (*command != ':')
-			{
 				command++;
-			}
 			command++;
 		}
 	}
 
-	if ((command[0] == 'i') && (command[1] == 'd'))
+	if (strpref(command, "id"))
 	{
 		//set id
-		par1 = atoi(command+2);
+		par1 = atoi(command + 2);
 		eeprom_update_byte((uint8_t*)0, par1);
 	}
-	else if (command[0] == '?')
+	else if (strpref(command, "?"))
 	{
 		//get info: id
 		par1 = eeprom_read_byte((uint8_t*)0);
@@ -173,61 +177,51 @@ void parse_and_execute_command(char *buf, uint8_t usart)
 	}
 	else
 	{
-		//bit_flip(PORTC, BIT(LED1));
 		reply_raw_func(command);
 	}
 }
 
 int main(void)
 {
+	// remove CLKDIV8
 	CLKPR = 0x80;
 	CLKPR = 0x00;
+
+	// disable JTAG - control F port
+	MCUCR = BIT(JTD);
+	MCUCR = BIT(JTD);
+
+	// initialize USB
 	usb_init();
 
-	//TODO Implement and test UART init
-	//UART init
-	DDRB &= 0b11110010;
-	DDRB |= 0b00001100;
-	DDRD &= ~(0b00000010);
-	DDRD |= 0b00010100;
-	//DDRD |= 0b00000010;
-	//19200
-	//8
-	UBRR1 = 51;
-	//enable Tx and Rx
-	UCSR1B = (1<<RXEN1)|(1<<TXEN1)|(1<<RXCIE1);
-	UCSR1C = (1<<USBS1)|(3<<UCSZ10);
+	// initialize RS485
+	UBRR1 = 51; // 19200, 8
+	UCSR1B = (1 << RXEN1) | (1 << TXEN1) | (1 << RXCIE1); // enable Tx, Rx
+	UCSR1C = (1 << USBS1) | (3 << UCSZ10); // 2-bit stop, 8-bit character
 
-	//Wait for USB to be configured
-	//while (!usb_configured()) /* wait */ ;
+	// wait for USB configuration
+	// while (!usb_configured());
 	_delay_ms(1000);
 
+	sei(); // enable interrupts
 
-	PCICR = 1; //enable pin change interrupt
-	PCMSK0 = 0b00000001;
-
-	OCR1AL = 0;
-	//OCR1BL = 0;
-
-	sei();
 
 	uint8_t n;
 	char buf[16];
 
 	while (1)
 	{
-		//TODO implement UART read
 		if (usb_serial_available())
 		{
 			n = usb_recv_str(buf, sizeof(buf));
 			if (n == sizeof(buf))
 			{
-				parse_and_execute_command(buf, 0);
+				parse_and_execute_command(buf, false);
 			}
 		}
-		else if (usart_data_ready == 1)
+		else if (usart_data_ready)
 		{
-			parse_and_execute_command(usart_buf, 1);
+			parse_and_execute_command(usart_buf, true);
 			usart_data_ready = 0;
 		}
 	}
