@@ -185,6 +185,11 @@ void parse_and_execute_command(char *buf, bool usart)
 	}
 }
 
+ISR(TIMER0_COMPA_vect)
+{
+	bit_flip(PORTF, BIT(LED1G)); // visualize heartbeat
+}
+
 int main(void)
 {
 	// clock prescaler
@@ -209,6 +214,13 @@ int main(void)
 	// wait for USB configuration
 	// while (!usb_configured());
 	_delay_ms(1000);
+
+	// heartbeat timer (timer0)
+	TCCR0A = BITS(0b10, WGM00); // CTC mode (mode 2)
+	TCCR0B = BITS(0b101, CS00); // divider 1024
+	TIMSK0 = BIT(OCIE0A); // enable compare A on timer0
+	OCR0A = 250; // 62.5Hz
+	TCNT0 = 0;
 
 	sei(); // enable interrupts
 
