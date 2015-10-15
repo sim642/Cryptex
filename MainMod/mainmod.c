@@ -21,6 +21,8 @@
 #define LED2B PF4
 #define LEDS 0b11110011
 
+#define KICK PD5
+#define CHARGE PD4
 
 int atoi(const char * str);
 
@@ -74,6 +76,16 @@ void parse_and_execute_command(char *buf, bool usart)
 		sprintf(response, "id:%d", par1);
 		reply_func(response);
 	}
+	else if (strpref(command, "k"))
+	{
+		par1 = atoi(command + 1);
+		bit_write(par1, PORTD, BIT(KICK));
+	}
+	else if (strpref(command, "c"))
+	{
+		par1 = atoi(command + 1);
+		bit_write(par1, PORTD, BIT(CHARGE));
+	}
 	else
 	{
 		reply_raw_func(command);
@@ -100,6 +112,11 @@ int main(void)
 	bit_set(DDRF, LEDS);
 	bit_set(PORTF, LEDS);
 
+	// coil outputs
+	bit_set(DDRD, BIT(KICK));
+	bit_set(DDRD, BIT(CHARGE));
+	bit_clear(PORTD, BIT(KICK));
+	bit_clear(PORTD, BIT(CHARGE));
 
 	// initialize comms
 	usb_init();
