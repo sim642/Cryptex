@@ -21,6 +21,13 @@
 #define BIT(x) (0x01 << (x))
 #define LONGBIT(x) ((unsigned long)0x00000001 << (x))
 
+#define LED1R PF6
+#define LED1G PF5
+#define LED1B PF7
+#define LED2R PF1
+#define LED2G PF0
+#define LED2B PF4
+
 int atoi(const char * str);
 
 bool strpref(const char *str, const char *pre)
@@ -191,6 +198,9 @@ int main(void)
 	MCUCR = BIT(JTD);
 	MCUCR = BIT(JTD);
 
+	// LED outputs
+	bit_set(DDRF, 0b11110011);
+
 	// initialize USB
 	usb_init();
 
@@ -205,6 +215,9 @@ int main(void)
 
 	sei(); // enable interrupts
 
+	// LED test
+	bit_set(PORTF, BIT(LED1R));
+	bit_set(PORTF, BIT(LED2B));
 
 	uint8_t n;
 	char buf[16];
