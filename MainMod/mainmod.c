@@ -32,6 +32,8 @@ char response[16];
 
 void parse_and_execute_command(char *buf, bool usart)
 {
+	bit_flip(PORTF, BIT(LED2R));
+
 	char *command;
 	int16_t par1;
 	command = buf;
@@ -123,7 +125,7 @@ void parse_and_execute_command(char *buf, bool usart)
 ISR(TIMER0_COMPA_vect)
 {
 	bit_flip(PORTF, BIT(LED1B)); // visualize heartbeat
-	bit_flip(PORTF, BIT(LED2R));
+	//bit_flip(PORTF, BIT(LED2R));
 }
 
 int main(void)
@@ -151,6 +153,9 @@ int main(void)
 
 	// initialize comms
 	usb_init();
+	bit_set(DDRD, BIT(PD3) | BIT(PD6) | BIT(PD7));
+	bit_set(PORTD, BIT(PD6)); // enable Tx
+	bit_clear(PORTD, BIT(PD7)); // enable Rx
 	usart_init();
 
 	// wait for USB configuration
@@ -173,7 +178,7 @@ int main(void)
 	sei(); // enable interrupts
 
 	// LED test
-	bit_clear(PORTF, BIT(LED2R));
+	//bit_clear(PORTF, BIT(LED2R));
 
 
 	uint8_t n;

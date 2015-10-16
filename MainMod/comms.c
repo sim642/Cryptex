@@ -70,6 +70,8 @@ uint8_t usb_recv_str(char *buf, uint8_t size)
 
 ISR(USART1_RX_vect)
 {
+	bit_flip(PORTF, BIT(PF0));
+
 	unsigned char ch = UDR1;
 
 	if (iseol(ch))
