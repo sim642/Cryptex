@@ -1,15 +1,11 @@
-/** EEPROM
-0: id
-**/
-
 #define F_CPU 16000000UL
 #include <avr/io.h>
 #define __DELAY_BACKWARD_COMPATIBLE__ // http://lists.gnu.org/archive/html/avr-gcc-list/2012-05/msg00030.html
 #include <util/delay.h>
 #include <avr/interrupt.h>
-#include <avr/eeprom.h>
 
 #include <stdbool.h>
+#include "eeprom.h"
 #include "comms.h"
 #include "util.h"
 
@@ -49,7 +45,7 @@ void parse_and_execute_command(char *buf, bool usart)
 
 	if (usart == 1)
 	{
-		uint8_t id = eeprom_read_byte((uint8_t*)0);
+		uint8_t id = eeprom_read_byte(EEPROM_ID);
 		par1 = atoi(command);
 		if(par1 != id)
 		{
@@ -67,12 +63,12 @@ void parse_and_execute_command(char *buf, bool usart)
 	{
 		//set id
 		par1 = atoi(command + 2);
-		eeprom_update_byte((uint8_t*)0, par1);
+		eeprom_update_byte(EEPROM_ID, par1);
 	}
 	else if (strpref(command, "?"))
 	{
 		//get info: id
-		par1 = eeprom_read_byte((uint8_t*)0);
+		par1 = eeprom_read_byte(EEPROM_ID);
 		sprintf(response, "id:%d", par1);
 		reply_func(response);
 	}

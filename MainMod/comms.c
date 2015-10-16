@@ -1,6 +1,6 @@
 #include "comms.h"
 #include <avr/interrupt.h>
-#include <avr/eeprom.h>
+#include "eeprom.h"
 #include "util.h"
 
 volatile unsigned char usart_buf[16];
@@ -92,7 +92,7 @@ void usb_reply_raw(const char *str)
 
 void usart_reply_raw(const char *str)
 {
-	uint8_t id = eeprom_read_byte((uint8_t*)0);
+	uint8_t id = eeprom_read_byte(EEPROM_ID);
 	sprintf(reply, "%d:%s\n", id, str);
 	usart_write(reply);
 }
@@ -105,7 +105,7 @@ void usb_reply(const char *str)
 
 void usart_reply(const char *str)
 {
-	uint8_t id = eeprom_read_byte((uint8_t*)0);
+	uint8_t id = eeprom_read_byte(EEPROM_ID);
 	sprintf(reply, "<%d:%s>\n", id, str);
 	usart_write(reply);
 }

@@ -47,6 +47,7 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="comms.h" />
+		<Unit filename="eeprom.h" />
 		<Unit filename="mainmod.c">
 			<Option compilerVar="CC" />
 			<Option weight="25" />
