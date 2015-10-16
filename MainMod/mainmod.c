@@ -63,25 +63,27 @@ void parse_and_execute_command(char *buf, bool usart)
 
 	if (strpref(command, "id"))
 	{
-		//set id
+		// set ID
 		par1 = atoi(command + 2);
 		eeprom_update_byte(EEPROM_ID, par1);
 	}
 	else if (strpref(command, "?"))
 	{
-		//get info: id
+		// get ID
 		par1 = eeprom_read_byte(EEPROM_ID);
 		sprintf(response, "id:%d", par1);
 		reply_func(response);
 	}
-	else if (strpref(command, "k"))
+	else if (strpref(command, "ko"))
 	{
-		par1 = atoi(command + 1);
+		// kick override
+		par1 = atoi(command + 2);
 		bit_write(par1, PORTD, BIT(KICK));
 	}
-	else if (strpref(command, "c"))
+	else if (strpref(command, "co"))
 	{
-		par1 = atoi(command + 1);
+		// charge override
+		par1 = atoi(command + 2);
 		bit_write(par1, PORTD, BIT(CHARGE));
 	}
 	else if (strpref(command, "dm"))
