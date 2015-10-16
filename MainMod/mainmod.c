@@ -20,6 +20,8 @@
 #define KICK PD5
 #define CHARGE PD4
 
+#define EXTPWM PC6
+
 int atoi(const char * str);
 
 
@@ -82,6 +84,12 @@ void parse_and_execute_command(char *buf, bool usart)
 		par1 = atoi(command + 1);
 		bit_write(par1, PORTD, BIT(CHARGE));
 	}
+	else if (strpref(command, "dm"))
+	{
+		// dribbler motor
+		par1 = atoi(command + 2);
+		OCR3AL = par1;
+	}
 	else
 	{
 		reply_raw_func(command);
@@ -128,6 +136,12 @@ int main(void)
 	TIMSK0 = BIT(OCIE0A); // enable compare A on timer0
 	OCR0A = 250; // 62.5Hz
 	TCNT0 = 0;
+
+	// ext PWM (timer3)
+	bit_set(DDRC, BIT(EXTPWM)); // ext PWM pin as output
+	TCCR3A = BITS(0b10, COM3A0) | BITS(0b01, WGM30); // fast PWM, 8-bit (mode 5)
+	TCCR3B = BITS(0b01, WGM32) | BITS(0b100, CS30); // divider 256
+	OCR3AL = 0;
 
 	sei(); // enable interrupts
 
