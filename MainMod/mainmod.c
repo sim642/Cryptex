@@ -20,6 +20,9 @@
 #define KICK PD5
 #define CHARGE PD4
 
+#define BTN1 PD0
+#define BTN2 PD1
+
 #define EXTPWM PC6
 
 int atoi(const char * str);
@@ -86,6 +89,25 @@ void parse_and_execute_command(char *buf, bool usart)
 		par1 = atoi(command + 2);
 		bit_write(par1, PORTD, BIT(CHARGE));
 	}
+	else if (strpref(command, "b"))
+	{
+		// get button state
+		par1 = atoi(command + 1);
+
+		int state = -1;
+		switch (par1)
+		{
+			case 1:
+				state = bit_get(PIND, BIT(BTN1)) == 0;
+				break;
+
+			case 2:
+				state = bit_get(PIND, BIT(BTN2)) == 0;
+				break;
+		}
+		sprintf(response, "b%d:%d", par1, state);
+		reply_func(response);
+	}
 	else if (strpref(command, "dm"))
 	{
 		// dribbler motor
@@ -123,6 +145,9 @@ int main(void)
 	bit_set(DDRD, BIT(CHARGE));
 	bit_clear(PORTD, BIT(KICK));
 	bit_clear(PORTD, BIT(CHARGE));
+
+	// button inputs
+	bit_clear(DDRD, BIT(BTN1) | BIT(BTN2));
 
 	// initialize comms
 	usb_init();
