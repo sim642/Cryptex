@@ -5,25 +5,11 @@
 #include <avr/interrupt.h>
 
 #include <stdbool.h>
+#include "pins.h"
 #include "eeprom.h"
 #include "comms.h"
 #include "util.h"
 
-#define LED1R PF6
-#define LED1G PF5
-#define LED1B PF7
-#define LED2R PF1
-#define LED2G PF0
-#define LED2B PF4
-#define LEDS 0b11110011
-
-#define KICK PD5
-#define CHARGE PD4
-
-#define BTN1 PD0
-#define BTN2 PD1
-
-#define EXTPWM PC6
 
 int atoi(const char * str);
 
@@ -153,9 +139,6 @@ int main(void)
 
 	// initialize comms
 	usb_init();
-	bit_set(DDRD, BIT(PD3) | BIT(PD6) | BIT(PD7));
-	bit_set(PORTD, BIT(PD6)); // enable Tx
-	bit_clear(PORTD, BIT(PD7)); // enable Rx
 	usart_init();
 
 	// wait for USB configuration

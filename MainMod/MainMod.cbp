@@ -52,6 +52,7 @@
 			<Option compilerVar="CC" />
 			<Option weight="25" />
 		</Unit>
+		<Unit filename="pins.h" />
 		<Unit filename="usb_serial.c">
 			<Option compilerVar="CC" />
 		</Unit>

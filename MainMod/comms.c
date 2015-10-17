@@ -1,5 +1,6 @@
 #include "comms.h"
 #include <avr/interrupt.h>
+#include "pins.h"
 #include "eeprom.h"
 #include "util.h"
 
@@ -20,6 +21,12 @@ bool isdata(char ch)
 
 void usart_init()
 {
+	bit_set(DDRD, BIT(RS485TX) | BIT(RS485TXEN) | BIT(RS485RXEN));
+	bit_clear(DDRD, BIT(RS485RX));
+
+	bit_set(PORTD, BIT(RS485TXEN)); // enable Tx
+	bit_clear(PORTD, BIT(RS485RXEN)); // enable Rx (inverted)
+
 	UBRR1 = 51; // 19200, 8
 	UCSR1B = BIT(RXEN1) | BIT(TXEN1) | BIT(RXCIE1); // enable Tx, Rx
 	UCSR1C = BIT(USBS1) | BITS(0b11, UCSZ10); // 2-bit stop, 8-bit character
@@ -70,7 +77,7 @@ uint8_t usb_recv_str(char *buf, uint8_t size)
 
 ISR(USART1_RX_vect)
 {
-	bit_flip(PORTF, BIT(PF0));
+	bit_flip(PORTF, BIT(LED2G));
 
 	unsigned char ch = UDR1;
 
