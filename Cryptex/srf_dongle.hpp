@@ -2,8 +2,10 @@
 #define SRF_DONGLE_H
 
 #include "serial_device.hpp"
+#include <thread>
+#include <mutex>
 #include <string>
-#include <queue>
+#include <vector>
 #include <tuple>
 
 class srf_dongle
@@ -12,6 +14,7 @@ class srf_dongle
 		srf_dongle(boost::asio::io_service &io, const std::string &dev);
 		virtual ~srf_dongle();
 
+		void send(std::string raw);
 		void send(char start, std::string id, std::string cmd);
 		void send(char field, char target, std::string cmd);
 
@@ -20,10 +23,16 @@ class srf_dongle
 		std::tuple<char, char, std::string> recv_parsed();
 
 	private:
+		void receiver();
+
 		boost::asio::serial_port port;
 		serial_stream stream;
+		std::mutex stream_mut;
 
-		std::string buffer;
+		std::thread thr;
+
+		std::vector<std::string> recvd;
+		std::mutex recvd_mut;
 };
 
 #endif // SRF_DONGLE_H

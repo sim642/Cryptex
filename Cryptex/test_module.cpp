@@ -2,17 +2,13 @@
 
 #include <iostream>
 #include <boost/asio.hpp>
-#include "serial_scanner.hpp"
-#include "rs485_dongle.hpp"
-#include "motor.hpp"
 #include <chrono>
 #include <thread>
 
 #include "global.hpp"
+#include "srf_dongle.hpp"
 
-#include "driver.hpp"
-#include "blob_finder.hpp"
-#include "pid_controller.hpp"
+#include "serial_device.hpp"
 
 using namespace std;
 
@@ -30,78 +26,42 @@ module::type test_module::run(const module::type &prev_module)
 {
 	boost::asio::io_service io;
 
-	rs485_dongle dongle(io, "/dev/ttyUSB0");
-	driver d(dongle);
+	srf_dongle srf(io, "/dev/ttyACM0");
 
-	cv::VideoCapture capture(global::video_id);
-	if (!capture.isOpened())
-		throw runtime_error("capture could not be opened");
-
-	blob_finder blobber("kollane", "goal");
-
-	/*for (int i = 0; i < 20; i++)
-	{
-		d.omni(17, -90, 13);
-		this_thread::sleep_for(chrono::milliseconds(150));
-	}*/
-
-	cv::namedWindow("Remote");
 	while (1)
 	{
-		cv::Mat frame;
-		capture >> frame;
-
-		cv::Mat keyframe;
-		frame.copyTo(keyframe);
-
-
-		auto largest = blobber.largest(frame);
-		if (largest.size >= 0.f) // if blob found
+		/*auto data = srf.recv_raw();
+		if (!data.empty())
+			cout << ">" << data << "<" << endl;*/
+		auto data = srf.recv_parsed();
+		if (get<0>(data))
 		{
-			cv::circle(keyframe, largest.pt, largest.size / 2, cv::Scalar(255, 0, 255), 5);
+			char field, target;
+			string cmd;
+			tie(field, target, cmd) = data;
 
-			int diff = frame.cols / 2 - largest.pt.x;
-			float factor = float(diff) / (frame.cols / 2);
+			//cout << get<0>(data) << " " << get<1>(data) << " " << get<2>(data) << endl;]
 
-			float dist = (frame.rows - largest.pt.y) / float(frame.rows);
-			//d.omni(speed_controller.step(dist), 0, rotate_controller.step(factor));
-
-			cout << factor << endl;
-
-			if (abs(factor) < 0.2)
-				d.stop();
-			if (factor > 0)
-				d.omni(17 * fabs(factor), -90, 13 * fabs(factor));
-			else
-				d.omni(17 * fabs(factor), 90, -13 * fabs(factor));
+			if ((field == 'A' || field == 'B') && ((target >= 'A' && target <= 'D') || target == 'X') && (cmd == "START" || cmd == "STOP"))
+				cout << field << " " << target << "  " << cmd << endl;
 		}
 
-		imshow("Remote", keyframe);
-
-		char key = cv::waitKey(1000 / 60);
-		switch (key)
-		{
-			case 27:
-			case 'q':
-				return module::type::menu;
-		}
+		this_thread::sleep_for(chrono::milliseconds(100));
 	}
 
-	/*for (int i = 0; i < 4; i++)
-	{
-		d.omni(50, i * 90);
-		this_thread::sleep_for(chrono::seconds(1));
-	}*/
+	/*boost::asio::serial_port port(io, "/dev/ttyACM0");
+	port.set_option(boost::asio::serial_port_base::baud_rate(9600));
 
-	//device_controller *control = dongle[1];
-	/*serial_scanner dongle(io, "ttyACM");
-	device_controller *control = dongle[1];*/
-	/*motor mot(control);
+	serial_stream stream(port);
+
 	while (1)
 	{
-		cout << mot.encoder() << endl;
-		this_thread::sleep_for(chrono::milliseconds(2));
+		cout << stream.peek() << endl;
+
+		this_thread::sleep_for(chrono::milliseconds(100));
 	}*/
+
+
 
 	return module::type::menu;
 }
