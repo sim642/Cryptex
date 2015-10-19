@@ -118,6 +118,15 @@ ISR(TIMER0_COMPA_vect)
 {
 	bit_flip(PORTF, BIT(LED1B)); // visualize heartbeat
 	//bit_flip(PORTF, BIT(LED2R));
+
+}
+
+ISR(INT6_vect)
+{
+	bit_flip(PORTF, BIT(LED2B));
+
+	sprintf(response, "bl:%d", bit_get(PINE, BIT(BALL)) != 0);
+	usart_reply(response);
 }
 
 int main(void)
@@ -145,6 +154,8 @@ int main(void)
 
 	// ball detector input
 	bit_clear(DDRE, BIT(BALL));
+	EICRB = BITS(0b01, ISC60);
+	bit_set(EIMSK, BIT(INT6));
 
 	// initialize comms
 	usb_init();
