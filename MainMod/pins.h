@@ -29,4 +29,7 @@
 // dribbler PWM
 #define EXTPWM PC6
 
+// BALL input
+#define BALL PE6
+
 #endif

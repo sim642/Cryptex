@@ -77,6 +77,12 @@ void parse_and_execute_command(char *buf, bool usart)
 		par1 = atoi(command + 2);
 		bit_write(par1, PORTD, BIT(CHARGE));
 	}
+	else if (strpref(command, "bl"))
+	{
+		// ball detector input
+		sprintf(response, "bl:%d", bit_get(PINE, BIT(BALL)) != 0);
+		reply_func(response);
+	}
 	else if (strpref(command, "b"))
 	{
 		// get button state
@@ -136,6 +142,9 @@ int main(void)
 
 	// button inputs
 	bit_clear(DDRD, BIT(BTN1) | BIT(BTN2));
+
+	// ball detector input
+	bit_clear(DDRE, BIT(BALL));
 
 	// initialize comms
 	usb_init();
