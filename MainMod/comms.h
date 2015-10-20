@@ -23,7 +23,9 @@ typedef void (*reply_func_t)(const char*);
 
 void usb_reply_raw(const char *str);
 void usart_reply_raw(const char *str);
+void all_reply_raw(const char *str);
 void usb_reply(const char *str);
 void usart_reply(const char *str);
+void all_reply(const char *str);
 
 #endif

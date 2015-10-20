@@ -106,6 +106,12 @@ void usart_reply_raw(const char *str)
 	usart_write(reply);
 }
 
+void all_reply_raw(const char *str)
+{
+	usb_reply_raw(str);
+	usart_reply_raw(str);
+}
+
 void usb_reply(const char *str)
 {
 	sprintf(reply, "<%s>\n", str);
@@ -117,4 +123,10 @@ void usart_reply(const char *str)
 	uint8_t id = eeprom_read_byte(EEPROM_ID);
 	sprintf(reply, "<%d:%s>\n", id, str);
 	usart_write(reply);
+}
+
+void all_reply(const char *str)
+{
+	usb_reply(str);
+	usart_reply(str);
 }

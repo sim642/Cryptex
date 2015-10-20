@@ -65,6 +65,12 @@ void parse_and_execute_command(char *buf, bool usart)
 		sprintf(response, "id:%d", par1);
 		reply_func(response);
 	}
+	else if (strpref(command, "ir"))
+	{
+		// set interrupt replies status
+		par1 = atoi(command + 2);
+		eeprom_update_byte(EEPROM_INTRPL, par1);
+	}
 	else if (strpref(command, "ko"))
 	{
 		// kick override
@@ -125,8 +131,11 @@ ISR(INT6_vect)
 {
 	bit_flip(PORTF, BIT(LED2B));
 
-	sprintf(response, "bl:%d", bit_get(PINE, BIT(BALL)) != 0);
-	usart_reply(response);
+	if (eeprom_read_byte(EEPROM_INTRPL))
+	{
+		sprintf(response, "bl:%d", bit_get(PINE, BIT(BALL)) != 0);
+		all_reply(response);
+	}
 }
 
 int main(void)
