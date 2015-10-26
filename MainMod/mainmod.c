@@ -13,7 +13,6 @@
 
 int atoi(const char * str);
 
-
 char response[16];
 
 void parse_and_execute_command(char *buf, bool usart)
@@ -83,6 +82,22 @@ void parse_and_execute_command(char *buf, bool usart)
 		par1 = atoi(command + 2);
 		bit_write(par1, PORTD, BIT(CHARGE));
 	}
+	else if (strpref(command, "k"))
+	{
+		// kick
+		bit_clear(PORTD, BIT(CHARGE));
+
+		bit_set(PORTD, BIT(KICK));
+		_delay_ms(KICKTIME);
+		bit_clear(PORTD, BIT(KICK));
+	}
+	else if (strpref(command, "c"))
+	{
+		// charge
+		bit_clear(PORTD, BIT(KICK));
+
+		bit_set(PORTD, BIT(CHARGE));
+	}
 	else if (strpref(command, "bl"))
 	{
 		// ball detector input
@@ -127,6 +142,20 @@ ISR(TIMER0_COMPA_vect)
 
 }
 
+ISR(PCINT0_vect)
+{
+	if (bit_get(PINB, BIT(DONE)) == 0) // DONE changed to LOW
+	{
+		bit_clear(PORTD, BIT(CHARGE));
+
+		if (eeprom_read_byte(EEPROM_INTRPL))
+		{
+			sprintf(response, "c:0");
+			all_reply(response);
+		}
+	}
+}
+
 ISR(INT6_vect)
 {
 	bit_flip(PORTF, BIT(LED2B));
@@ -157,6 +186,11 @@ int main(void)
 	bit_set(DDRD, BIT(CHARGE));
 	bit_clear(PORTD, BIT(KICK));
 	bit_clear(PORTD, BIT(CHARGE));
+
+	// coil input
+	bit_clear(DDRB, BIT(DONE));
+	bit_set(PCICR, BIT(PCIE0));
+	bit_set(PCMSK0, BIT(PCINT4));
 
 	// button inputs
 	bit_clear(DDRD, BIT(BTN1) | BIT(BTN2));
