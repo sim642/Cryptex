@@ -63,13 +63,15 @@
 		<Unit filename="global.cpp" />
 		<Unit filename="global.hpp" />
 		<Unit filename="main.cpp" />
+		<Unit filename="main_controller.cpp" />
+		<Unit filename="main_controller.hpp" />
 		<Unit filename="math.hpp" />
 		<Unit filename="menu_module.cpp" />
 		<Unit filename="menu_module.hpp" />
 		<Unit filename="module.cpp" />
 		<Unit filename="module.hpp" />
-		<Unit filename="motor.cpp" />
-		<Unit filename="motor.hpp" />
+		<Unit filename="motor_controller.cpp" />
+		<Unit filename="motor_controller.hpp" />
 		<Unit filename="pid_controller.cpp" />
 		<Unit filename="pid_controller.hpp" />
 		<Unit filename="player_module.cpp" />
