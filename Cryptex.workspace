@@ -2,8 +2,6 @@
 <CodeBlocks_workspace_file>
 	<Workspace title="Workspace">
 		<Project filename="Cryptex/Cryptex.cbp" />
-		<Project filename="opencv_test/opencv_test.cbp" />
-		<Project filename="motor_test/motor_test.cbp" />
 		<Project filename="WheelMod/WheelMod.cbp" />
 	</Workspace>
 </CodeBlocks_workspace_file>
