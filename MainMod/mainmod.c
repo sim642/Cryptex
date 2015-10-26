@@ -10,8 +10,14 @@
 #include "comms.h"
 #include "util.h"
 
+#define KICKTIME 100 // ms
+#define FAILSAFE 100 // ticks
+
 
 int atoi(const char * str);
+
+bool failsafe = true;
+volatile uint8_t failsafe_counter = 0;
 
 char response[16];
 
@@ -129,6 +135,17 @@ void parse_and_execute_command(char *buf, bool usart)
 		par1 = atoi(command + 2);
 		OCR3AL = par1;
 	}
+	else if (strpref(command, "fs"))
+	{
+		// set failsafe
+		par1 = atoi(command + 2);
+		failsafe = par1;
+	}
+	else if (strpref(command, "p"))
+	{
+		// ping, keep failsafe from triggering
+		failsafe_counter = 0;
+	}
 	else
 	{
 		reply_raw_func(command);
@@ -140,6 +157,7 @@ ISR(TIMER0_COMPA_vect)
 	bit_flip(PORTF, BIT(LED1B)); // visualize heartbeat
 	//bit_flip(PORTF, BIT(LED2R));
 
+	failsafe_counter++;
 }
 
 ISR(PCINT0_vect)
@@ -232,6 +250,16 @@ int main(void)
 
 	while (1)
 	{
+		if (failsafe && (failsafe_counter >= FAILSAFE))
+		{
+			// failsafe triggered
+			bit_clear(PORTD, BIT(CHARGE));
+			bit_set(PORTD, BIT(KICK));
+			OCR3AL = 0;
+
+			failsafe_counter = 0;
+		}
+
 		if (usb_serial_available())
 		{
 			n = usb_recv_str(buf, sizeof(buf));

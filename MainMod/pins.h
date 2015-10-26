@@ -22,7 +22,6 @@
 #define CHARGE PD4
 #define DONE PB4
 #define KICK PD5
-#define KICKTIME 100 // ms
 
 // BTN inputs
 #define BTN1 PD0

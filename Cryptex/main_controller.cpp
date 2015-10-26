@@ -49,3 +49,8 @@ void main_controller::dribbler(const int& speed)
 {
 	controller->send("dm", speed);
 }
+
+void main_controller::ping()
+{
+	controller->send("p");
+}

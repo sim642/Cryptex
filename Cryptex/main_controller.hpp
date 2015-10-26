@@ -20,6 +20,8 @@ class main_controller
 
 		void dribbler(const int &speed);
 
+		void ping();
+
 	private:
 		device_controller *controller;
 };
