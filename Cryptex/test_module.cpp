@@ -6,9 +6,13 @@
 #include <thread>
 
 #include "global.hpp"
-#include "srf_dongle.hpp"
+#include "serial_scanner.hpp"
+#include "rs485_dongle.hpp"
+#include "merge_manager.hpp"
+#include "driver.hpp"
 
 #include "serial_device.hpp"
+#include "srf_dongle.hpp"
 
 using namespace std;
 
@@ -25,6 +29,12 @@ test_module::~test_module()
 module::type test_module::run(const module::type &prev_module)
 {
 	boost::asio::io_service io;
+
+	merge_manager manager;
+	manager.add_manager(new serial_scanner(io, "ttyACM"));
+	manager.add_manager(new rs485_dongle(io, "/dev/ttyUSB0"));
+
+	driver d(manager);
 
 	srf_dongle srf(io, "/dev/ttyACM0");
 
