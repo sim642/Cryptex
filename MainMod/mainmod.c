@@ -129,6 +129,25 @@ void parse_and_execute_command(char *buf, bool usart)
 		sprintf(response, "b%d:%d", par1, state);
 		reply_func(response);
 	}
+	else if (strpref(command, "io"))
+	{
+		// get IO state
+		par1 = atoi(command + 2);
+
+		int state = -1;
+		switch (par1)
+		{
+			case 1:
+				state = bit_get(PINB, BIT(IO1)) != 0;
+				break;
+
+			case 2:
+				state = bit_get(PINC, BIT(IO2)) != 0;
+				break;
+		}
+		sprintf(response, "io%d:%d", par1, state);
+		reply_func(response);
+	}
 	else if (strpref(command, "dm"))
 	{
 		// dribbler motor
@@ -217,6 +236,10 @@ int main(void)
 	bit_clear(DDRE, BIT(BALL));
 	EICRB = BITS(0b01, ISC60);
 	bit_set(EIMSK, BIT(INT6));
+
+	// IO inputs
+	bit_clear(DDRB, BIT(IO1));
+	bit_clear(DDRC, BIT(IO2));
 
 	// initialize comms
 	usb_init();

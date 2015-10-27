@@ -33,4 +33,8 @@
 // BALL input
 #define BALL PE6
 
+// IO inputs
+#define IO1 PB7
+#define IO2 PC7
+
 #endif

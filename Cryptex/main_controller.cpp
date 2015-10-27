@@ -50,6 +50,13 @@ void main_controller::dribbler(const int& speed)
 	controller->send("dm", speed);
 }
 
+bool main_controller::io(const int &num)
+{
+	string reply = "io";
+	reply += to_string(num);
+	return stoi(controller->send_recv("io", reply, num).second);
+}
+
 void main_controller::ping()
 {
 	controller->send("p");

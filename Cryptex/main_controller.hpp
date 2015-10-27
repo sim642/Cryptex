@@ -20,6 +20,8 @@ class main_controller
 
 		void dribbler(const int &speed);
 
+		bool io(const int &num);
+
 		void ping();
 
 	private:
