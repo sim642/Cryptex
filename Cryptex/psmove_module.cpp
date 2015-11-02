@@ -28,8 +28,7 @@ psmove_module::~psmove_module()
 
 module::type psmove_module::run(const module::type &prev_module)
 {
-    if (!psmove_init(PSMOVE_CURRENT_VERSION))
-		throw runtime_error("PSMove API init failed");
+	psmove::init();
 
 	cout << "PSMove count: " << psmove::connected_count() << endl;
 

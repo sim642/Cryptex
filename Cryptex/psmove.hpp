@@ -9,6 +9,7 @@ class psmove
 	public:
 		psmove();
 		virtual ~psmove();
+		static void init();
 
 		static int connected_count();
 

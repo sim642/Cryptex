@@ -21,6 +21,12 @@ psmove::~psmove()
 	psmove_disconnect(move);
 }
 
+void psmove::init()
+{
+	if (!psmove_init(PSMOVE_CURRENT_VERSION))
+		throw runtime_error("PSMove API init failed");
+}
+
 int psmove::connected_count()
 {
 	return psmove_count_connected();

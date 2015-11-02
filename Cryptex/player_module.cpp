@@ -83,9 +83,7 @@ module::type player_module::run(const module::type &prev_module)
 	if (!capture.isOpened())
 		throw runtime_error("capture could not be opened");
 
-	/*if (!psmove_init(PSMOVE_CURRENT_VERSION))
-		throw runtime_error("PSMove API init failed");
-
+	/*psmove::init();
 	psmove move;*/
 
 	srf_dongle srf(io, "/dev/ttyACM0");
