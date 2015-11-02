@@ -10,7 +10,7 @@
 #include "comms.h"
 #include "util.h"
 
-#define KICKTIME 100 // ms
+#define KICKTIME 5 // ms
 #define FAILSAFE 100 // ticks
 
 
@@ -277,7 +277,8 @@ int main(void)
 		{
 			// failsafe triggered
 			bit_clear(PORTD, BIT(CHARGE));
-			bit_set(PORTD, BIT(KICK));
+			//bit_set(PORTD, BIT(KICK));
+			bit_clear(PORTD, BIT(KICK));
 			OCR3AL = 0;
 
 			failsafe_counter = 0;
