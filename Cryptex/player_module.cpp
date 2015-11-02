@@ -19,7 +19,7 @@
 
 using namespace std;
 
-player_module::player_module() : state(Start)
+player_module::player_module() : state(Undefined)
 {
 
 }
@@ -61,10 +61,14 @@ void player_module::set_state(const state_t &new_state)
 		case Goal:
 			cout << "Goal";
 			break;
+
+		default:
+			throw domain_error("player going to invalid state");
 	}
 	cout << endl;
 
 	state = new_state;
+	reset_statestart();
 }
 
 module::type player_module::run(const module::type &prev_module)
@@ -89,9 +93,9 @@ module::type player_module::run(const module::type &prev_module)
 	blob_finder baller("oranz", "ball");
 	blob_finder goaler("kollane", "goal");
 
-	chrono::high_resolution_clock::time_point ballstart;
-
 	cv::namedWindow("Remote");
+
+	set_state(Start);
 	while (1)
 	{
 		auto srf_data = srf.recv_parsed();
@@ -143,7 +147,7 @@ module::type player_module::run(const module::type &prev_module)
 					set_state(GoalFind);
 			}
 			else
-				d.rotate(max(5.f, 25 - float(chrono::duration_cast<chrono::milliseconds>(chrono::high_resolution_clock::now() - ballstart).count()) / 2000.f * 10));
+				d.rotate(max(5.f, 25 - get_statestart() / 2 * 10));
 		}
 		else if (state == GoalFind || state == Goal)
 		{
@@ -172,7 +176,6 @@ module::type player_module::run(const module::type &prev_module)
 					if (largest.size > 485.f)
 					{
 						set_state(Ball);
-						ballstart = chrono::high_resolution_clock::now();
 					}
 				}
 			}
@@ -218,7 +221,6 @@ module::type player_module::run(const module::type &prev_module)
 				if (state == Manual)
 				{
 					set_state(Ball);
-					ballstart = chrono::high_resolution_clock::now();
 				}
 				else
 				{
@@ -239,4 +241,14 @@ module::type player_module::run(const module::type &prev_module)
 		if (move.pressed(Btn_MOVE))
 			set_state(Manual);*/
 	}
+}
+
+void player_module::reset_statestart()
+{
+	statestart = chrono::high_resolution_clock::now();
+}
+
+float player_module::get_statestart()
+{
+	return chrono::duration_cast<chrono::milliseconds>(chrono::high_resolution_clock::now() - statestart).count() / 1000.f;
 }

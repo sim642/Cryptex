@@ -4,6 +4,7 @@
 #include "module.hpp"
 
 #include "pid_controller.hpp"
+#include <chrono>
 
 class player_module : public module
 {
@@ -16,6 +17,7 @@ class player_module : public module
 	private:
 		enum state_t
 		{
+			Undefined,
 			Start,
 			Manual,
 			Ball,
@@ -24,9 +26,11 @@ class player_module : public module
 		};
 
 		void set_state(const state_t &new_state);
+		void reset_statestart();
+		float get_statestart();
 
 		state_t state;
-
+		std::chrono::high_resolution_clock::time_point statestart;
 
 		pid_controller speed_controller, rotate_controller;
 };
