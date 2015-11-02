@@ -1,10 +1,12 @@
 #include "player_module.hpp"
 
 #include <iostream>
-
 #include <boost/asio.hpp>
+
 #include "rs485_dongle.hpp"
+#include "global.hpp"
 #include "driver.hpp"
+#include "main_controller.hpp"
 
 #include "psmove.hpp"
 #include "srf_dongle.hpp"
@@ -15,7 +17,6 @@
 
 #include "math.hpp"
 
-#include "global.hpp"
 
 using namespace std;
 
@@ -78,6 +79,7 @@ module::type player_module::run(const module::type &prev_module)
 	rs485_dongle dongle(io, "/dev/ttyUSB0");
 
 	driver d(dongle);
+	main_controller m(dongle[device_id::main]);
 
 	cv::VideoCapture capture(global::video_id);
 	if (!capture.isOpened())
@@ -89,7 +91,11 @@ module::type player_module::run(const module::type &prev_module)
 	srf_dongle srf(io, "/dev/ttyACM0");
 
 	blob_finder baller("oranz", "ball");
-	blob_finder goaler("kollane", "goal");
+
+	bool team = m.button(btn_team);
+	string team_str = team ? "kollane" : "sinine";
+	cout << "team: " << team_str << endl;
+	blob_finder goaler(team_str, "goal");
 
 	cv::namedWindow("Remote");
 

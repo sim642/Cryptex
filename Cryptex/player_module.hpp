@@ -25,6 +25,8 @@ class player_module : public module
 			Goal
 		};
 
+		const int btn_team = 1;
+
 		void set_state(const state_t &new_state);
 		void reset_statestart();
 		float get_statestart();
