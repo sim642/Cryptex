@@ -12,6 +12,7 @@
 #define LONGBIT(x) ((unsigned long)0x00000001 << (x))
 #define BITS(b, x) ((b) << (x))
 
+bool streq(const char *str1, const char *str2);
 bool strpref(const char *str, const char *pre);
 
 #endif

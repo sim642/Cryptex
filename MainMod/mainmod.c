@@ -63,7 +63,7 @@ void parse_and_execute_command(char *buf, bool usart)
 		par1 = atoi(command + 2);
 		eeprom_update_byte(EEPROM_ID, par1);
 	}
-	else if (strpref(command, "?"))
+	else if (streq(command, "?"))
 	{
 		// get ID
 		par1 = eeprom_read_byte(EEPROM_ID);
@@ -88,7 +88,7 @@ void parse_and_execute_command(char *buf, bool usart)
 		par1 = atoi(command + 2);
 		bit_write(par1, PORTD, BIT(CHARGE));
 	}
-	else if (strpref(command, "k"))
+	else if (streq(command, "k"))
 	{
 		// kick
 		bit_clear(PORTD, BIT(CHARGE));
@@ -97,14 +97,14 @@ void parse_and_execute_command(char *buf, bool usart)
 		_delay_ms(KICKTIME);
 		bit_clear(PORTD, BIT(KICK));
 	}
-	else if (strpref(command, "c"))
+	else if (streq(command, "c"))
 	{
 		// charge
 		bit_clear(PORTD, BIT(KICK));
 
 		bit_set(PORTD, BIT(CHARGE));
 	}
-	else if (strpref(command, "bl"))
+	else if (streq(command, "bl"))
 	{
 		// ball detector input
 		sprintf(response, "bl:%d", bit_get(PINE, BIT(BALL)) != 0);
@@ -160,7 +160,7 @@ void parse_and_execute_command(char *buf, bool usart)
 		par1 = atoi(command + 2);
 		failsafe = par1;
 	}
-	else if (strpref(command, "p"))
+	else if (streq(command, "p"))
 	{
 		// ping, keep failsafe from triggering
 		failsafe_counter = 0;
