@@ -5,6 +5,9 @@
 #include <opencv2/video.hpp>
 #include "calibrator_window.hpp"
 #include "global.hpp"
+#include <boost/algorithm/string/split.hpp>
+#include <boost/algorithm/string/classification.hpp>
+#include <limits>
 
 using namespace std;
 
@@ -25,14 +28,20 @@ module::type calibrator_module::run(const module::type &prev_module)
 		throw runtime_error("capture could not be opened");
 
 	calibrator_window calibrator(capture);
-	string color, params;
-	while (cout << "calib: ", cin >> color >> params)
+
+	string line;
+	cin.ignore(numeric_limits<streamsize>::max(), '\n');
+	while (cout << "color [params]: ", getline(cin, line))
 	{
-		if (color == "_")
+		if (line.empty())
 			break;
 
-		if (params == "_")
-			params = "";
+		vector<string> parts;
+		boost::algorithm::split(parts, line, boost::algorithm::is_any_of(" "));
+
+		string color = parts[0], params = "";
+		if (parts.size() >= 2)
+			params = parts[1];
 
 		calibrator.calibrate(color, params);
 	}
