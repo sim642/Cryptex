@@ -2,7 +2,7 @@
 #define DRIVER_H
 
 #include "device_manager.hpp"
-#include "motor.hpp"
+#include "motor_controller.hpp"
 #include <vector>
 
 class driver
@@ -17,7 +17,7 @@ class driver
 		void stop();
 
 	private:
-		std::vector<motor> motors;
+		std::vector<motor_controller> motors;
 		std::vector<int> angles;
 };
 

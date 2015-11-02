@@ -3,5 +3,6 @@
 	<Workspace title="Workspace">
 		<Project filename="Cryptex/Cryptex.cbp" />
 		<Project filename="WheelMod/WheelMod.cbp" />
+		<Project filename="MainMod/MainMod.cbp" />
 	</Workspace>
 </CodeBlocks_workspace_file>
