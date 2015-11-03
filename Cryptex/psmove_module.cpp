@@ -28,8 +28,6 @@ psmove_module::~psmove_module()
 
 module::type psmove_module::run(const module::type &prev_module)
 {
-	psmove::init();
-
 	cout << "PSMove count: " << psmove::connected_count() << endl;
 
 	psmove move;
