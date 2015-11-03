@@ -104,6 +104,21 @@ cv::KeyPoint blob_finder::largest(const cv::Mat &frame)
 		return none;
 }
 
+boost::optional<blob_finder::factordist_t> blob_finder::factordist(const cv::Mat &frame, const cv::KeyPoint& largest)
+{
+	if (largest.size >= 0.f) // if blob found
+	{
+		int diff = frame.cols / 2 - largest.pt.x;
+		float factor = float(diff) / (frame.cols / 2);
+
+		float dist = (frame.rows - largest.pt.y) / float(frame.rows);
+
+		return make_pair(factor, dist);
+	}
+	else
+		return boost::none;
+}
+
 void blob_finder::init_detector()
 {
 	detector = cv::SimpleBlobDetector::create(params);

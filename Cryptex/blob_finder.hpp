@@ -4,6 +4,8 @@
 #include <opencv2/opencv.hpp>
 #include <string>
 #include <vector>
+#include <boost/optional.hpp>
+#include <utility>
 
 class calibrator_window;
 
@@ -12,6 +14,7 @@ class blob_finder
 	public:
 		typedef cv::Scalar_<int> bounds_t;
 		static const cv::KeyPoint none;
+		typedef std::pair<float, float> factordist_t;
 
 		blob_finder();
 		blob_finder(const std::string &color_name);
@@ -29,6 +32,8 @@ class blob_finder
 		void threshold(const cv::Mat &frame, cv::Mat &mask);
 		void detect(const cv::Mat &mask, std::vector<cv::KeyPoint> &keypoints);
 		cv::KeyPoint largest(const cv::Mat &frame);
+
+		boost::optional<factordist_t> factordist(const cv::Mat &frame, const cv::KeyPoint &largest);
 
 		friend class calibrator_window;
 	private:

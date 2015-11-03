@@ -105,6 +105,9 @@ module::type player_module::run(const module::type &prev_module)
 	{
 		switch (referee.poll()) // only one per cycle
 		{
+			case referee_controller::None:
+				break;
+
 			case referee_controller::Start:
 				set_state(Ball);
 				break;
@@ -124,14 +127,15 @@ module::type player_module::run(const module::type &prev_module)
 		if (state == Ball)
 		{
 			auto largest = baller.largest(frame);
-			if (largest.size >= 0.f) // if blob found
+			auto factordist = baller.factordist(frame, largest);
+
+			if (factordist) // if blob found
 			{
+				float factor, dist;
+				tie(factor, dist) = *factordist;
+
 				cv::circle(keyframe, largest.pt, largest.size / 2, cv::Scalar(255, 0, 255), 5);
 
-				int diff = frame.cols / 2 - largest.pt.x;
-				float factor = float(diff) / (frame.cols / 2);
-
-				float dist = (frame.rows - largest.pt.y) / float(frame.rows);
 				d.omni(speed_controller.step(dist), 0, rotate_controller.step(factor));
 
 				if (dist < 0.1)
@@ -143,15 +147,15 @@ module::type player_module::run(const module::type &prev_module)
 		else if (state == GoalFind || state == Goal)
 		{
 			auto largest = goaler.largest(frame);
+			auto factordist = goaler.factordist(frame, largest);
+
 			cout << largest.size << endl;
-			if (largest.size >= 0.f) // if blob found
+			if (factordist) // if blob found
 			{
+				float factor, dist;
+				tie(factor, dist) = *factordist;
+
 				cv::circle(keyframe, largest.pt, largest.size / 2, cv::Scalar(255, 0, 255), 5);
-
-				int diff = frame.cols / 2 - largest.pt.x;
-				float factor = float(diff) / (frame.cols / 2);
-
-				float dist = (frame.rows - largest.pt.y) / float(frame.rows);
 
 				if (state == GoalFind)
 				{
