@@ -10,6 +10,7 @@
 
 #include "psmove.hpp"
 #include "srf_dongle.hpp"
+#include "referee_controller.hpp"
 
 #include <opencv2/highgui.hpp>
 #include <opencv2/video.hpp>
@@ -88,6 +89,7 @@ module::type player_module::run(const module::type &prev_module)
 	//psmove move;
 
 	srf_dongle srf(io, "/dev/ttyACM0");
+	referee_controller referee(srf);
 
 	blob_finder baller("oranz", "ball");
 
@@ -101,30 +103,16 @@ module::type player_module::run(const module::type &prev_module)
 	set_state(Start);
 	while (1)
 	{
-		auto srf_data = srf.recv_parsed();
-		if (get<0>(srf_data))
+		switch (referee.poll()) // only one per cycle
 		{
-			char field, target;
-			string cmd;
-			tie(field, target, cmd) = srf_data;
+			case referee_controller::Start:
+				set_state(Ball);
+				break;
 
-			if (field == global::field && (target == global::id || target == 'X'))
-			{
-				if (cmd == "START")
-				{
-					set_state(Ball);
-				}
-				else if (cmd == "STOP")
-				{
-					set_state(Manual);
-					d.stop();
-				}
-
-				if (target == global::id)
-				{
-					srf.send(field, target, "ACK");
-				}
-			}
+			case referee_controller::Stop:
+				set_state(Manual);
+				d.stop();
+				break;
 		}
 
 		cv::Mat frame;

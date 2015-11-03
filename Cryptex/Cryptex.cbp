@@ -82,6 +82,8 @@
 		<Unit filename="psmove.hpp" />
 		<Unit filename="psmove_module.cpp" />
 		<Unit filename="psmove_module.hpp" />
+		<Unit filename="referee_controller.cpp" />
+		<Unit filename="referee_controller.hpp" />
 		<Unit filename="rs485_controller.cpp" />
 		<Unit filename="rs485_controller.hpp" />
 		<Unit filename="rs485_dongle.cpp" />
