@@ -21,6 +21,7 @@ class player_module : public module
 			Start,
 			Manual,
 			Ball,
+			BallGrab,
 			GoalFind,
 			Goal
 		};

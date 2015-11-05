@@ -52,6 +52,10 @@ void player_module::set_state(const state_t &new_state)
 			rotate_controller.Kp = 30;
 			break;
 
+		case BallGrab:
+			cout << "BallGrab";
+			break;
+
 		case GoalFind:
 			cout << "BallFind";
 			speed_controller.reset();
@@ -81,6 +85,7 @@ module::type player_module::run(const module::type &prev_module)
 
 	driver d(dongle);
 	main_controller m(dongle[device_id::main]);
+	m.dribbler(255);
 
 	cv::VideoCapture capture(global::video_id);
 	if (!capture.isOpened())
@@ -101,8 +106,12 @@ module::type player_module::run(const module::type &prev_module)
 	cv::namedWindow("Remote");
 
 	set_state(Start);
+	m.charge();
+
 	while (1)
 	{
+		m.ping();
+
 		switch (referee.poll()) // only one per cycle
 		{
 			case referee_controller::None:
@@ -139,12 +148,20 @@ module::type player_module::run(const module::type &prev_module)
 				d.omni(speed_controller.step(dist), 0, rotate_controller.step(factor));
 
 				if (dist < 0.1)
-					set_state(GoalFind);
+					set_state(BallGrab);
 			}
 			else
 				d.rotate(max(5.f, 25 - get_statestart() / 2 * 10));
 		}
-		else if (state == GoalFind || state == Goal)
+		else if (state == BallGrab)
+		{
+			d.straight(50);
+
+			if (m.ball())
+				set_state(GoalFind);
+		}
+		//else if (state == GoalFind || state == Goal)
+		else if (state == GoalFind)
 		{
 			auto largest = goaler.largest(frame);
 			auto factordist = goaler.factordist(frame, largest);
@@ -160,7 +177,16 @@ module::type player_module::run(const module::type &prev_module)
 				if (state == GoalFind)
 				{
 					if (abs(factor) < 0.2)
-						set_state(Goal);
+					{
+						//set_state(Goal);
+						m.dribbler(0);
+						this_thread::sleep_for(chrono::milliseconds(250));
+						m.kick();
+						this_thread::sleep_for(chrono::milliseconds(100));
+						m.charge();
+						m.dribbler(255);
+						set_state(Ball);
+					}
 					else
 						d.omni(speed_controller.step(fabs(factor)), sign(factor) * (-90), rotate_controller.step(factor));
 				}
@@ -223,6 +249,14 @@ module::type player_module::run(const module::type &prev_module)
 					d.stop();
 				}
 
+				break;
+
+			case 'c':
+				m.charge();
+				break;
+
+			case 'k':
+				m.kick();
 				break;
 		}
 
