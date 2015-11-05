@@ -6,9 +6,10 @@
 #include <thread>
 
 #include "global.hpp"
-#include "srf_dongle.hpp"
+#include "device_id.hpp"
 
-#include "serial_device.hpp"
+#include "rs485_dongle.hpp"
+#include "main_controller.hpp"
 
 using namespace std;
 
@@ -26,42 +27,17 @@ module::type test_module::run(const module::type &prev_module)
 {
 	boost::asio::io_service io;
 
-	srf_dongle srf(io, "/dev/ttyACM0");
+	rs485_dongle dongle(io, "/dev/ttyUSB0");
+	main_controller mainer(dongle[device_id::main]);
 
 	while (1)
 	{
-		/*auto data = srf.recv_raw();
-		if (!data.empty())
-			cout << ">" << data << "<" << endl;*/
-		auto data = srf.recv_parsed();
-		if (get<0>(data))
-		{
-			char field, target;
-			string cmd;
-			tie(field, target, cmd) = data;
+		mainer.ping(); // keep failsafe from triggering
 
-			//cout << get<0>(data) << " " << get<1>(data) << " " << get<2>(data) << endl;]
-
-			if ((field == 'A' || field == 'B') && ((target >= 'A' && target <= 'D') || target == 'X') && (cmd == "START" || cmd == "STOP"))
-				cout << field << " " << target << "  " << cmd << endl;
-		}
+		cout << mainer.ball() << endl;
 
 		this_thread::sleep_for(chrono::milliseconds(100));
 	}
-
-	/*boost::asio::serial_port port(io, "/dev/ttyACM0");
-	port.set_option(boost::asio::serial_port_base::baud_rate(9600));
-
-	serial_stream stream(port);
-
-	while (1)
-	{
-		cout << stream.peek() << endl;
-
-		this_thread::sleep_for(chrono::milliseconds(100));
-	}*/
-
-
 
 	return module::type::menu;
 }

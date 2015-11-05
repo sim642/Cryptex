@@ -31,7 +31,7 @@ int main()
 	{
 		auto cur_module = next_module;
 		auto it = modules.find(cur_module);
-		if (it == modules.end()) // module not found
+		if (it == modules.end() || !it->second) // module not found or initialized
 			throw domain_error("module not initialized");
 
 		next_module = (it->second)->run(prev_module);

@@ -1,13 +1,16 @@
 #include "player_module.hpp"
 
 #include <iostream>
-
 #include <boost/asio.hpp>
+
 #include "rs485_dongle.hpp"
+#include "global.hpp"
 #include "driver.hpp"
+#include "main_controller.hpp"
 
 #include "psmove.hpp"
 #include "srf_dongle.hpp"
+#include "referee_controller.hpp"
 
 #include <opencv2/highgui.hpp>
 #include <opencv2/video.hpp>
@@ -15,11 +18,10 @@
 
 #include "math.hpp"
 
-#include "global.hpp"
 
 using namespace std;
 
-player_module::player_module() : state(Start)
+player_module::player_module() : state(Undefined)
 {
 
 }
@@ -50,6 +52,10 @@ void player_module::set_state(const state_t &new_state)
 			rotate_controller.Kp = 30;
 			break;
 
+		case BallGrab:
+			cout << "BallGrab";
+			break;
+
 		case GoalFind:
 			cout << "BallFind";
 			speed_controller.reset();
@@ -61,10 +67,14 @@ void player_module::set_state(const state_t &new_state)
 		case Goal:
 			cout << "Goal";
 			break;
+
+		default:
+			throw domain_error("player going to invalid state");
 	}
 	cout << endl;
 
 	state = new_state;
+	reset_statestart();
 }
 
 module::type player_module::run(const module::type &prev_module)
@@ -74,50 +84,47 @@ module::type player_module::run(const module::type &prev_module)
 	rs485_dongle dongle(io, "/dev/ttyUSB0");
 
 	driver d(dongle);
+	main_controller m(dongle[device_id::main]);
+	m.dribbler(255);
 
 	cv::VideoCapture capture(global::video_id);
 	if (!capture.isOpened())
 		throw runtime_error("capture could not be opened");
 
-	/*if (!psmove_init(PSMOVE_CURRENT_VERSION))
-		throw runtime_error("PSMove API init failed");
-
-	psmove move;*/
+	//psmove move;
 
 	srf_dongle srf(io, "/dev/ttyACM0");
+	referee_controller referee(srf);
 
 	blob_finder baller("oranz", "ball");
-	blob_finder goaler("kollane", "goal");
 
-	chrono::high_resolution_clock::time_point ballstart;
+	bool team = m.button(btn_team);
+	string team_str = team ? "kollane" : "sinine";
+	cout << "team: " << team_str << endl;
+	blob_finder goaler(team_str, "goal");
 
 	cv::namedWindow("Remote");
+
+	set_state(Start);
+	m.charge();
+
 	while (1)
 	{
-		auto srf_data = srf.recv_parsed();
-		if (get<0>(srf_data))
+		m.ping();
+
+		switch (referee.poll()) // only one per cycle
 		{
-			char field, target;
-			string cmd;
-			tie(field, target, cmd) = srf_data;
+			case referee_controller::None:
+				break;
 
-			if (field == global::field && (target == global::id || target == 'X'))
-			{
-				if (cmd == "START")
-				{
-					set_state(Ball);
-				}
-				else if (cmd == "STOP")
-				{
-					set_state(Manual);
-					d.stop();
-				}
+			case referee_controller::Start:
+				set_state(Ball);
+				break;
 
-				if (target == global::id)
-				{
-					srf.send(field, target, "ACK");
-				}
-			}
+			case referee_controller::Stop:
+				set_state(Manual);
+				d.stop();
+				break;
 		}
 
 		cv::Mat frame;
@@ -129,39 +136,57 @@ module::type player_module::run(const module::type &prev_module)
 		if (state == Ball)
 		{
 			auto largest = baller.largest(frame);
-			if (largest.size >= 0.f) // if blob found
+			auto factordist = baller.factordist(frame, largest);
+
+			if (factordist) // if blob found
 			{
+				float factor, dist;
+				tie(factor, dist) = *factordist;
+
 				cv::circle(keyframe, largest.pt, largest.size / 2, cv::Scalar(255, 0, 255), 5);
 
-				int diff = frame.cols / 2 - largest.pt.x;
-				float factor = float(diff) / (frame.cols / 2);
-
-				float dist = (frame.rows - largest.pt.y) / float(frame.rows);
 				d.omni(speed_controller.step(dist), 0, rotate_controller.step(factor));
 
 				if (dist < 0.1)
-					set_state(GoalFind);
+					set_state(BallGrab);
 			}
 			else
-				d.rotate(max(5.f, 25 - float(chrono::duration_cast<chrono::milliseconds>(chrono::high_resolution_clock::now() - ballstart).count()) / 2000.f * 10));
+				d.rotate(max(5.f, 25 - get_statestart() / 2 * 10));
 		}
-		else if (state == GoalFind || state == Goal)
+		else if (state == BallGrab)
+		{
+			d.straight(50);
+
+			if (m.ball())
+				set_state(GoalFind);
+		}
+		//else if (state == GoalFind || state == Goal)
+		else if (state == GoalFind)
 		{
 			auto largest = goaler.largest(frame);
+			auto factordist = goaler.factordist(frame, largest);
+
 			cout << largest.size << endl;
-			if (largest.size >= 0.f) // if blob found
+			if (factordist) // if blob found
 			{
+				float factor, dist;
+				tie(factor, dist) = *factordist;
+
 				cv::circle(keyframe, largest.pt, largest.size / 2, cv::Scalar(255, 0, 255), 5);
-
-				int diff = frame.cols / 2 - largest.pt.x;
-				float factor = float(diff) / (frame.cols / 2);
-
-				float dist = (frame.rows - largest.pt.y) / float(frame.rows);
 
 				if (state == GoalFind)
 				{
 					if (abs(factor) < 0.2)
-						set_state(Goal);
+					{
+						//set_state(Goal);
+						m.dribbler(0);
+						this_thread::sleep_for(chrono::milliseconds(250));
+						m.kick();
+						this_thread::sleep_for(chrono::milliseconds(100));
+						m.charge();
+						m.dribbler(255);
+						set_state(Ball);
+					}
 					else
 						d.omni(speed_controller.step(fabs(factor)), sign(factor) * (-90), rotate_controller.step(factor));
 				}
@@ -172,7 +197,6 @@ module::type player_module::run(const module::type &prev_module)
 					if (largest.size > 485.f)
 					{
 						set_state(Ball);
-						ballstart = chrono::high_resolution_clock::now();
 					}
 				}
 			}
@@ -218,7 +242,6 @@ module::type player_module::run(const module::type &prev_module)
 				if (state == Manual)
 				{
 					set_state(Ball);
-					ballstart = chrono::high_resolution_clock::now();
 				}
 				else
 				{
@@ -226,6 +249,14 @@ module::type player_module::run(const module::type &prev_module)
 					d.stop();
 				}
 
+				break;
+
+			case 'c':
+				m.charge();
+				break;
+
+			case 'k':
+				m.kick();
 				break;
 		}
 
@@ -239,4 +270,14 @@ module::type player_module::run(const module::type &prev_module)
 		if (move.pressed(Btn_MOVE))
 			set_state(Manual);*/
 	}
+}
+
+void player_module::reset_statestart()
+{
+	statestart = chrono::high_resolution_clock::now();
+}
+
+float player_module::get_statestart()
+{
+	return chrono::duration_cast<chrono::milliseconds>(chrono::high_resolution_clock::now() - statestart).count() / 1000.f;
 }

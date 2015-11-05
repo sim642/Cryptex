@@ -4,6 +4,19 @@
 #include <psmoveapi/psmove.h>
 #include <opencv2/core/affine.hpp>
 
+class psmove_library
+{
+	public:
+		static psmove_library& get();
+
+	private:
+		psmove_library();
+
+		// prevent copies
+		psmove_library(const psmove_library&) = delete;
+		void operator=(const psmove_library&) = delete;
+};
+
 class psmove
 {
 	public:

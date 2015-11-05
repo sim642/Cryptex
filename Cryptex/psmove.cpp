@@ -3,8 +3,22 @@
 
 using namespace std;
 
+psmove_library& psmove_library::get()
+{
+	static psmove_library lib;
+	return lib;
+}
+
+psmove_library::psmove_library()
+{
+	if (!psmove_init(PSMOVE_CURRENT_VERSION))
+		throw runtime_error("PSMove API init failed");
+}
+
 psmove::psmove()
 {
+	psmove_library::get(); // guarantee library initialization
+
 	move = psmove_connect();
 	if (move == NULL)
 		throw runtime_error("PSMove controller not found");
@@ -23,6 +37,8 @@ psmove::~psmove()
 
 int psmove::connected_count()
 {
+	psmove_library::get(); // guarantee library initialization
+
 	return psmove_count_connected();
 }
 
