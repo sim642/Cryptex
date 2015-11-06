@@ -57,7 +57,7 @@ void player_module::set_state(const state_t &new_state)
 			break;
 
 		case GoalFind:
-			cout << "BallFind";
+			cout << "GoalFind";
 			speed_controller.reset();
 			rotate_controller.reset();
 			speed_controller.Kp = 17;
@@ -102,11 +102,15 @@ module::type player_module::run(const module::type &prev_module)
 	string team_str = team ? "kollane" : "sinine";
 	cout << "team: " << team_str << endl;
 	blob_finder goaler(team_str, "goal");
+	blob_finder goaler2(team ? "sinine" : "kollane", "goal");
+	half goalside;
 
 	cv::namedWindow("Remote");
 
 	set_state(Start);
+
 	m.charge();
+	int kickcnt = 0;
 
 	while (1)
 	{
@@ -132,6 +136,21 @@ module::type player_module::run(const module::type &prev_module)
 
 		cv::Mat keyframe;
 		frame.copyTo(keyframe);
+
+
+		auto glarge = goaler.largest(frame);
+		auto g2large = goaler2.largest(frame);
+
+		if (glarge.size > 0.f)
+		{
+			goalside = get<0>(*goaler.factordist(frame, glarge)) >= 0 ? half::left : half::right;
+		}
+		else if (g2large.size > 0.f)
+		{
+			goalside = get<0>(*goaler2.factordist(frame, g2large)) >= 0 ? half::right : half::left;
+		}
+
+		//cout << "goalside: " << (goalside == half::left ? "left" : "right") << endl;
 
 		if (state == Ball)
 		{
@@ -163,7 +182,7 @@ module::type player_module::run(const module::type &prev_module)
 		//else if (state == GoalFind || state == Goal)
 		else if (state == GoalFind)
 		{
-			auto largest = goaler.largest(frame);
+			auto &largest = glarge;
 			auto factordist = goaler.factordist(frame, largest);
 
 			cout << largest.size << endl;
@@ -176,19 +195,58 @@ module::type player_module::run(const module::type &prev_module)
 
 				if (state == GoalFind)
 				{
-					if (abs(factor) < 0.2)
+					if (abs(factor) < 0.1)
 					{
-						//set_state(Goal);
-						m.dribbler(0);
-						this_thread::sleep_for(chrono::milliseconds(250));
-						m.kick();
-						this_thread::sleep_for(chrono::milliseconds(100));
-						m.charge();
-						m.dribbler(255);
-						set_state(Ball);
+						cv::Mat mask;
+						baller.threshold(frame, mask);
+
+						vector<cv::KeyPoint> keypoints;
+						baller.detect(mask, keypoints);
+
+						bool good = true;
+						for (auto &kp : keypoints)
+						{
+							float factor, dist;
+							tie(factor, dist) = *baller.factordist(frame, kp);
+
+							if (abs(factor) < 0.1)
+							{
+								good = false;
+								break;
+							}
+						}
+
+						if (good)
+						{
+							//set_state(Goal);
+							d.stop();
+							this_thread::sleep_for(chrono::milliseconds(500));
+							m.dribbler(0);
+							this_thread::sleep_for(chrono::milliseconds(250));
+							m.kick();
+							kickcnt++;
+							this_thread::sleep_for(chrono::milliseconds(100));
+
+							if (kickcnt % 2 == 0)
+								m.charge();
+
+							m.dribbler(255);
+							//set_state(Ball);
+							set_state(Manual);
+
+							//throw;
+						}
+						else
+						{
+							cout << "kick block" << endl;
+							d.omni(50, 60, 5);
+							this_thread::sleep_for(chrono::milliseconds(100)); // TODO: smooth driving, not time
+							set_state(GoalFind);
+						}
 					}
 					else
 						d.omni(speed_controller.step(fabs(factor)), sign(factor) * (-90), rotate_controller.step(factor));
+						//d.rotate(speed_controller.step(fabs(factor)));
 				}
 				else
 				{
@@ -203,7 +261,14 @@ module::type player_module::run(const module::type &prev_module)
 			else
 			{
 				if (state == GoalFind)
-					d.omni(17, -90, 13);
+				{
+					cout << "goalside: " << (goalside == half::left ? "left" : "right") << endl;
+					if (goalside == half::left)
+						d.omni(17, -90, 13);
+					else
+						d.omni(17, 90, -13);
+					//d.rotate(17);
+				}
 				else
 					d.straight(30);
 			}

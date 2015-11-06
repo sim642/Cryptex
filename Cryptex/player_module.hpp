@@ -26,6 +26,12 @@ class player_module : public module
 			Goal
 		};
 
+		enum class half
+		{
+			left,
+			right
+		};
+
 		const int btn_team = 1;
 
 		void set_state(const state_t &new_state);

@@ -1,0 +1,4 @@
+%YAML:1.0
+lower: [ 58, 0, 0, 0 ]
+upper: [ 97, 255, 255, 0 ]
+struct_size: 5
