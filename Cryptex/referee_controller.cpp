@@ -25,6 +25,11 @@ referee_controller::poll_t referee_controller::poll()
 
 		if (field == global::field && (target == global::id || target == 'X'))
 		{
+			if (target == global::id)
+			{
+				dongle.send(field, target, "ACK");
+			}
+
 			if (cmd == "START")
 			{
 				return Start;
@@ -32,11 +37,6 @@ referee_controller::poll_t referee_controller::poll()
 			else if (cmd == "STOP")
 			{
 				return Stop;
-			}
-
-			if (target == global::id)
-			{
-				dongle.send(field, target, "ACK");
 			}
 		}
 	}
