@@ -85,7 +85,6 @@ module::type player_module::run(const module::type &prev_module)
 
 	driver d(dongle);
 	main_controller m(dongle[device_id::main]);
-	m.dribbler(dribblerspeed);
 
 	cv::VideoCapture capture(global::video_id);
 	if (!capture.isOpened())
@@ -160,6 +159,7 @@ module::type player_module::run(const module::type &prev_module)
 
 		if (state == Ball)
 		{
+			m.dribbler(dribblerspeed);
 			auto largest = baller.largest(frame);
 			auto factordist = baller.factordist(frame, largest);
 
@@ -183,7 +183,10 @@ module::type player_module::run(const module::type &prev_module)
 			d.straight(50);
 
 			if (m.ball())
+			{
+				this_thread::sleep_for(chrono::milliseconds(500));
 				set_state(GoalFind);
+			}
 			else if (get_statestart() > 2.f)
 				set_state(Ball);
 		}
@@ -254,7 +257,7 @@ module::type player_module::run(const module::type &prev_module)
 						else
 						{
 							cout << "kick block" << endl;
-							d.omni(50, 60, -3);
+							d.omni(50, 45, -2);
 							//this_thread::sleep_for(chrono::milliseconds(100)); // TODO: smooth driving, not time
 							set_state(GoalFind);
 						}

@@ -15,7 +15,7 @@ int main()
 {
 	global::env = "301";
 	global::video_id = 0;
-	global::field = 'A';
+	global::field = 'B';
 	global::id = 'A';
 
 	system("v4l2ctrl -l calibs/camera.v4l2"); // load camera config
