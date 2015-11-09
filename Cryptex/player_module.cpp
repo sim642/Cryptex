@@ -113,8 +113,11 @@ module::type player_module::run(const module::type &prev_module)
 		m.charge();
 	int kickcnt = 0;
 
+	chrono::high_resolution_clock::time_point framestart;
 	while (1)
 	{
+		framestart = chrono::high_resolution_clock::now();
+
 		m.ping();
 
 		switch (referee.poll()) // only one per cycle
@@ -289,9 +292,11 @@ module::type player_module::run(const module::type &prev_module)
 			}
 		}
 
+		int dt = chrono::duration_cast<chrono::milliseconds>(chrono::high_resolution_clock::now() - framestart).count();
+
 		imshow("Remote", keyframe);
 
-		char key = cv::waitKey(1000 / 60);
+		char key = cv::waitKey(max(1, 1000 / 60 - dt));
 		switch (key)
 		{
 			case 27:
