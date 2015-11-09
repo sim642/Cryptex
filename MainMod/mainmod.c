@@ -17,6 +17,7 @@
 int atoi(const char * str);
 
 bool failsafe = true;
+bool automation = true;
 volatile uint8_t failsafe_counter = 0;
 
 char response[16];
@@ -165,6 +166,12 @@ void parse_and_execute_command(char *buf, bool usart)
 		par1 = atoi(command + 2);
 		failsafe = par1;
 	}
+	else if (strpref(command, "au"))
+	{
+		// set automation
+		par1 = atoi(command + 2);
+		automation = par1;
+	}
 	else if (streq(command, "p"))
 	{
 		// ping, keep failsafe from triggering
@@ -186,7 +193,7 @@ ISR(TIMER0_COMPA_vect)
 
 ISR(PCINT0_vect)
 {
-	if (bit_get(PINB, BIT(DONE)) == 0) // DONE changed to LOW
+	if (automation && bit_get(PINB, BIT(DONE)) == 0) // DONE changed to LOW
 	{
 		bit_clear(PORTD, BIT(CHARGE));
 
