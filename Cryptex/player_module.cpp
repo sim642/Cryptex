@@ -173,7 +173,7 @@ module::type player_module::run(const module::type &prev_module)
 					set_state(BallGrab);
 			}
 			else
-				d.rotate(max(5.f, 25 - get_statestart() / 2 * 10));
+				d.rotate(max(5.f, 25 - get_statestart() / 1.5 * 10));
 		}
 		else if (state == BallGrab)
 		{
@@ -181,6 +181,8 @@ module::type player_module::run(const module::type &prev_module)
 
 			if (m.ball())
 				set_state(GoalFind);
+			else if (get_statestart() > 2.f)
+				set_state(Ball);
 		}
 		else if (state == GoalFind || state == Goal)
 		{
@@ -249,8 +251,8 @@ module::type player_module::run(const module::type &prev_module)
 						else
 						{
 							cout << "kick block" << endl;
-							d.omni(50, 60, 5);
-							this_thread::sleep_for(chrono::milliseconds(100)); // TODO: smooth driving, not time
+							d.omni(50, 60, -3);
+							//this_thread::sleep_for(chrono::milliseconds(100)); // TODO: smooth driving, not time
 							set_state(GoalFind);
 						}
 					}
@@ -335,6 +337,30 @@ module::type player_module::run(const module::type &prev_module)
 
 			case 'k':
 				m.kick();
+				break;
+
+			case '1':
+				set_state(Start);
+				break;
+
+			case '2':
+				set_state(Manual);
+				break;
+
+			case '3':
+				set_state(Ball);
+				break;
+
+			case '4':
+				set_state(BallGrab);
+				break;
+
+			case '5':
+				set_state(GoalFind);
+				break;
+
+			case '6':
+				set_state(Goal);
 				break;
 		}
 
