@@ -138,17 +138,19 @@ module::type player_module::run(const module::type &prev_module)
 		cv::Mat keyframe;
 		frame.copyTo(keyframe);
 
+		cv::Mat framelow;
+		cv::resize(frame, framelow, cv::Size(), scalelow, scalelow, CV_INTER_AREA);
 
-		auto glarge = goaler.largest(frame);
-		auto g2large = goaler2.largest(frame);
+		auto glarge = goaler.largest(framelow);
+		auto g2large = goaler2.largest(framelow);
 
 		if (glarge.size > 0.f)
 		{
-			goalside = get<0>(*goaler.factordist(frame, glarge)) >= 0 ? half::left : half::right;
+			goalside = get<0>(*goaler.factordist(framelow, glarge)) >= 0 ? half::left : half::right;
 		}
 		else if (g2large.size > 0.f)
 		{
-			goalside = get<0>(*goaler2.factordist(frame, g2large)) >= 0 ? half::right : half::left;
+			goalside = get<0>(*goaler2.factordist(framelow, g2large)) >= 0 ? half::right : half::left;
 		}
 
 		//cout << "goalside: " << (goalside == half::left ? "left" : "right") << endl;
@@ -183,15 +185,15 @@ module::type player_module::run(const module::type &prev_module)
 		else if (state == GoalFind || state == Goal)
 		{
 			auto &largest = glarge;
-			auto factordist = goaler.factordist(frame, largest);
+			auto factordist = goaler.factordist(framelow, largest);
 
-			cout << largest.size << endl;
+			cout << largest.size / scalelow << endl;
 			if (factordist) // if blob found
 			{
 				float factor, dist;
 				tie(factor, dist) = *factordist;
 
-				cv::circle(keyframe, largest.pt, largest.size / 2, cv::Scalar(255, 0, 255), 5);
+				cv::circle(keyframe, largest.pt / scalelow, largest.size / 2 / scalelow, cv::Scalar(255, 0, 255), 5);
 
 				if (state == GoalFind)
 				{
@@ -260,7 +262,7 @@ module::type player_module::run(const module::type &prev_module)
 				{
 					d.omni(100, 0, rotate_controller.step(factor));
 
-					if (largest.size > 485.f)
+					if (largest.size > 485.f * pow(scalelow, 2))
 					{
 						m.dribbler(0);
 						this_thread::sleep_for(chrono::milliseconds(500));
