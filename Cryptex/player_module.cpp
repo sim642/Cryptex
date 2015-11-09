@@ -85,7 +85,7 @@ module::type player_module::run(const module::type &prev_module)
 
 	driver d(dongle);
 	main_controller m(dongle[device_id::main]);
-	m.dribbler(255);
+	m.dribbler(dribblerspeed);
 
 	cv::VideoCapture capture(global::video_id);
 	if (!capture.isOpened())
@@ -109,7 +109,8 @@ module::type player_module::run(const module::type &prev_module)
 
 	set_state(Start);
 
-	m.charge();
+	if (coilenabled)
+		m.charge();
 	int kickcnt = 0;
 
 	while (1)
@@ -179,8 +180,7 @@ module::type player_module::run(const module::type &prev_module)
 			if (m.ball())
 				set_state(GoalFind);
 		}
-		//else if (state == GoalFind || state == Goal)
-		else if (state == GoalFind)
+		else if (state == GoalFind || state == Goal)
 		{
 			auto &largest = glarge;
 			auto factordist = goaler.factordist(frame, largest);
@@ -218,23 +218,31 @@ module::type player_module::run(const module::type &prev_module)
 
 						if (good)
 						{
-							//set_state(Goal);
-							d.stop();
-							this_thread::sleep_for(chrono::milliseconds(500));
-							m.dribbler(0);
-							this_thread::sleep_for(chrono::milliseconds(250));
-							m.kick();
-							kickcnt++;
-							this_thread::sleep_for(chrono::milliseconds(100));
+							if (coilenabled)
+							{
+								//set_state(Goal);
+								d.stop();
+								this_thread::sleep_for(chrono::milliseconds(500));
+								m.dribbler(0);
+								this_thread::sleep_for(chrono::milliseconds(250));
+								m.kick(kicktime);
+								kickcnt++;
+								this_thread::sleep_for(chrono::milliseconds(100));
 
-							if (kickcnt % 2 == 0)
-								m.charge();
+								if (kickcnt >= kickstotal)
+								{
+									m.charge();
+									kickcnt = 0;
+								}
 
-							m.dribbler(255);
-							//set_state(Ball);
-							set_state(Manual);
+								m.dribbler(dribblerspeed);
+								set_state(Ball);
+								//set_state(Manual);
 
-							//throw;
+								//throw;
+							}
+							else
+								set_state(Goal);
 						}
 						else
 						{
@@ -254,6 +262,9 @@ module::type player_module::run(const module::type &prev_module)
 
 					if (largest.size > 485.f)
 					{
+						m.dribbler(0);
+						this_thread::sleep_for(chrono::milliseconds(500));
+						m.dribbler(dribblerspeed);
 						set_state(Ball);
 					}
 				}

@@ -33,6 +33,10 @@ class player_module : public module
 		};
 
 		const int btn_team = 1;
+		const int dribblerspeed = 255;
+		const bool coilenabled = true;
+		const int kicktime = 3;
+		const int kickstotal = 2;
 
 		void set_state(const state_t &new_state);
 		void reset_statestart();

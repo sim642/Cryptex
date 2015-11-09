@@ -28,6 +28,11 @@ void main_controller::kick()
 	controller->send("k");
 }
 
+void main_controller::kick(const int &ms)
+{
+	controller->send("k", ms);
+}
+
 void main_controller::charge()
 {
 	controller->send("c");

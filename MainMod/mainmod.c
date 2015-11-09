@@ -88,13 +88,18 @@ void parse_and_execute_command(char *buf, bool usart)
 		par1 = atoi(command + 2);
 		bit_write(par1, PORTD, BIT(CHARGE));
 	}
-	else if (streq(command, "k"))
+	else if (strpref(command, "k"))
 	{
 		// kick
+		if (streq(command, "k"))
+			par1 = KICKTIME;
+		else
+			par1 = atoi(command + 1);
+
 		bit_clear(PORTD, BIT(CHARGE));
 
 		bit_set(PORTD, BIT(KICK));
-		_delay_ms(KICKTIME);
+		_delay_ms(par1);
 		bit_clear(PORTD, BIT(KICK));
 	}
 	else if (streq(command, "c"))
