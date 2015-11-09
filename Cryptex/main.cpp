@@ -2,6 +2,7 @@
 #include "module.hpp"
 #include <map>
 #include <stdexcept>
+#include <cstdlib>
 #include "menu_module.hpp"
 #include "calibrator_module.hpp"
 #include "player_module.hpp"
@@ -14,8 +15,10 @@ int main()
 {
 	global::env = "301";
 	global::video_id = 0;
-	global::field = 'A';
+	global::field = 'B';
 	global::id = 'A';
+
+	system("v4l2ctrl -l calibs/camera.v4l2"); // load camera config
 
 	map<module::type, module*> modules;
 	modules[module::type::menu] = new menu_module();
