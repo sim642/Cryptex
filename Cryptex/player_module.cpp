@@ -173,7 +173,7 @@ module::type player_module::run(const module::type &prev_module)
 					set_state(BallGrab);
 			}
 			else
-				d.rotate(max(5.f, 25 - get_statestart() / 1.5 * 10));
+				d.rotate(max(5.f, 25 - get_statestart() / 1.5f * 10));
 		}
 		else if (state == BallGrab)
 		{
