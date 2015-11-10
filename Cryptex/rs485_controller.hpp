@@ -13,7 +13,8 @@ class rs485_controller : public device_controller
 		virtual ~rs485_controller();
 
 		virtual void send(const std::string &cmd);
-		virtual void send(const std::string &cmd, const int &val);
+		virtual void send(const std::string &cmd, const std::string &val);
+		using device_controller::send;
 
 	private:
 		virtual std::string read_line();

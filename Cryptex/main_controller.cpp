@@ -28,7 +28,7 @@ void main_controller::kick()
 	controller->send("k");
 }
 
-void main_controller::kick(const int &ms)
+void main_controller::kick(const double &ms)
 {
 	controller->send("k", ms);
 }

@@ -11,7 +11,8 @@ class serial_controller : public device_controller
 		virtual ~serial_controller();
 
 		virtual void send(const std::string &cmd);
-		virtual void send(const std::string &cmd, const int &val);
+		virtual void send(const std::string &cmd, const std::string &val);
+		using device_controller::send;
 
 		int id();
 		int id(const int &new_id);
