@@ -57,6 +57,8 @@ std::string config_module::get_var(const var_type& type, void* ptr)
 		case var_type::bool_t:
 			return to_string(*(static_cast<int*>(ptr)));
 	}
+
+	return "";
 }
 
 void config_module::set_var(const var_type& type, void* ptr, const std::string &val)
@@ -80,7 +82,7 @@ void config_module::set_var(const var_type& type, void* ptr, const std::string &
 
 void config_module::print_choices()
 {
-	for (int i = 0; i < choices.size(); i++)
+	for (unsigned int i = 0; i < choices.size(); i++)
 	{
 		auto &choice = choices[i];
 		cout << (i + 1) << ". " << get<0>(choice) << " [" << get_var(get<1>(choice), get<2>(choice)) << "]" << endl;

@@ -33,6 +33,7 @@
 			<Add option="-Wextra" />
 			<Add option="-Wall" />
 			<Add option="-fexceptions" />
+			<Add option="-Wno-unused-parameter" />
 		</Compiler>
 		<Linker>
 			<Add option="-lboost_system" />

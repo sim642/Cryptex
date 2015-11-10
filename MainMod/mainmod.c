@@ -4,6 +4,8 @@
 #include <util/delay.h>
 #include <avr/interrupt.h>
 
+#include <stdio.h>
+#include <stdlib.h>
 #include <stdbool.h>
 #include "pins.h"
 #include "eeprom.h"
@@ -13,8 +15,6 @@
 #define KICKTIME 5000 // us
 #define FAILSAFE 100 // ticks
 
-
-int atoi(const char * str);
 
 bool failsafe = true;
 bool automation = true;
