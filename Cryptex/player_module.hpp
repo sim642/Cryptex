@@ -35,7 +35,7 @@ class player_module : public module
 		const int btn_team = 1;
 		const double scalelow = 0.5;
 		const int dribblerspeed = 255;
-		const int kicktime = 3;
+		const double kicktime = 2.5;
 		const int kickstotal = 2;
 
 		void set_state(const state_t &new_state);
