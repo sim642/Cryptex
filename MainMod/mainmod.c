@@ -10,7 +10,7 @@
 #include "comms.h"
 #include "util.h"
 
-#define KICKTIME 5 // ms
+#define KICKTIME 5000 // us
 #define FAILSAFE 100 // ticks
 
 
@@ -100,7 +100,7 @@ void parse_and_execute_command(char *buf, bool usart)
 		bit_clear(PORTD, BIT(CHARGE));
 
 		bit_set(PORTD, BIT(KICK));
-		_delay_ms(par1);
+		_delay_us(par1);
 		bit_clear(PORTD, BIT(KICK));
 	}
 	else if (streq(command, "c"))

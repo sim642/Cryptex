@@ -39,10 +39,10 @@ void main_controller::kick()
 	controller->send("k");
 }
 
-void main_controller::kick(const int &ms)
+void main_controller::kick(const double &ms)
 {
 	assume_coilgun();
-	controller->send("k", ms);
+	controller->send("k", static_cast<int>(ms * 1000)); // MainMod takes us
 }
 
 void main_controller::charge()
