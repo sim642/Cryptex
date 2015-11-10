@@ -108,7 +108,7 @@ module::type player_module::run(const module::type &prev_module)
 
 	set_state(Start);
 
-	if (coilenabled)
+	if (global::coilgun)
 		m.charge();
 	int kickcnt = 0;
 
@@ -228,7 +228,7 @@ module::type player_module::run(const module::type &prev_module)
 
 						if (good)
 						{
-							if (coilenabled)
+							if (global::coilgun)
 							{
 								//set_state(Goal);
 								d.stop();

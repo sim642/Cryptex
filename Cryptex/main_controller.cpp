@@ -1,7 +1,15 @@
 #include "main_controller.hpp"
+#include "global.hpp"
 #include <string>
+#include <stdexcept>
 
 using namespace std;
+
+void assume_coilgun()
+{
+	if (!global::coilgun)
+		throw runtime_error("attempt to use disabled coilun");
+}
 
 main_controller::main_controller(device_controller *new_controller) : controller(new_controller)
 {
@@ -15,26 +23,31 @@ main_controller::~main_controller()
 
 void main_controller::kick_override(const bool& state)
 {
+	assume_coilgun();
 	controller->send("ko", state);
 }
 
 void main_controller::charge_override(const bool &state)
 {
+	assume_coilgun();
 	controller->send("co", state);
 }
 
 void main_controller::kick()
 {
+	assume_coilgun();
 	controller->send("k");
 }
 
 void main_controller::kick(const double &ms)
 {
+	assume_coilgun();
 	controller->send("k", ms);
 }
 
 void main_controller::charge()
 {
+	assume_coilgun();
 	controller->send("c");
 }
 

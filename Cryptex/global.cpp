@@ -4,8 +4,8 @@ namespace global
 {
 	std::string env;
 	int video_id;
-
 	char field, id;
+	bool coilgun;
 
 	std::string calib_filename(const std::string &name, const std::string &ext)
 	{

@@ -35,7 +35,6 @@ class player_module : public module
 		const int btn_team = 1;
 		const double scalelow = 0.5;
 		const int dribblerspeed = 255;
-		const bool coilenabled = true;
 		const int kicktime = 3;
 		const int kickstotal = 2;
 

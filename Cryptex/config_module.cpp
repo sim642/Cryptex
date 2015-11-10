@@ -12,6 +12,7 @@ config_module::config_module()
 	choices.push_back(make_tuple("video", var_type::int_t, &global::video_id));
 	choices.push_back(make_tuple("field", var_type::char_t, &global::field));
 	choices.push_back(make_tuple("id", var_type::char_t, &global::id));
+	choices.push_back(make_tuple("coilgun", var_type::bool_t, &global::coilgun));
 }
 
 config_module::~config_module()
@@ -53,6 +54,7 @@ std::string config_module::get_var(const var_type& type, void* ptr)
 			return string(1, *(static_cast<char*>(ptr)));
 
 		case var_type::int_t:
+		case var_type::bool_t:
 			return to_string(*(static_cast<int*>(ptr)));
 	}
 }
@@ -70,6 +72,7 @@ void config_module::set_var(const var_type& type, void* ptr, const std::string &
 			break;
 
 		case var_type::int_t:
+		case var_type::bool_t:
 			*(static_cast<int*>(ptr)) = stoi(val);
 			break;
 	}
