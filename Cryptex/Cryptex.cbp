@@ -51,6 +51,8 @@
 		<Unit filename="calibrator_module.hpp" />
 		<Unit filename="calibrator_window.cpp" />
 		<Unit filename="calibrator_window.hpp" />
+		<Unit filename="config_module.cpp" />
+		<Unit filename="config_module.hpp" />
 		<Unit filename="device_controller.cpp" />
 		<Unit filename="device_controller.hpp" />
 		<Unit filename="device_id.hpp" />
