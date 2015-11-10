@@ -17,7 +17,7 @@ void rs485_controller::send(const std::string &cmd)
 	dongle->send(id, cmd);
 }
 
-void rs485_controller::send(const std::string &cmd, const std::string &val)
+void rs485_controller::send(const std::string &cmd, const int &val)
 {
 	dongle->send(id, cmd, val);
 }

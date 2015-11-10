@@ -18,7 +18,7 @@ void serial_controller::send(const std::string &cmd)
 	stream << cmd << endl;
 }
 
-void serial_controller::send(const std::string &cmd, const std::string &val)
+void serial_controller::send(const std::string &cmd, const int &val)
 {
 	stream << cmd << val << endl;
 }

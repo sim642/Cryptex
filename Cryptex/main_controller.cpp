@@ -39,7 +39,7 @@ void main_controller::kick()
 	controller->send("k");
 }
 
-void main_controller::kick(const double &ms)
+void main_controller::kick(const int &ms)
 {
 	assume_coilgun();
 	controller->send("k", ms);

@@ -13,7 +13,7 @@ class rs485_dongle : public device_manager
 		virtual ~rs485_dongle();
 
 		void send(const int &id, const std::string &cmd);
-		void send(const int &id, const std::string &cmd, const std::string &val);
+		void send(const int &id, const std::string &cmd, const int &val);
 
 		std::string read_line(const int &id);
 

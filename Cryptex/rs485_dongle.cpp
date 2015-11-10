@@ -22,7 +22,7 @@ void rs485_dongle::send(const int &id, const std::string &cmd)
 	stream << id << ":" << cmd << endl;
 }
 
-void rs485_dongle::send(const int &id, const std::string &cmd, const std::string &val)
+void rs485_dongle::send(const int &id, const std::string &cmd, const int &val)
 {
 	stream << id << ":" << cmd << val << endl;
 }

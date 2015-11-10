@@ -13,13 +13,7 @@ class device_controller
 		virtual ~device_controller();
 
 		virtual void send(const std::string &cmd) = 0;
-		virtual void send(const std::string &cmd, const std::string &val) = 0;
-
-		template<typename T>
-		void send(const std::string &cmd, const T &val)
-		{
-			send(cmd, std::to_string(val));
-		}
+		virtual void send(const std::string &cmd, const int &val) = 0;
 
 		virtual recv_t recv(const std::string &reply);
 
