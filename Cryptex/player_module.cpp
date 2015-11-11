@@ -110,7 +110,7 @@ module::type player_module::run(const module::type &prev_module)
 
 	if (global::coilgun)
 		m.charge();
-	int kickcnt = 0;
+	auto kickit = kicks.begin();
 
 	chrono::high_resolution_clock::time_point framestart;
 	while (1)
@@ -230,26 +230,22 @@ module::type player_module::run(const module::type &prev_module)
 						{
 							if (global::coilgun)
 							{
-								//set_state(Goal);
 								d.stop();
 								this_thread::sleep_for(chrono::milliseconds(500));
 								m.dribbler(0);
 								this_thread::sleep_for(chrono::milliseconds(250));
-								m.kick(kicktime);
-								kickcnt++;
+								m.kick(*kickit);
+								kickit++;
 								this_thread::sleep_for(chrono::milliseconds(100));
 
-								if (kickcnt >= kickstotal)
+								if (kickit == kicks.end())
 								{
 									m.charge();
-									kickcnt = 0;
+									kickit = kicks.begin();
 								}
 
 								m.dribbler(dribblerspeed);
 								set_state(Ball);
-								//set_state(Manual);
-
-								//throw;
 							}
 							else
 								set_state(Goal);

@@ -4,6 +4,7 @@
 #include "module.hpp"
 
 #include "pid_controller.hpp"
+#include <vector>
 #include <chrono>
 
 class player_module : public module
@@ -35,8 +36,7 @@ class player_module : public module
 		const int btn_team = 1;
 		const double scalelow = 0.5;
 		const int dribblerspeed = 255;
-		const double kicktime = 2.5;
-		const int kickstotal = 2;
+		const std::vector<int> kicks = {2500, 8000};
 
 		void set_state(const state_t &new_state);
 		void reset_statestart();
