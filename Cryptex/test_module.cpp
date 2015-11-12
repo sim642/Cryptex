@@ -32,15 +32,17 @@ module::type test_module::run(const module::type &prev_module)
 	driver d(dongle);
 	main_controller m(dongle[device_id::main]);
 
-	//m.dribbler(255);
+	m.dribbler(255);
 	//this_thread::sleep_for(chrono::seconds(1));
 
 	while (1)
 	{
-		//m.ping();
-		d.omni(35, -85, 25);
+		m.ping();
+		//d.omni(17, -90, 13);
+		//d.omni(35, -85, 25);
 		//d.omni(45, -85, 32);
 		//d.omni(45, -80, 29);
+		d.omni(35, -45, 30);
 		this_thread::sleep_for(chrono::milliseconds(1000 / 60));
 	}
 
