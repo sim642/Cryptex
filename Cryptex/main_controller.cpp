@@ -18,7 +18,7 @@ main_controller::main_controller(device_controller *new_controller) : controller
 
 main_controller::~main_controller()
 {
-
+	dribbler(0);
 }
 
 void main_controller::kick_override(const bool& state)
