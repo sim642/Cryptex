@@ -18,9 +18,9 @@ int main()
 	global::video_id = 0;
 	global::field = 'A';
 	global::id = 'A';
-	global::coilgun = false;
+	global::coilgun = true;
 
-	system("v4l2ctrl -l calibs/camera.v4l2"); // load camera config
+	system("v4l2ctrl -l calibs/pseye.v4l2"); // load camera config
 
 	map<module::type, module*> modules;
 	modules[module::type::menu] = new menu_module();
