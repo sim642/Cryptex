@@ -16,6 +16,7 @@
 #include <opencv2/video.hpp>
 #include "blob_finder.hpp"
 
+#include <algorithm>
 #include "math.hpp"
 
 
@@ -143,8 +144,52 @@ module::type player_module::run(const module::type &prev_module)
 		cv::Mat framelow;
 		cv::resize(frame, framelow, cv::Size(), scalelow, scalelow, CV_INTER_AREA);
 
-		auto glarge = goaler.largest(framelow);
-		auto g2large = goaler2.largest(framelow);
+		vector<cv::KeyPoint> gpoints, g2points;
+
+		// detect all goal blobs
+		{
+			cv::Mat mask;
+
+			goaler.threshold(framelow, mask);
+			goaler.detect(mask, gpoints);
+
+			goaler2.threshold(framelow, mask);
+			goaler2.detect(mask, g2points);
+		}
+
+		// filter robot markings
+		{
+			vector<bool> gkeep(gpoints.size(), true), g2keep(g2points.size(), true);
+
+			for (unsigned int g = 0; g < gpoints.size(); g++)
+			{
+				for (unsigned int g2 = 0; g2 < g2points.size(); g2++)
+				{
+					auto d = g2points[g2].pt - gpoints[g].pt;
+					float deg = rad2deg(angle(d));
+					if (fabs(deg - 90) < 45 || fabs(deg + 90) < 45)
+						gkeep[g] = g2keep[g2] = false;
+				}
+			}
+
+			decltype(gpoints) gpoints2, g2points2;
+			for (unsigned int g = 0; g < gpoints.size(); g++)
+			{
+				if (gkeep[g])
+					gpoints2.push_back(gpoints[g]);
+			}
+			for (unsigned int g2 = 0; g2 < g2points.size(); g2++)
+			{
+				if (g2keep[g2])
+					g2points2.push_back(g2points[g2]);
+			}
+
+			gpoints = move(gpoints2);
+			g2points = move(g2points2);
+		}
+
+		auto glarge = blob_finder::largest(gpoints);
+		auto g2large = blob_finder::largest(g2points);
 
 		if (glarge.size > 0.f)
 		{

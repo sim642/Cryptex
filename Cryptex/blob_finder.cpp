@@ -85,14 +85,8 @@ void blob_finder::detect(const cv::Mat &mask, std::vector<cv::KeyPoint> &keypoin
 	detector->detect(mask, keypoints);
 }
 
-cv::KeyPoint blob_finder::largest(const cv::Mat &frame)
+cv::KeyPoint blob_finder::largest(const std::vector<cv::KeyPoint> &keypoints)
 {
-	cv::Mat mask;
-	threshold(frame, mask);
-
-	vector<cv::KeyPoint> keypoints;
-	detect(mask, keypoints);
-
 	auto largest = max_element(keypoints.begin(), keypoints.end(), [](const cv::KeyPoint &lhs, const cv::KeyPoint &rhs)
 	{
 		return lhs.size < rhs.size;
@@ -102,6 +96,17 @@ cv::KeyPoint blob_finder::largest(const cv::Mat &frame)
 		return *largest;
 	else
 		return none;
+}
+
+cv::KeyPoint blob_finder::largest(const cv::Mat &frame)
+{
+	cv::Mat mask;
+	threshold(frame, mask);
+
+	vector<cv::KeyPoint> keypoints;
+	detect(mask, keypoints);
+
+	return largest(keypoints);
 }
 
 boost::optional<blob_finder::factordist_t> blob_finder::factordist(const cv::Mat &frame, const cv::KeyPoint& largest)

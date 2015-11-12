@@ -31,6 +31,7 @@ class blob_finder
 
 		void threshold(const cv::Mat &frame, cv::Mat &mask);
 		void detect(const cv::Mat &mask, std::vector<cv::KeyPoint> &keypoints);
+		static cv::KeyPoint largest(const std::vector<cv::KeyPoint> &keypoints);
 		cv::KeyPoint largest(const cv::Mat &frame);
 
 		boost::optional<factordist_t> factordist(const cv::Mat &frame, const cv::KeyPoint &largest);

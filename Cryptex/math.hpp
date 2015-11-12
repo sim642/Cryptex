@@ -2,6 +2,7 @@
 #define MATH_H
 
 #include <cmath>
+#include <opencv2/core/types.hpp>
 
 inline float deg2rad(float deg)
 {
@@ -22,6 +23,12 @@ int sign(T val)
 		return -1;
 	else
 		return 0;
+}
+
+template<typename T>
+float angle(const cv::Point_<T> &vec)
+{
+	return atan2(vec.y, vec.x);
 }
 
 #endif // MATH_H
