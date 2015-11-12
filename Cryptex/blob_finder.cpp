@@ -1,6 +1,8 @@
 #include "blob_finder.hpp"
 #include <vector>
+#include <algorithm>
 #include "global.hpp"
+#include "math.hpp"
 
 using namespace std;
 
@@ -80,12 +82,12 @@ void blob_finder::threshold(const cv::Mat &frame, cv::Mat &mask)
 	cv::erode(mask, mask, structuring);
 }
 
-void blob_finder::detect(const cv::Mat &mask, std::vector<cv::KeyPoint> &keypoints)
+void blob_finder::detect(const cv::Mat &mask, keypoints_t &keypoints)
 {
 	detector->detect(mask, keypoints);
 }
 
-cv::KeyPoint blob_finder::largest(const std::vector<cv::KeyPoint> &keypoints)
+cv::KeyPoint blob_finder::largest(const keypoints_t &keypoints)
 {
 	auto largest = max_element(keypoints.begin(), keypoints.end(), [](const cv::KeyPoint &lhs, const cv::KeyPoint &rhs)
 	{
@@ -103,10 +105,41 @@ cv::KeyPoint blob_finder::largest(const cv::Mat &frame)
 	cv::Mat mask;
 	threshold(frame, mask);
 
-	vector<cv::KeyPoint> keypoints;
+	keypoints_t keypoints;
 	detect(mask, keypoints);
 
 	return largest(keypoints);
+}
+
+void blob_finder::angle_filter_out(keypoints_t& ps1, keypoints_t& ps2, float angle, float delta)
+{
+	vector<bool> keep1(ps1.size(), true), keep2(ps2.size(), true);
+
+	for (unsigned int i = 0; i < ps1.size(); i++)
+	{
+		for (unsigned int j = 0; j < ps2.size(); j++)
+		{
+			auto d = ps2[j].pt - ps1[i].pt;
+			float deg = rad2deg(vec_angle(d));
+			if (fabs(deg - angle) < delta || fabs(deg - (-180 + angle)) < delta)
+				keep1[i] = keep2[j] = false;
+		}
+	}
+
+	keypoints_t nps1, nps2;
+	for (unsigned int i = 0; i < ps1.size(); i++)
+	{
+		if (keep1[i])
+			nps1.push_back(ps1[i]);
+	}
+	for (unsigned int j = 0; j < ps2.size(); j++)
+	{
+		if (keep2[j])
+			nps2.push_back(ps2[j]);
+	}
+
+	ps1 = move(nps1);
+	ps2 = move(nps2);
 }
 
 boost::optional<blob_finder::factordist_t> blob_finder::factordist(const cv::Mat &frame, const cv::KeyPoint& largest)

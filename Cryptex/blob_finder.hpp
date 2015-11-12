@@ -14,6 +14,7 @@ class blob_finder
 	public:
 		typedef cv::Scalar_<int> bounds_t;
 		static const cv::KeyPoint none;
+		typedef std::vector<cv::KeyPoint> keypoints_t;
 		typedef std::pair<float, float> factordist_t;
 
 		blob_finder();
@@ -30,9 +31,11 @@ class blob_finder
 		void set_params(const cv::SimpleBlobDetector::Params &new_params);
 
 		void threshold(const cv::Mat &frame, cv::Mat &mask);
-		void detect(const cv::Mat &mask, std::vector<cv::KeyPoint> &keypoints);
-		static cv::KeyPoint largest(const std::vector<cv::KeyPoint> &keypoints);
+		void detect(const cv::Mat &mask, keypoints_t &keypoints);
+		static cv::KeyPoint largest(const keypoints_t &keypoints);
 		cv::KeyPoint largest(const cv::Mat &frame);
+
+		static void angle_filter_out(keypoints_t &ps1, keypoints_t &ps2, float angle, float delta);
 
 		boost::optional<factordist_t> factordist(const cv::Mat &frame, const cv::KeyPoint &largest);
 

@@ -26,7 +26,7 @@ int sign(T val)
 }
 
 template<typename T>
-float angle(const cv::Point_<T> &vec)
+float vec_angle(const cv::Point_<T> &vec)
 {
 	return atan2(vec.y, vec.x);
 }
