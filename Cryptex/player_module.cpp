@@ -51,7 +51,7 @@ void player_module::set_state(const state_t &new_state, const string &changer)
 			cout << "Ball";
 			speed_controller.reset();
 			rotate_controller.reset();
-			speed_controller.Kp = 135;
+			speed_controller.Kp = 100;
 			rotate_controller.Kp = 35;
 			break;
 
@@ -196,23 +196,26 @@ module::type player_module::run(const module::type &prev_module)
 
 				d.omni(speed_controller.step(dist), 0, rotate_controller.step(factor));
 
-				if (dist < 0.2)
+				if (dist < 0.3)
 					set_state(BallGrab, "play");
 			}
 			else
-				d.rotate(max(10.f, 35 - get_statestart() / 1.5f * 10));
+				d.rotate(max(10.f, 35 - get_statestart() / 2.f * 10));
 		}
 		else if (state == BallGrab)
 		{
-			d.straight(40);
+			d.straight(35);
+			cout << "bg" << endl;
 
 			if (m.ball())
 			{
-				this_thread::sleep_for(chrono::milliseconds(100));
+				this_thread::sleep_for(chrono::milliseconds(150));
 				set_state(GoalFind, "play");
 			}
-			else if (get_statestart() > 0.5f)
+			else if (get_statestart() > 0.65f)
 				set_state(Ball, "play");
+
+			cout << "bg2" << endl;
 		}
 		else if (state == GoalFind || state == Goal)
 		{
@@ -370,7 +373,7 @@ module::type player_module::run(const module::type &prev_module)
 				m.kick();
 				break;
 
-			case '1':
+			/*case '1':
 				set_state(Start);
 				break;
 
@@ -392,7 +395,7 @@ module::type player_module::run(const module::type &prev_module)
 
 			case '6':
 				set_state(Goal);
-				break;
+				break;*/
 		}
 
 		/*bool polled = move.poll();

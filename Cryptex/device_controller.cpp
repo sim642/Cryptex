@@ -2,6 +2,8 @@
 #include <string>
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/classification.hpp>
+#include <chrono>
+#include <thread>
 
 using namespace std;
 
@@ -18,12 +20,13 @@ device_controller::~device_controller()
 
 device_controller::recv_t device_controller::recv(const std::string &reply)
 {
+	chrono::high_resolution_clock::time_point start = chrono::high_resolution_clock::now();
 	recv_t recv;
 	do
 	{
 		recv = parse_recv(read_line());
 	}
-	while (recv.first != reply);
+	while (recv.first != reply && chrono::duration_cast<chrono::milliseconds>(chrono::high_resolution_clock::now() - start).count() < 100);
 
 	return recv;
 }

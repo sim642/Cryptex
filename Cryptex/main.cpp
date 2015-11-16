@@ -20,7 +20,7 @@ int main()
 	global::id = 'A';
 	global::coilgun = true;
 
-	system("v4l2ctrl -l calibs/pseye.v4l2"); // load camera config
+	//system("v4l2ctrl -l calibs/pseye.v4l2"); // load camera config
 
 	map<module::type, module*> modules;
 	modules[module::type::menu] = new menu_module();
