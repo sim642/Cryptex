@@ -116,6 +116,8 @@ module::type player_module::run(const module::type &prev_module)
 	auto kickit = kicks.begin();
 
 	chrono::high_resolution_clock::time_point framestart;
+	long long framecnt = 0;
+
 	while (1)
 	{
 		framestart = chrono::high_resolution_clock::now();
@@ -139,6 +141,7 @@ module::type player_module::run(const module::type &prev_module)
 
 		cv::Mat frame;
 		capture >> frame;
+		framecnt++;
 
 		cv::Mat keyframe;
 		frame.copyTo(keyframe);
@@ -147,22 +150,31 @@ module::type player_module::run(const module::type &prev_module)
 		cv::resize(frame, framelow, cv::Size(), scalelow, scalelow, CV_INTER_AREA);
 
 		blob_finder::keypoints_t gpoints, g2points;
-		//cv::drawKeypoints(keyframe, gpoints, keyframe, cv::Scalar(255, 0, 255), cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS);
-		//cv::drawKeypoints(keyframe, g2points, keyframe, cv::Scalar(255, 255, 0), cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS);
 
-		// detect all goal blobs
+		if ((state == GoalFind || state == Goal) || framecnt % 10 == 0)
 		{
-			cv::Mat mask;
+			// detect all goal blobs
+			{
+				cv::Mat mask;
 
-			goaler.threshold(framelow, mask);
-			goaler.detect(mask, gpoints);
+				goaler.threshold(framelow, mask);
+				goaler.detect(mask, gpoints);
 
-			goaler2.threshold(framelow, mask);
-			goaler2.detect(mask, g2points);
+				goaler2.threshold(framelow, mask);
+				goaler2.detect(mask, g2points);
+			}
+
+			cv::drawKeypoints(keyframe, gpoints, keyframe, cv::Scalar(255, 0, 255), cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS);
+			cv::drawKeypoints(keyframe, g2points, keyframe, cv::Scalar(255, 0, 255), cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS);
+			//cout << "B: " << gpoints.size() << " " << g2points.size() << endl;
+
+			// filter robot markings
+			blob_finder::angle_filter_out(gpoints, g2points, 90, 70);
+
+			cv::drawKeypoints(keyframe, gpoints, keyframe, cv::Scalar(255, 255, 0), cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS);
+			cv::drawKeypoints(keyframe, g2points, keyframe, cv::Scalar(255, 255, 0), cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS);
+			//cout << "A: " << gpoints.size() << " " << g2points.size() << endl;
 		}
-
-		// filter robot markings
-		blob_finder::angle_filter_out(gpoints, g2points, 90, 45);
 
 		auto glarge = blob_finder::largest(gpoints);
 		auto g2large = blob_finder::largest(g2points);
