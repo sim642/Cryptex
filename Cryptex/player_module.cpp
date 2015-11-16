@@ -31,9 +31,12 @@ player_module::~player_module()
 
 }
 
-void player_module::set_state(const state_t &new_state)
+void player_module::set_state(const state_t &new_state, const string &changer)
 {
-	cout << "state: ";
+	cout << "state";
+	if (!changer.empty())
+		cout << " [" << changer << "]";
+	cout << ": ";
 	switch (new_state)
 	{
 		case Start:
@@ -106,7 +109,7 @@ module::type player_module::run(const module::type &prev_module)
 
 	cv::namedWindow("Remote");
 
-	set_state(Start);
+	set_state(Start, "init");
 
 	if (global::coilgun)
 		m.charge();
@@ -125,11 +128,11 @@ module::type player_module::run(const module::type &prev_module)
 				break;
 
 			case referee_controller::Start:
-				set_state(Ball);
+				set_state(Ball, "referee");
 				break;
 
 			case referee_controller::Stop:
-				set_state(Manual);
+				set_state(Manual, "referee");
 				d.stop();
 				break;
 		}
@@ -177,6 +180,9 @@ module::type player_module::run(const module::type &prev_module)
 
 		if (state == Ball)
 		{
+			if (m.ball())
+				set_state(GoalFind, "play");
+
 			m.dribbler(dribblerspeed);
 			auto largest = baller.largest(frame);
 			auto factordist = baller.factordist(frame, largest);
@@ -191,7 +197,7 @@ module::type player_module::run(const module::type &prev_module)
 				d.omni(speed_controller.step(dist), 0, rotate_controller.step(factor));
 
 				if (dist < 0.2)
-					set_state(BallGrab);
+					set_state(BallGrab, "play");
 			}
 			else
 				d.rotate(max(10.f, 35 - get_statestart() / 1.5f * 10));
@@ -203,15 +209,15 @@ module::type player_module::run(const module::type &prev_module)
 			if (m.ball())
 			{
 				this_thread::sleep_for(chrono::milliseconds(100));
-				set_state(GoalFind);
+				set_state(GoalFind, "play");
 			}
 			else if (get_statestart() > 0.5f)
-				set_state(Ball);
+				set_state(Ball, "play");
 		}
 		else if (state == GoalFind || state == Goal)
 		{
 			if (!m.ball())
-				set_state(Ball);
+				set_state(Ball, "play");
 
 			auto &largest = glarge;
 			auto factordist = goaler.factordist(framelow, largest);
@@ -266,17 +272,17 @@ module::type player_module::run(const module::type &prev_module)
 								}
 
 								m.dribbler(dribblerspeed);
-								set_state(Ball);
+								set_state(Ball, "play");
 							}
 							else
-								set_state(Goal);
+								set_state(Goal, "play");
 						}
 						else
 						{
 							cout << "kick block" << endl;
 							d.omni(50, 45, -2);
 							//this_thread::sleep_for(chrono::milliseconds(100)); // TODO: smooth driving, not time
-							set_state(GoalFind);
+							set_state(GoalFind, "play");
 						}
 					}
 					else
@@ -292,7 +298,7 @@ module::type player_module::run(const module::type &prev_module)
 						m.dribbler(0);
 						this_thread::sleep_for(chrono::milliseconds(500));
 						m.dribbler(dribblerspeed);
-						set_state(Ball);
+						set_state(Ball, "play");
 					}
 				}
 			}
@@ -346,11 +352,11 @@ module::type player_module::run(const module::type &prev_module)
 			case 'e':
 				if (state == Manual)
 				{
-					set_state(Ball);
+					set_state(Ball, "manual");
 				}
 				else
 				{
-					set_state(Manual);
+					set_state(Manual, "manual");
 					d.stop();
 				}
 

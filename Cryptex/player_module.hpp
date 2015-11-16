@@ -4,6 +4,7 @@
 #include "module.hpp"
 
 #include "pid_controller.hpp"
+#include <string>
 #include <vector>
 #include <chrono>
 
@@ -38,7 +39,7 @@ class player_module : public module
 		const int dribblerspeed = 255;
 		const std::vector<int> kicks = {2500, 8000};
 
-		void set_state(const state_t &new_state);
+		void set_state(const state_t &new_state, const std::string &changer = "");
 		void reset_statestart();
 		float get_statestart();
 
