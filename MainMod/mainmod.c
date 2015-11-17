@@ -13,12 +13,29 @@
 #include "util.h"
 
 #define KICKTIME 5000 // us
+#define DISCHARGECYCLES 75
+#define DISCHARGETIME 800 // us
+#define DISCHARGEWAIT 200 // ms
 #define FAILSAFE 100 // ticks
 
 
 bool failsafe = true;
 bool automation = true;
-volatile uint8_t failsafe_counter = 0;
+volatile uint16_t failsafe_counter = 0;
+
+void discharge(uint8_t cycles)
+{
+	bit_clear(PORTD, BIT(CHARGE));
+
+	uint8_t i;
+	for (i = 0; i < cycles; i++)
+	{
+		bit_set(PORTD, BIT(KICK));
+		_delay_us(DISCHARGETIME);
+		bit_clear(PORTD, BIT(KICK));
+		_delay_ms(DISCHARGEWAIT);
+	}
+}
 
 char response[16];
 
@@ -109,6 +126,16 @@ void parse_and_execute_command(char *buf, bool usart)
 		bit_clear(PORTD, BIT(KICK));
 
 		bit_set(PORTD, BIT(CHARGE));
+	}
+	else if (strpref(command, "d"))
+	{
+		// discharge
+		if (streq(command, "d"))
+			par1 = DISCHARGECYCLES;
+		else
+			par1 = atoi(command + 1);
+
+		discharge(par1);
 	}
 	else if (streq(command, "bl"))
 	{
@@ -289,11 +316,12 @@ int main(void)
 		{
 			// failsafe triggered
 			bit_clear(PORTD, BIT(CHARGE));
-			//bit_set(PORTD, BIT(KICK));
+			bit_set(PORTD, BIT(KICK));
+			_delay_us(DISCHARGETIME);
 			bit_clear(PORTD, BIT(KICK));
-			OCR3AL = 0;
+			_delay_ms(DISCHARGEWAIT);
 
-			failsafe_counter = 0;
+			OCR3AL = 0;
 		}
 
 		if (usb_serial_available())
