@@ -94,6 +94,12 @@ void parse_and_execute_command(char *buf, bool usart)
 		par1 = atoi(command + 2);
 		eeprom_update_byte(EEPROM_INTRPL, par1);
 	}
+	else if (strpref(command, "dm"))
+	{
+		// dribbler motor
+		par1 = atoi(command + 2);
+		OCR3AL = par1;
+	}
 	else if (strpref(command, "ko"))
 	{
 		// kick override
@@ -180,12 +186,6 @@ void parse_and_execute_command(char *buf, bool usart)
 		}
 		sprintf(response, "io%d:%d", par1, state);
 		reply_func(response);
-	}
-	else if (strpref(command, "dm"))
-	{
-		// dribbler motor
-		par1 = atoi(command + 2);
-		OCR3AL = par1;
 	}
 	else if (strpref(command, "fs"))
 	{
