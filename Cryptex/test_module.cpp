@@ -42,7 +42,8 @@ module::type test_module::run(const module::type &prev_module)
 		//d.omni(35, -85, 25);
 		//d.omni(45, -85, 32);
 		//d.omni(45, -80, 29);
-		d.omni(35, -45, 30);
+		//d.omni(35, -45, 30);
+		cout << m.ball() << endl;
 		this_thread::sleep_for(chrono::milliseconds(1000 / 60));
 	}
 

@@ -16,8 +16,8 @@ int main()
 {
 	global::env = "301";
 	global::video_id = 0;
-	global::field = 'A';
-	global::id = 'A';
+	global::field = 'B';
+	global::id = 'D';
 	global::coilgun = true;
 
 	system("v4l2ctrl -l calibs/pseye.v4l2"); // load camera config

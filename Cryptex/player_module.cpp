@@ -200,10 +200,13 @@ module::type player_module::run(const module::type &prev_module)
 
 		if (state == Ball)
 		{
+			cout << "." << flush;
 			if (m.ball())
 				set_state(GoalFind, "play");
 
+			//m.dribbler(0);
 			m.dribbler(dribblerspeed);
+
 			auto largest = baller.largest(frame);
 			auto factordist = baller.factordist(frame, largest);
 
@@ -224,6 +227,7 @@ module::type player_module::run(const module::type &prev_module)
 		}
 		else if (state == BallGrab)
 		{
+			//m.dribbler(dribblerspeed);
 			d.straight(50);
 			cout << "bg" << endl;
 
