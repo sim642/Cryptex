@@ -6,8 +6,6 @@
 
 using namespace std;
 
-const cv::KeyPoint blob_finder::none(-1, -1, -1);
-
 blob_finder::blob_finder()
 {
 
@@ -87,74 +85,81 @@ void blob_finder::detect(const cv::Mat &mask, keypoints_t &keypoints)
 	detector->detect(mask, keypoints);
 }
 
-cv::KeyPoint blob_finder::largest(const keypoints_t &keypoints)
+void blob_finder::detect(const cv::Mat &mask, blobs_t &blobs)
 {
-	auto largest = max_element(keypoints.begin(), keypoints.end(), [](const cv::KeyPoint &lhs, const cv::KeyPoint &rhs)
-	{
-		return lhs.size < rhs.size;
-	});
-
-	if (largest != keypoints.end())
-		return *largest;
-	else
-		return none;
-}
-
-cv::KeyPoint blob_finder::largest(const cv::Mat &frame)
-{
-	cv::Mat mask;
-	threshold(frame, mask);
-
 	keypoints_t keypoints;
 	detect(mask, keypoints);
 
-	return largest(keypoints);
+	blobs.clear();
+	for (auto &kp : keypoints)
+	{
+		blob b;
+		b.kp = kp;
+		tie(b.factor, b.dist) = factordist(mask, b);
+
+		blobs.push_back(b);
+	}
 }
 
-void blob_finder::angle_filter_out(keypoints_t& ps1, keypoints_t& ps2, float angle, float delta)
+void blob_finder::detect_frame(const cv::Mat& frame, blobs_t& blobs)
 {
-	vector<bool> keep1(ps1.size(), true), keep2(ps2.size(), true);
+	cv::Mat mask;
+	threshold(frame, mask);
+	detect(mask, blobs);
+}
 
-	for (unsigned int i = 0; i < ps1.size(); i++)
+boost::optional<blob> blob_finder::largest(const blobs_t &blobs)
+{
+	auto largest = max_element(blobs.begin(), blobs.end(), [](const blob &lhs, const blob &rhs)
 	{
-		for (unsigned int j = 0; j < ps2.size(); j++)
+		return lhs.kp.size < rhs.kp.size;
+	});
+
+	if (largest != blobs.end())
+		return *largest;
+	else
+		return boost::none;
+}
+
+void blob_finder::angle_filter_out(blobs_t& bs1, blobs_t &bs2, float angle, float delta)
+{
+	vector<bool> keep1(bs1.size(), true), keep2(bs2.size(), true);
+
+	for (unsigned int i = 0; i < bs1.size(); i++)
+	{
+		for (unsigned int j = 0; j < bs2.size(); j++)
 		{
-			auto d = ps2[j].pt - ps1[i].pt;
+			auto d = bs2[j].kp.pt - bs1[i].kp.pt;
 			float deg = rad2deg(vec_angle(d));
 			if (fabs(deg - angle) < delta || fabs(deg - (-180 + angle)) < delta)
 				keep1[i] = keep2[j] = false;
 		}
 	}
 
-	keypoints_t nps1, nps2;
-	for (unsigned int i = 0; i < ps1.size(); i++)
+	blobs_t nbs1, nbs2;
+	for (unsigned int i = 0; i < bs1.size(); i++)
 	{
 		if (keep1[i])
-			nps1.push_back(ps1[i]);
+			nbs1.push_back(bs1[i]);
 	}
-	for (unsigned int j = 0; j < ps2.size(); j++)
+	for (unsigned int j = 0; j < bs2.size(); j++)
 	{
 		if (keep2[j])
-			nps2.push_back(ps2[j]);
+			nbs2.push_back(bs2[j]);
 	}
 
-	ps1 = move(nps1);
-	ps2 = move(nps2);
+	bs1 = move(nbs1);
+	bs2 = move(nbs2);
 }
 
-boost::optional<blob_finder::factordist_t> blob_finder::factordist(const cv::Mat &frame, const cv::KeyPoint& largest)
+blob_finder::factordist_t blob_finder::factordist(const cv::Mat &frame, const blob& largest)
 {
-	if (largest.size >= 0.f) // if blob found
-	{
-		int diff = frame.cols / 2 - largest.pt.x;
-		float factor = float(diff) / (frame.cols / 2);
+	int diff = frame.cols / 2 - largest.kp.pt.x;
+	float factor = float(diff) / (frame.cols / 2);
 
-		float dist = (frame.rows - largest.pt.y) / float(frame.rows);
+	float dist = (frame.rows - largest.kp.pt.y) / float(frame.rows);
 
-		return make_pair(factor, dist);
-	}
-	else
-		return boost::none;
+	return make_pair(factor, dist);
 }
 
 void blob_finder::init_detector()

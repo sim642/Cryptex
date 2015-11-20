@@ -143,52 +143,42 @@ module::type player_module::run(const module::type &prev_module)
 		cv::Mat framelow;
 		cv::resize(frame, framelow, cv::Size(), scalelow, scalelow, CV_INTER_AREA);
 
-		blob_finder::keypoints_t gpoints, g2points;
+		blob_finder::blobs_t gblobs, g2blobs;
 
 		// detect all goal blobs
-		{
-			cv::Mat mask;
-
-			goaler.threshold(framelow, mask);
-			goaler.detect(mask, gpoints);
-
-			goaler2.threshold(framelow, mask);
-			goaler2.detect(mask, g2points);
-		}
+		goaler.detect_frame(frame, gblobs);
+		goaler2.detect_frame(frame, g2blobs);
 
 		// filter robot markings
-		blob_finder::angle_filter_out(gpoints, g2points, 90, 45);
+		blob_finder::angle_filter_out(gblobs, g2blobs, 90, 45);
 
-		auto glarge = blob_finder::largest(gpoints);
-		auto g2large = blob_finder::largest(g2points);
+		auto glarge = blob_finder::largest(gblobs);
+		auto g2large = blob_finder::largest(g2blobs);
 
-		if (glarge.size > 0.f)
+		if (glarge)
 		{
-			goalside = get<0>(*goaler.factordist(framelow, glarge)) >= 0 ? half::left : half::right;
+			goalside = glarge->factor >= 0 ? half::left : half::right;
 		}
-		else if (g2large.size > 0.f)
+		else if (g2large)
 		{
-			goalside = get<0>(*goaler2.factordist(framelow, g2large)) >= 0 ? half::right : half::left;
+			goalside = g2large->factor >= 0 ? half::right : half::left;
 		}
-
-		//cout << "goalside: " << (goalside == half::left ? "left" : "right") << endl;
 
 		if (state == Ball)
 		{
 			m.dribbler(dribblerspeed);
-			auto largest = baller.largest(frame);
-			auto factordist = baller.factordist(frame, largest);
 
-			if (factordist) // if blob found
+			blob_finder::blobs_t balls;
+			baller.detect_frame(frame, balls);
+			auto largest = baller.largest(balls);
+
+			if (largest) // if ball found
 			{
-				float factor, dist;
-				tie(factor, dist) = *factordist;
+				cv::circle(keyframe, largest->kp.pt, largest->kp.size / 2, cv::Scalar(255, 0, 255), 5);
 
-				cv::circle(keyframe, largest.pt, largest.size / 2, cv::Scalar(255, 0, 255), 5);
+				d.omni(speed_controller.step(largest->dist), 0, rotate_controller.step(largest->factor));
 
-				d.omni(speed_controller.step(dist), 0, rotate_controller.step(factor));
-
-				if (dist < 0.1)
+				if (largest->dist < 0.1)
 					set_state(BallGrab);
 			}
 			else
@@ -208,34 +198,21 @@ module::type player_module::run(const module::type &prev_module)
 		}
 		else if (state == GoalFind || state == Goal)
 		{
-			auto &largest = glarge;
-			auto factordist = goaler.factordist(framelow, largest);
-
-			cout << largest.size / scalelow << endl;
-			if (factordist) // if blob found
+			if (glarge) // if goal found
 			{
-				float factor, dist;
-				tie(factor, dist) = *factordist;
-
-				cv::circle(keyframe, largest.pt / scalelow, largest.size / 2 / scalelow, cv::Scalar(255, 0, 255), 5);
+				cv::circle(keyframe, glarge->kp.pt / scalelow, glarge->kp.size / 2 / scalelow, cv::Scalar(255, 0, 255), 5);
 
 				if (state == GoalFind)
 				{
-					if (abs(factor) < 0.1)
+					if (abs(glarge->factor) < 0.1)
 					{
-						cv::Mat mask;
-						baller.threshold(frame, mask);
-
-						vector<cv::KeyPoint> keypoints;
-						baller.detect(mask, keypoints);
+						blob_finder::blobs_t balls;
+						baller.detect_frame(frame, balls);
 
 						bool good = true;
-						for (auto &kp : keypoints)
+						for (auto &ball : balls)
 						{
-							float factor, dist;
-							tie(factor, dist) = *baller.factordist(frame, kp);
-
-							if (abs(factor) < 0.1)
+							if (abs(ball.factor) < 0.1)
 							{
 								good = false;
 								break;
@@ -275,14 +252,13 @@ module::type player_module::run(const module::type &prev_module)
 						}
 					}
 					else
-						d.omni(speed_controller.step(fabs(factor)), sign(factor) * (-90), rotate_controller.step(factor));
-						//d.rotate(speed_controller.step(fabs(factor)));
+						d.omni(speed_controller.step(fabs(glarge->factor)), sign(glarge->factor) * (-90), rotate_controller.step(glarge->factor));
 				}
 				else
 				{
-					d.omni(100, 0, rotate_controller.step(factor));
+					d.omni(100, 0, rotate_controller.step(glarge->factor));
 
-					if (largest.size > 485.f * pow(scalelow, 2))
+					if (glarge->kp.size > 485.f * pow(scalelow, 2))
 					{
 						m.dribbler(0);
 						this_thread::sleep_for(chrono::milliseconds(500));
@@ -300,7 +276,6 @@ module::type player_module::run(const module::type &prev_module)
 						d.omni(17, -90, 13);
 					else
 						d.omni(17, 90, -13);
-					//d.rotate(17);
 				}
 				else
 					d.straight(30);

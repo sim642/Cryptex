@@ -46,6 +46,7 @@
 			<Add option="-lpsmoveapi" />
 			<Add option="-lpthread" />
 		</Linker>
+		<Unit filename="blob.hpp" />
 		<Unit filename="blob_finder.cpp" />
 		<Unit filename="blob_finder.hpp" />
 		<Unit filename="calibrator_module.cpp" />
