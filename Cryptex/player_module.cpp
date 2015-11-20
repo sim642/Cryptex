@@ -143,7 +143,7 @@ module::type player_module::run(const module::type &prev_module)
 		cv::Mat framelow;
 		cv::resize(frame, framelow, cv::Size(), scalelow, scalelow, CV_INTER_AREA);
 
-		blob_finder::blobs_t gblobs, g2blobs;
+		blobs_t gblobs, g2blobs;
 
 		// detect all goal blobs
 		goaler.detect_frame(frame, gblobs);
@@ -168,7 +168,7 @@ module::type player_module::run(const module::type &prev_module)
 		{
 			m.dribbler(dribblerspeed);
 
-			blob_finder::blobs_t balls;
+			blobs_t balls;
 			baller.detect_frame(frame, balls);
 			auto largest = baller.largest(balls);
 
@@ -206,7 +206,7 @@ module::type player_module::run(const module::type &prev_module)
 				{
 					if (abs(glarge->factor) < 0.1)
 					{
-						blob_finder::blobs_t balls;
+						blobs_t balls;
 						baller.detect_frame(frame, balls);
 
 						bool good = true;

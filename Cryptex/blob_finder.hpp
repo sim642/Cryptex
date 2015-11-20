@@ -16,7 +16,6 @@ class blob_finder
 		typedef cv::Scalar_<int> bounds_t;
 		typedef std::vector<cv::KeyPoint> keypoints_t;
 		typedef std::pair<float, float> factordist_t;
-		typedef std::vector<blob> blobs_t;
 
 		blob_finder();
 		blob_finder(const std::string &color_name);

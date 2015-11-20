@@ -49,6 +49,8 @@
 		<Unit filename="blob.hpp" />
 		<Unit filename="blob_finder.cpp" />
 		<Unit filename="blob_finder.hpp" />
+		<Unit filename="blob_tracker.cpp" />
+		<Unit filename="blob_tracker.hpp" />
 		<Unit filename="calibrator_module.cpp" />
 		<Unit filename="calibrator_module.hpp" />
 		<Unit filename="calibrator_window.cpp" />
