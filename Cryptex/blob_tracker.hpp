@@ -14,6 +14,7 @@ class blob_tracker
 		void update(const blobs_t &blobs);
 		void clear();
 
+		const std::map<int, blob>& get_all() const;
 		boost::optional<blob> operator[] (const int &id);
 		int best();
 
