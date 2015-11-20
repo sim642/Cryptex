@@ -37,7 +37,8 @@ class player_module : public module
 		const int btn_team = 1;
 		const double scalelow = 0.5;
 		const int dribblerspeed = 255;
-		const std::vector<int> kicks = {2500, 8000};
+		//const std::vector<int> kicks = {2500, 8000};
+		const std::vector<int> kicks = {4000};
 
 		void set_state(const state_t &new_state, const std::string &changer = "");
 		void reset_statestart();

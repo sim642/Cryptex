@@ -51,8 +51,12 @@ void player_module::set_state(const state_t &new_state, const string &changer)
 			cout << "Ball";
 			speed_controller.reset();
 			rotate_controller.reset();
-			speed_controller.Kp = 100;
-			rotate_controller.Kp = 35;
+			speed_controller.Kp = 115;
+			rotate_controller.Kp = 45;
+			speed_controller.Ki = 0;
+			rotate_controller.Ki = 0;
+			//speed_controller.Kd = 0;
+			//rotate_controller.Kd = 0;
 			break;
 
 		case BallGrab:
@@ -64,7 +68,10 @@ void player_module::set_state(const state_t &new_state, const string &changer)
 			speed_controller.reset();
 			rotate_controller.reset();
 			speed_controller.Kp = 25;
-			rotate_controller.Kp = 18;
+			rotate_controller.Kp = 25;
+			speed_controller.Ki = 0;
+			rotate_controller.Ki = 0;
+			//speed_controller.Kd = rotate_controller.Kd = 0;
 			break;
 
 		case Goal:
@@ -151,7 +158,8 @@ module::type player_module::run(const module::type &prev_module)
 
 		blob_finder::keypoints_t gpoints, g2points;
 
-		if ((state == GoalFind || state == Goal) || framecnt % 10 == 0)
+		//if ((state == GoalFind || state == Goal) || framecnt % 10 == 0)
+		if ((state == GoalFind || state == Goal))
 		{
 			// detect all goal blobs
 			{
@@ -216,12 +224,12 @@ module::type player_module::run(const module::type &prev_module)
 		}
 		else if (state == BallGrab)
 		{
-			d.straight(35);
+			d.straight(50);
 			cout << "bg" << endl;
 
 			if (m.ball())
 			{
-				this_thread::sleep_for(chrono::milliseconds(150));
+				this_thread::sleep_for(chrono::milliseconds(250));
 				set_state(GoalFind, "play");
 			}
 			else if (get_statestart() > 0.65f)
@@ -247,7 +255,8 @@ module::type player_module::run(const module::type &prev_module)
 
 				if (state == GoalFind)
 				{
-					if (abs(factor) < 0.15)
+					if (abs(factor) < max(0.15f, (1 - dist) / 3))
+					//if (abs(factor) < 0.15f)
 					{
 						cv::Mat mask;
 						baller.threshold(frame, mask);
