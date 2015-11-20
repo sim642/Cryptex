@@ -15,6 +15,7 @@
 #include <opencv2/highgui.hpp>
 #include <opencv2/video.hpp>
 #include "blob_finder.hpp"
+#include "blob_tracker.hpp"
 
 #include "math.hpp"
 
@@ -96,6 +97,7 @@ module::type player_module::run(const module::type &prev_module)
 	referee_controller referee(srf);
 
 	blob_finder baller("oranz", "ball");
+	blob_tracker balltr(50);
 
 	bool team = m.button(btn_team);
 	string team_str = team ? "kollane" : "sinine";
@@ -107,6 +109,8 @@ module::type player_module::run(const module::type &prev_module)
 	cv::namedWindow("Remote");
 
 	set_state(Start);
+
+	int ballid = 0;
 
 	if (global::coilgun)
 		m.charge();
@@ -170,8 +174,13 @@ module::type player_module::run(const module::type &prev_module)
 
 			blobs_t balls;
 			baller.detect_frame(frame, balls);
-			auto largest = baller.largest(balls);
+			balltr.update(balls);
+			int bestid = balltr.best();
 
+			if (!bestid || !ballid || !balltr[ballid] || (balltr[bestid]->score + 0.2f < balltr[ballid]->score))
+				ballid = bestid;
+
+			auto largest = balltr[ballid];
 			if (largest) // if ball found
 			{
 				cv::circle(keyframe, largest->kp.pt, largest->kp.size / 2, cv::Scalar(255, 0, 255), 5);
@@ -186,6 +195,8 @@ module::type player_module::run(const module::type &prev_module)
 		}
 		else if (state == BallGrab)
 		{
+			balltr.clear();
+
 			d.straight(50);
 
 			if (m.ball())
