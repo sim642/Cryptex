@@ -211,6 +211,7 @@ module::type player_module::run(const module::type &prev_module)
 		{
 			//m.dribbler(dribblerspeed);
 			balltr.clear();
+			ballid = 0;
 
 			d.straight(50);
 
