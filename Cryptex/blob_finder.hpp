@@ -1,6 +1,7 @@
 #ifndef BLOB_FINDER_H
 #define BLOB_FINDER_H
 
+#include "blob.hpp"
 #include <opencv2/opencv.hpp>
 #include <string>
 #include <vector>
@@ -13,7 +14,6 @@ class blob_finder
 {
 	public:
 		typedef cv::Scalar_<int> bounds_t;
-		static const cv::KeyPoint none;
 		typedef std::vector<cv::KeyPoint> keypoints_t;
 		typedef std::pair<float, float> factordist_t;
 
@@ -31,13 +31,14 @@ class blob_finder
 		void set_params(const cv::SimpleBlobDetector::Params &new_params);
 
 		void threshold(const cv::Mat &frame, cv::Mat &mask);
-		void detect(const cv::Mat &mask, keypoints_t &keypoints);
-		static cv::KeyPoint largest(const keypoints_t &keypoints);
-		cv::KeyPoint largest(const cv::Mat &frame);
+		void detect(const cv::Mat &mask, keypoints_t &blobs);
+		void detect(const cv::Mat &mask, blobs_t &blobs);
+		void detect_frame(const cv::Mat &frame, blobs_t &blobs);
+		static boost::optional<blob> largest(const blobs_t &blobs);
 
-		static void angle_filter_out(keypoints_t &ps1, keypoints_t &ps2, float angle, float delta);
+		static void angle_filter_out(blobs_t &bs1, blobs_t &bs2, float angle, float delta);
 
-		boost::optional<factordist_t> factordist(const cv::Mat &frame, const cv::KeyPoint &largest);
+		factordist_t factordist(const cv::Mat &frame, const blob &b);
 
 		friend class calibrator_window;
 	private:

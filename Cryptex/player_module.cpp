@@ -15,6 +15,7 @@
 #include <opencv2/highgui.hpp>
 #include <opencv2/video.hpp>
 #include "blob_finder.hpp"
+#include "blob_tracker.hpp"
 
 #include "math.hpp"
 
@@ -106,6 +107,7 @@ module::type player_module::run(const module::type &prev_module)
 	referee_controller referee(srf);
 
 	blob_finder baller("oranz", "ball");
+	blob_tracker balltr(50);
 
 	bool team = m.button(btn_team);
 	string team_str = team ? "kollane" : "sinine";
@@ -118,13 +120,13 @@ module::type player_module::run(const module::type &prev_module)
 
 	set_state(Start, "init");
 
+	int ballid = 0;
+
 	if (global::coilgun)
 		m.charge();
 	auto kickit = kicks.begin();
 
 	chrono::high_resolution_clock::time_point framestart;
-	long long framecnt = 0;
-
 	while (1)
 	{
 		framestart = chrono::high_resolution_clock::now();
@@ -148,7 +150,6 @@ module::type player_module::run(const module::type &prev_module)
 
 		cv::Mat frame;
 		capture >> frame;
-		framecnt++;
 
 		cv::Mat keyframe;
 		frame.copyTo(keyframe);
@@ -156,70 +157,51 @@ module::type player_module::run(const module::type &prev_module)
 		cv::Mat framelow;
 		cv::resize(frame, framelow, cv::Size(), scalelow, scalelow, CV_INTER_AREA);
 
-		blob_finder::keypoints_t gpoints, g2points;
+		blobs_t gblobs, g2blobs;
 
-		//if ((state == GoalFind || state == Goal) || framecnt % 10 == 0)
-		if ((state == GoalFind || state == Goal))
+		// detect all goal blobs
+		goaler.detect_frame(frame, gblobs);
+		goaler2.detect_frame(frame, g2blobs);
+
+		// filter robot markings
+		blob_finder::angle_filter_out(gblobs, g2blobs, 90, 45);
+
+		auto glarge = blob_finder::largest(gblobs);
+		auto g2large = blob_finder::largest(g2blobs);
+
+		if (glarge)
 		{
-			// detect all goal blobs
-			{
-				cv::Mat mask;
-
-				goaler.threshold(framelow, mask);
-				goaler.detect(mask, gpoints);
-
-				goaler2.threshold(framelow, mask);
-				goaler2.detect(mask, g2points);
-			}
-
-			cv::drawKeypoints(keyframe, gpoints, keyframe, cv::Scalar(255, 0, 255), cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS);
-			cv::drawKeypoints(keyframe, g2points, keyframe, cv::Scalar(255, 0, 255), cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS);
-			//cout << "B: " << gpoints.size() << " " << g2points.size() << endl;
-
-			// filter robot markings
-			blob_finder::angle_filter_out(gpoints, g2points, 90, 70);
-
-			cv::drawKeypoints(keyframe, gpoints, keyframe, cv::Scalar(255, 255, 0), cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS);
-			cv::drawKeypoints(keyframe, g2points, keyframe, cv::Scalar(255, 255, 0), cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS);
-			//cout << "A: " << gpoints.size() << " " << g2points.size() << endl;
+			goalside = glarge->factor >= 0 ? half::left : half::right;
 		}
-
-		auto glarge = blob_finder::largest(gpoints);
-		auto g2large = blob_finder::largest(g2points);
-
-		if (glarge.size > 0.f)
+		else if (g2large)
 		{
-			goalside = get<0>(*goaler.factordist(framelow, glarge)) >= 0 ? half::left : half::right;
+			goalside = g2large->factor >= 0 ? half::right : half::left;
 		}
-		else if (g2large.size > 0.f)
-		{
-			goalside = get<0>(*goaler2.factordist(framelow, g2large)) >= 0 ? half::right : half::left;
-		}
-
-		//cout << "goalside: " << (goalside == half::left ? "left" : "right") << endl;
 
 		if (state == Ball)
 		{
-			cout << "." << flush;
 			if (m.ball())
 				set_state(GoalFind, "play");
 
 			//m.dribbler(0);
 			m.dribbler(dribblerspeed);
 
-			auto largest = baller.largest(frame);
-			auto factordist = baller.factordist(frame, largest);
+			blobs_t balls;
+			baller.detect_frame(frame, balls);
+			balltr.update(balls);
+			int bestid = balltr.best();
 
-			if (factordist) // if blob found
+			if (!bestid || !ballid || !balltr[ballid] || (balltr[bestid]->score + 0.2f < balltr[ballid]->score))
+				ballid = bestid;
+
+			auto largest = balltr[ballid];
+			if (largest) // if ball found
 			{
-				float factor, dist;
-				tie(factor, dist) = *factordist;
+				cv::circle(keyframe, largest->kp.pt, largest->kp.size / 2, cv::Scalar(255, 0, 255), 5);
 
-				cv::circle(keyframe, largest.pt, largest.size / 2, cv::Scalar(255, 0, 255), 5);
+				d.omni(speed_controller.step(largest->dist), 0, rotate_controller.step(largest->factor));
 
-				d.omni(speed_controller.step(dist), 0, rotate_controller.step(factor));
-
-				if (dist < 0.3)
+				if (largest->dist < 0.3)
 					set_state(BallGrab, "play");
 			}
 			else
@@ -228,8 +210,9 @@ module::type player_module::run(const module::type &prev_module)
 		else if (state == BallGrab)
 		{
 			//m.dribbler(dribblerspeed);
+			balltr.clear();
+
 			d.straight(50);
-			cout << "bg" << endl;
 
 			if (m.ball())
 			{
@@ -238,43 +221,27 @@ module::type player_module::run(const module::type &prev_module)
 			}
 			else if (get_statestart() > 0.65f)
 				set_state(Ball, "play");
-
-			cout << "bg2" << endl;
 		}
 		else if (state == GoalFind || state == Goal)
 		{
 			if (!m.ball())
 				set_state(Ball, "play");
 
-			auto &largest = glarge;
-			auto factordist = goaler.factordist(framelow, largest);
-
-			cout << largest.size / scalelow << endl;
-			if (factordist) // if blob found
+			if (glarge) // if goal found
 			{
-				float factor, dist;
-				tie(factor, dist) = *factordist;
-
-				cv::circle(keyframe, largest.pt / scalelow, largest.size / 2 / scalelow, cv::Scalar(255, 0, 255), 5);
+				cv::circle(keyframe, glarge->kp.pt / scalelow, glarge->kp.size / 2 / scalelow, cv::Scalar(255, 0, 255), 5);
 
 				if (state == GoalFind)
 				{
-					if (abs(factor) < max(0.15f, (1 - dist) / 3))
-					//if (abs(factor) < 0.15f)
+					if (abs(glarge->factor) < 0.1)
 					{
-						cv::Mat mask;
-						baller.threshold(frame, mask);
-
-						vector<cv::KeyPoint> keypoints;
-						baller.detect(mask, keypoints);
+						blobs_t balls;
+						baller.detect_frame(frame, balls);
 
 						bool good = true;
-						for (auto &kp : keypoints)
+						for (auto &ball : balls)
 						{
-							float factor, dist;
-							tie(factor, dist) = *baller.factordist(frame, kp);
-
-							if (abs(factor) < 0.1)
+							if (abs(ball.factor) < 0.1)
 							{
 								good = false;
 								break;
@@ -314,14 +281,13 @@ module::type player_module::run(const module::type &prev_module)
 						}
 					}
 					else
-						d.omni(speed_controller.step(fabs(factor)), sign(factor) * (-90), rotate_controller.step(factor));
-						//d.rotate(speed_controller.step(fabs(factor)));
+						d.omni(speed_controller.step(fabs(glarge->factor)), sign(glarge->factor) * (-90), rotate_controller.step(glarge->factor));
 				}
 				else
 				{
-					d.omni(100, 0, rotate_controller.step(factor));
+					d.omni(100, 0, rotate_controller.step(glarge->factor));
 
-					if (largest.size > 485.f * pow(scalelow, 2))
+					if (glarge->kp.size > 485.f * pow(scalelow, 2))
 					{
 						m.dribbler(0);
 						this_thread::sleep_for(chrono::milliseconds(500));
