@@ -52,8 +52,8 @@ void player_module::set_state(const state_t &new_state, const string &changer)
 			cout << "Ball";
 			speed_controller.reset();
 			rotate_controller.reset();
-			speed_controller.Kp = 115;
-			rotate_controller.Kp = 45;
+			speed_controller.Kp = 95;
+			rotate_controller.Kp = 30;
 			speed_controller.Ki = 0;
 			rotate_controller.Ki = 0;
 			//speed_controller.Kd = 0;
@@ -68,8 +68,8 @@ void player_module::set_state(const state_t &new_state, const string &changer)
 			cout << "GoalFind";
 			speed_controller.reset();
 			rotate_controller.reset();
-			speed_controller.Kp = 25;
-			rotate_controller.Kp = 25;
+			speed_controller.Kp = 26;
+			rotate_controller.Kp = 19;
 			speed_controller.Ki = 0;
 			rotate_controller.Ki = 0;
 			//speed_controller.Kd = rotate_controller.Kd = 0;
@@ -226,7 +226,7 @@ module::type player_module::run(const module::type &prev_module)
 			balltr.clear();
 			ballid = 0;
 
-			d.straight(50);
+			d.straight(60);
 
 			if (m.ball())
 			{
@@ -289,7 +289,7 @@ module::type player_module::run(const module::type &prev_module)
 						else
 						{
 							cout << "kick block" << endl;
-							d.omni(50, 45, -2);
+							d.omni(60, 30, -2);
 							//this_thread::sleep_for(chrono::milliseconds(100)); // TODO: smooth driving, not time
 							set_state(GoalFind, "play");
 						}
