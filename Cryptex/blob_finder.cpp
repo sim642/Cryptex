@@ -96,7 +96,7 @@ void blob_finder::detect(const cv::Mat &mask, blobs_t &blobs)
 		blob b;
 		b.kp = kp;
 		tie(b.factor, b.dist) = factordist(mask, b);
-		b.score = b.dist + fabs(b.factor);
+		b.score = b.dist + fabs(b.factor) / 7;
 
 		blobs.push_back(b);
 	}
@@ -155,7 +155,7 @@ void blob_finder::angle_filter_out(blobs_t& bs1, blobs_t &bs2, float angle, floa
 
 blob_finder::factordist_t blob_finder::factordist(const cv::Mat &frame, const blob& largest)
 {
-	int diff = frame.cols / 2 - largest.kp.pt.x;
+	int diff = (frame.cols / 2 + 5) - largest.kp.pt.x;
 	float factor = float(diff) / (frame.cols / 2);
 
 	float dist = (frame.rows - largest.kp.pt.y) / float(frame.rows);

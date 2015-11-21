@@ -167,7 +167,7 @@ module::type player_module::run(const module::type &prev_module)
 		goaler2.detect_frame(frame, g2blobs);
 
 		// filter robot markings
-		blob_finder::angle_filter_out(gblobs, g2blobs, 90, 45);
+		blob_finder::angle_filter_out(gblobs, g2blobs, 90, 70);
 
 		auto glarge = blob_finder::largest(gblobs);
 		auto g2large = blob_finder::largest(g2blobs);
@@ -194,17 +194,27 @@ module::type player_module::run(const module::type &prev_module)
 			balltr.update(balls);
 			int bestid = balltr.best();
 
-			if (!bestid || !ballid || !balltr[ballid] || (balltr[bestid]->score + 0.2f < balltr[ballid]->score))
+			if (!bestid || !ballid || !balltr[ballid] || (balltr[bestid]->score + 0.05f < balltr[ballid]->score))
 				ballid = bestid;
+
+			for (auto &p : balltr.get_all())
+			{
+				int id = p.first;
+				const blob &b = p.second;
+
+
+				cv::circle(keyframe, b.kp.pt, b.kp.size / 2, cv::Scalar(0, 255, id == ballid ? 255 : 0), 2);
+				cv::putText(keyframe, to_string(id), b.kp.pt, cv::FONT_HERSHEY_PLAIN, 1, cv::Scalar(0, 0, 255), 1);
+				cv::putText(keyframe, to_string(b.score), b.kp.pt + cv::Point2f(0, 15), cv::FONT_HERSHEY_PLAIN, 1, cv::Scalar(255, 0, 0), 1);
+			}
 
 			auto largest = balltr[ballid];
 			if (largest) // if ball found
 			{
-				cv::circle(keyframe, largest->kp.pt, largest->kp.size / 2, cv::Scalar(255, 0, 255), 5);
 
 				d.omni(speed_controller.step(largest->dist), 0, rotate_controller.step(largest->factor));
 
-				if (largest->dist < 0.3)
+				if (largest->dist < 0.25)
 					set_state(BallGrab, "play");
 			}
 			else
@@ -237,7 +247,7 @@ module::type player_module::run(const module::type &prev_module)
 
 				if (state == GoalFind)
 				{
-					if (abs(glarge->factor) < 0.1)
+					if (abs(glarge->factor) < max(0.1f, (1 - glarge->dist) / 2.f))
 					{
 						blobs_t balls;
 						baller.detect_frame(frame, balls);
