@@ -133,19 +133,22 @@ module::type player_module::run(const module::type &prev_module)
 
 		m.ping();
 
-		switch (referee.poll()) // only one per cycle
+		if (global::referee)
 		{
-			case referee_controller::None:
-				break;
+			switch (referee.poll()) // only one per cycle
+			{
+				case referee_controller::None:
+					break;
 
-			case referee_controller::Start:
-				set_state(Ball, "referee");
-				break;
+				case referee_controller::Start:
+					set_state(Ball, "referee");
+					break;
 
-			case referee_controller::Stop:
-				set_state(Manual, "referee");
-				d.stop();
-				break;
+				case referee_controller::Stop:
+					set_state(Manual, "referee");
+					d.stop();
+					break;
+			}
 		}
 
 		cv::Mat frame;

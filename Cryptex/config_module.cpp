@@ -13,6 +13,7 @@ config_module::config_module()
 	choices.push_back(make_tuple("field", var_type::char_t, &global::field));
 	choices.push_back(make_tuple("id", var_type::char_t, &global::id));
 	choices.push_back(make_tuple("coilgun", var_type::bool_t, &global::coilgun));
+	choices.push_back(make_tuple("referee", var_type::bool_t, &global::referee));
 }
 
 config_module::~config_module()

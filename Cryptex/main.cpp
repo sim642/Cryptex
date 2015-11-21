@@ -19,6 +19,7 @@ int main()
 	global::field = 'B';
 	global::id = 'D';
 	global::coilgun = true;
+	global::referee = false;
 
 	system("v4l2ctrl -l calibs/pseye.v4l2"); // load camera config
 
