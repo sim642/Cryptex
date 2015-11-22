@@ -15,7 +15,7 @@
 #include <opencv2/highgui.hpp>
 #include <opencv2/video.hpp>
 #include "blob_finder.hpp"
-#include "blob_tracker.hpp"
+#include "ball_targeter.hpp"
 
 #include "math.hpp"
 
@@ -107,7 +107,7 @@ module::type player_module::run(const module::type &prev_module)
 	referee_controller referee(srf);
 
 	blob_finder baller("oranz", "ball");
-	blob_tracker balltr(50);
+	ball_targeter balls(baller, 50, 0.05f);
 
 	bool team = m.button(btn_team);
 	string team_str = team ? "kollane" : "sinine";
@@ -119,8 +119,6 @@ module::type player_module::run(const module::type &prev_module)
 	cv::namedWindow("Remote");
 
 	set_state(Start, "init");
-
-	int ballid = 0;
 
 	if (global::coilgun)
 		m.charge();
@@ -189,32 +187,14 @@ module::type player_module::run(const module::type &prev_module)
 			//m.dribbler(0);
 			m.dribbler(dribblerspeed);
 
-			blobs_t balls;
-			baller.detect_frame(frame, balls);
-			balltr.update(balls);
-			int bestid = balltr.best();
+			auto ball = balls.update(frame);
+			balls.draw(display);
 
-			if (!bestid || !ballid || !balltr[ballid] || (balltr[bestid]->score + 0.05f < balltr[ballid]->score))
-				ballid = bestid;
-
-			for (auto &p : balltr.get_all())
+			if (ball)
 			{
-				int id = p.first;
-				const blob &b = p.second;
+				d.omni(speed_controller.step(ball->dist), 0, rotate_controller.step(ball->factor));
 
-
-				cv::circle(keyframe, b.kp.pt, b.kp.size / 2, cv::Scalar(0, 255, id == ballid ? 255 : 0), 2);
-				cv::putText(keyframe, to_string(id), b.kp.pt, cv::FONT_HERSHEY_PLAIN, 1, cv::Scalar(0, 0, 255), 1);
-				cv::putText(keyframe, to_string(b.score), b.kp.pt + cv::Point2f(0, 15), cv::FONT_HERSHEY_PLAIN, 1, cv::Scalar(255, 0, 0), 1);
-			}
-
-			auto largest = balltr[ballid];
-			if (largest) // if ball found
-			{
-
-				d.omni(speed_controller.step(largest->dist), 0, rotate_controller.step(largest->factor));
-
-				if (largest->dist < 0.25)
+				if (ball->dist < 0.25)
 					set_state(BallGrab, "play");
 			}
 			else
@@ -223,8 +203,7 @@ module::type player_module::run(const module::type &prev_module)
 		else if (state == BallGrab)
 		{
 			//m.dribbler(dribblerspeed);
-			balltr.clear();
-			ballid = 0;
+			balls.reset();
 
 			d.straight(60);
 

@@ -46,6 +46,8 @@
 			<Add option="-lpsmoveapi" />
 			<Add option="-lpthread" />
 		</Linker>
+		<Unit filename="ball_targeter.cpp" />
+		<Unit filename="ball_targeter.hpp" />
 		<Unit filename="blob.hpp" />
 		<Unit filename="blob_finder.cpp" />
 		<Unit filename="blob_finder.hpp" />
