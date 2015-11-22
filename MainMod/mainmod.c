@@ -124,6 +124,11 @@ void parse_and_execute_command(char *buf, bool usart)
 		bit_set(PORTD, BIT(KICK));
 		_delay_us(par1);
 		bit_clear(PORTD, BIT(KICK));
+
+		if (eeprom_read_byte(EEPROM_SINGLE))
+		{
+			bit_set(PORTD, BIT(CHARGE));
+		}
 	}
 	else if (streq(command, "c"))
 	{
@@ -197,6 +202,12 @@ void parse_and_execute_command(char *buf, bool usart)
 		// set automation
 		par1 = atoi(command + 2);
 		eeprom_update_byte(EEPROM_AUTOMAT, par1);
+	}
+	else if (strpref(command, "ss"))
+	{
+		// set single shot
+		par1 = atoi(command + 2);
+		eeprom_update_byte(EEPROM_SINGLE, par1);
 	}
 	else if (streq(command, "p"))
 	{
