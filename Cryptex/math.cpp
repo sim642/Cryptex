@@ -34,3 +34,23 @@ cv::Point2f pol2rect(const cv::Point2f &pol)
 {
 	return pol.x * cv::Point2f(cos(deg2rad(pol.y)), sin(deg2rad(pol.y)));
 }
+
+float dist_line_point(const cv::Point2f &a, const cv::Vec2f &n, const cv::Point2f &p)
+{
+	/// https://en.wikipedia.org/wiki/Distance_from_a_point_to_a_line#Vector_formulation
+	cv::Point2f proj = (a - p).dot(n) * n;
+	return cv::norm((a - p) - proj);
+}
+
+float dist_lineseg_point(const cv::Point2f &a, const cv::Point2f &b, const cv::Point2f &p)
+{
+	/// http://www.geometrictools.com/Documentation/DistancePointLine.pdf
+	cv::Point2f nn = b - a; // not actually unit vector
+	float t = (p - a).dot(nn) / (nn.dot(nn));
+	if (t <= 0)
+		return cv::norm(a - p);
+	else if (t >= 1)
+		return cv::norm(b - p);
+	else
+		return cv::norm((a + t * nn) - p);
+}

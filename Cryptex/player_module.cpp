@@ -218,7 +218,7 @@ module::type player_module::run(const module::type &prev_module)
 						bool good = true;
 						for (auto &ball : balls)
 						{
-							if (abs(ball.factor) < 0.1)
+							if (dist_lineseg_point({0.f, 0.f}, goal->rel, ball.rel) < 0.05f)
 							{
 								good = false;
 								break;

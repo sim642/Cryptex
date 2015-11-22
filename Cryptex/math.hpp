@@ -43,4 +43,7 @@ cv::Point2f rel2cam(const cv::Point2f &rel, const cv::Size2i &size);
 cv::Point2f rect2pol(const cv::Point2f &rect);
 cv::Point2f pol2rect(const cv::Point2f &pol);
 
+float dist_line_point(const cv::Point2f &a, const cv::Vec2f &n, const cv::Point2f &p);
+float dist_lineseg_point(const cv::Point2f &a, const cv::Point2f &b, const cv::Point2f &p);
+
 #endif // MATH_H
