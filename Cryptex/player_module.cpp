@@ -16,6 +16,7 @@
 #include <opencv2/video.hpp>
 #include "blob_finder.hpp"
 #include "ball_targeter.hpp"
+#include "goal_targeter.hpp"
 
 #include "math.hpp"
 
@@ -114,7 +115,8 @@ module::type player_module::run(const module::type &prev_module)
 	cout << "team: " << team_str << endl;
 	blob_finder goaler(team_str, "goal");
 	blob_finder goaler2(team ? "sinine" : "kollane", "goal");
-	half goalside;
+	goal_targeter goals(goaler, goaler2, 70);
+	half goalside = half::right;
 
 	cv::namedWindow("Remote");
 
@@ -152,32 +154,8 @@ module::type player_module::run(const module::type &prev_module)
 		cv::Mat frame;
 		capture >> frame;
 
-		cv::Mat keyframe;
-		frame.copyTo(keyframe);
-
-		cv::Mat framelow;
-		cv::resize(frame, framelow, cv::Size(), scalelow, scalelow, CV_INTER_AREA);
-
-		blobs_t gblobs, g2blobs;
-
-		// detect all goal blobs
-		goaler.detect_frame(frame, gblobs);
-		goaler2.detect_frame(frame, g2blobs);
-
-		// filter robot markings
-		blob_finder::angle_filter_out(gblobs, g2blobs, 90, 70);
-
-		auto glarge = blob_finder::largest(gblobs);
-		auto g2large = blob_finder::largest(g2blobs);
-
-		if (glarge)
-		{
-			goalside = glarge->factor >= 0 ? half::left : half::right;
-		}
-		else if (g2large)
-		{
-			goalside = g2large->factor >= 0 ? half::right : half::left;
-		}
+		cv::Mat display;
+		frame.copyTo(display);
 
 		if (state == Ball)
 		{
@@ -220,13 +198,15 @@ module::type player_module::run(const module::type &prev_module)
 			if (!m.ball())
 				set_state(Ball, "play");
 
-			if (glarge) // if goal found
+			auto goal = goals.update(frame);
+
+			if (goal)
 			{
-				cv::circle(keyframe, glarge->kp.pt / scalelow, glarge->kp.size / 2 / scalelow, cv::Scalar(255, 0, 255), 5);
+				goals.draw(display);
 
 				if (state == GoalFind)
 				{
-					if (abs(glarge->factor) < max(0.1f, (1 - glarge->dist) / 2.f))
+					if (abs(goal->factor) < max(0.1f, (1 - goal->dist) / 2.f))
 					{
 						blobs_t balls;
 						baller.detect_frame(frame, balls);
@@ -274,13 +254,13 @@ module::type player_module::run(const module::type &prev_module)
 						}
 					}
 					else
-						d.omni(speed_controller.step(fabs(glarge->factor)), sign(glarge->factor) * (-90), rotate_controller.step(glarge->factor));
+						d.omni(speed_controller.step(fabs(goal->factor)), sign(goal->factor) * (-90), rotate_controller.step(goal->factor));
 				}
 				else
 				{
-					d.omni(100, 0, rotate_controller.step(glarge->factor));
+					d.omni(100, 0, rotate_controller.step(goal->factor));
 
-					if (glarge->kp.size > 485.f * pow(scalelow, 2))
+					if (goal->kp.size > 485.f)
 					{
 						m.dribbler(0);
 						this_thread::sleep_for(chrono::milliseconds(500));
@@ -307,7 +287,7 @@ module::type player_module::run(const module::type &prev_module)
 
 		int dt = chrono::duration_cast<chrono::milliseconds>(chrono::high_resolution_clock::now() - framestart).count();
 
-		imshow("Remote", keyframe);
+		imshow("Remote", display);
 
 		char key = cv::waitKey(max(1, 1000 / 60 - dt));
 		switch (key)

@@ -12,6 +12,11 @@ struct blob
 	float score;
 };
 
+inline bool operator== (const blob &lhs, const blob &rhs)
+{
+	return lhs.kp.pt == rhs.kp.pt;
+}
+
 typedef std::vector<blob> blobs_t;
 
 #endif // BLOB_H
