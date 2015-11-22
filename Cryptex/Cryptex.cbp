@@ -71,6 +71,7 @@
 		<Unit filename="main.cpp" />
 		<Unit filename="main_controller.cpp" />
 		<Unit filename="main_controller.hpp" />
+		<Unit filename="math.cpp" />
 		<Unit filename="math.hpp" />
 		<Unit filename="menu_module.cpp" />
 		<Unit filename="menu_module.hpp" />

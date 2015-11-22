@@ -8,6 +8,7 @@ struct blob
 {
 	cv::KeyPoint kp;
 	float factor, dist;
+	cv::Point2f rel;
 	float score;
 };
 

@@ -96,6 +96,7 @@ void blob_finder::detect(const cv::Mat &mask, blobs_t &blobs)
 		blob b;
 		b.kp = kp;
 		tie(b.factor, b.dist) = factordist(mask, b);
+		b.rel = cam2rel(b.kp.pt, mask.size());
 		b.score = b.dist + fabs(b.factor) / 7;
 
 		blobs.push_back(b);

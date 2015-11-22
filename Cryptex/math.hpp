@@ -15,7 +15,7 @@ inline float rad2deg(float rad)
 }
 
 template<typename T>
-int sign(T val)
+inline int sign(T val)
 {
 	if (val > 0)
 		return 1;
@@ -26,9 +26,21 @@ int sign(T val)
 }
 
 template<typename T>
+inline T sqr(T x)
+{
+	return std::pow(x, 2);
+}
+
+template<typename T>
 float vec_angle(const cv::Point_<T> &vec)
 {
-	return atan2(vec.y, vec.x);
+	return std::atan2(vec.y, vec.x);
 }
+
+cv::Point2f cam2rel(const cv::Point2f &cam, const cv::Size2i &size);
+cv::Point2f rel2cam(const cv::Point2f &rel, const cv::Size2i &size);
+
+cv::Point2f rect2pol(const cv::Point2f &rect);
+cv::Point2f pol2rect(const cv::Point2f &pol);
 
 #endif // MATH_H
