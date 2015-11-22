@@ -20,7 +20,6 @@
 
 
 bool failsafe = true;
-bool automation = true;
 volatile uint16_t failsafe_counter = 0;
 
 void discharge(uint8_t cycles)
@@ -197,7 +196,7 @@ void parse_and_execute_command(char *buf, bool usart)
 	{
 		// set automation
 		par1 = atoi(command + 2);
-		automation = par1;
+		eeprom_update_byte(EEPROM_AUTOMAT, par1);
 	}
 	else if (streq(command, "p"))
 	{
@@ -220,7 +219,7 @@ ISR(TIMER0_COMPA_vect)
 
 ISR(PCINT0_vect)
 {
-	if (automation && bit_get(PINB, BIT(DONE)) == 0) // DONE changed to LOW
+	if (eeprom_read_byte(EEPROM_AUTOMAT) && bit_get(PINB, BIT(DONE)) == 0) // DONE changed to LOW
 	{
 		bit_clear(PORTD, BIT(CHARGE));
 
