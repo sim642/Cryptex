@@ -5,6 +5,8 @@
 #include <chrono>
 #include <thread>
 
+#include "util.hpp"
+
 #include "global.hpp"
 #include "device_id.hpp"
 
@@ -63,7 +65,7 @@ module::type test_module::run(const module::type &prev_module)
 		finder.detect_frame(frame, blobs);
 		tracker.update(blobs);
 
-		for (auto &p : tracker.get_all())
+		for (const auto &p : as_const(tracker).get_all())
 		{
 			int id = p.first;
 			const blob &b = p.second;

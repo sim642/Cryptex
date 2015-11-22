@@ -45,6 +45,11 @@ const std::map<int, blob>& blob_tracker::get_all() const
 	return tracked;
 }
 
+std::map<int, blob>& blob_tracker::get_all()
+{
+	return tracked;
+}
+
 boost::optional<blob> blob_tracker::operator[] (const int& id)
 {
 	auto it = tracked.find(id);

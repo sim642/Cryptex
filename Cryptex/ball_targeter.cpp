@@ -3,7 +3,7 @@
 
 using namespace std;
 
-ball_targeter::ball_targeter(blob_finder &finder, int maxdist, float ngap) : blob_targeter(finder), tracker(maxdist), gap(ngap), ballid(0)
+ball_targeter::ball_targeter(blob_finder &finder, int maxdist, std::function<float(const blob&)> &nscorer, float ngap) : blob_targeter(finder), tracker(maxdist), scorer(nscorer), gap(ngap), ballid(0)
 {
 
 }
@@ -18,6 +18,12 @@ boost::optional<blob> ball_targeter::update(const cv::Mat& frame)
 	blobs_t balls;
 	finder.detect_frame(frame, balls);
 	tracker.update(balls);
+
+	for (auto &p : tracker.get_all())
+	{
+		blob &b = p.second;
+		b.score = scorer(b);
+	}
 
 	int bestid = tracker.best();
 	if (!bestid || !ballid || !tracker[ballid] || (tracker[bestid]->score + gap < tracker[ballid]->score))

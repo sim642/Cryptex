@@ -111,6 +111,7 @@
 		<Unit filename="srf_dongle.hpp" />
 		<Unit filename="test_module.cpp" />
 		<Unit filename="test_module.hpp" />
+		<Unit filename="util.hpp" />
 		<Extensions>
 			<code_completion />
 			<debugger />

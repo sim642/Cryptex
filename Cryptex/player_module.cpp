@@ -108,7 +108,11 @@ module::type player_module::run(const module::type &prev_module)
 	referee_controller referee(srf);
 
 	blob_finder baller("oranz", "ball");
-	ball_targeter balls(baller, 50, 0.05f);
+	ball_targeter::scorer_t scorer = [](const blob &b)
+	{
+		return b.dist + fabs(b.factor) / 7;
+	};
+	ball_targeter balls(baller, 50, scorer, 0.05f);
 
 	bool team = m.button(btn_team);
 	string team_str = team ? "kollane" : "sinine";

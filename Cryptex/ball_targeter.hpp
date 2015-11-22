@@ -3,11 +3,14 @@
 
 #include "blob_targeter.hpp"
 #include "blob_tracker.hpp"
+#include <functional>
 
 class ball_targeter : public blob_targeter
 {
 	public:
-		ball_targeter(blob_finder &finder, int maxdist, float gap);
+		typedef std::function<float(const blob&)> scorer_t;
+
+		ball_targeter(blob_finder &finder, int maxdist, scorer_t &nscorer, float gap);
 		virtual ~ball_targeter();
 
 		virtual boost::optional<blob> update(const cv::Mat &frame);
@@ -17,6 +20,7 @@ class ball_targeter : public blob_targeter
 
 	private:
 		blob_tracker tracker;
+		scorer_t &scorer;
 		float gap;
 		int ballid;
 };
