@@ -53,7 +53,7 @@ class player_module : public module
 		state_t state;
 		std::chrono::high_resolution_clock::time_point statestart;
 
-		pid_controller speed_controller, rotate_controller;
+		pid_controller speed_pid, angle_pid, rotate_pid;
 };
 
 #endif // PLAYER_MODULE_H

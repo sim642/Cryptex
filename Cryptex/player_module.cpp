@@ -99,6 +99,12 @@ module::type player_module::run(const module::type &prev_module)
 
 	set_state(Start, "init");
 
+	transitions[Manual] = [&](state_t prev_state)
+	{
+		d.stop();
+		m.dribbler(0);
+	};
+
 	transitions[BallFind] = [&](state_t prev_state)
 	{
 		m.dribbler(0);
@@ -106,11 +112,15 @@ module::type player_module::run(const module::type &prev_module)
 
 	transitions[BallDrive] = [&](state_t prev_state)
 	{
-		speed_controller.reset();
-		rotate_controller.reset();
+		speed_pid.reset();
+		angle_pid.reset();
+		rotate_pid.reset();
 
-		speed_controller.set(95);
-		rotate_controller.set(30);
+		speed_pid.set(100);
+		//angle_pid.set(0.5);
+		//rotate_pid.set(1.25);
+		angle_pid.set(0.1);
+		rotate_pid.set(1.5);
 	};
 
 	transitions[BallGrab] = [&](state_t prev_state)
@@ -121,11 +131,11 @@ module::type player_module::run(const module::type &prev_module)
 
 	transitions[GoalAim] = transitions[GoalDrive] = [&](state_t prev_state)
 	{
-		speed_controller.reset();
-		rotate_controller.reset();
+		speed_pid.reset();
+		rotate_pid.reset();
 
-		speed_controller.set(26);
-		rotate_controller.set(19);
+		speed_pid.set(1.5);
+		rotate_pid.set(0.7, 0.5, 0);
 	};
 
 	if (global::coilgun)
@@ -188,9 +198,9 @@ module::type player_module::run(const module::type &prev_module)
 					d.rotate(max(10.f, 35 - get_statestart() / 2.f * 10));
 				else if (state == BallDrive)
 				{
-					d.omni(speed_controller.step(ball->dist), 0, rotate_controller.step(ball->angle));
+					d.omni(speed_pid.step(ball->dist), angle_pid.step(ball->angle), rotate_pid.step(ball->angle));
 
-					if (ball->dist < 0.25)
+					if (ball->dist < 0.38)
 						SET_STATE(BallGrab)
 				}
 
@@ -283,11 +293,11 @@ module::type player_module::run(const module::type &prev_module)
 						else
 						{
 							cout << "kick block" << endl;
-							d.omni(60, 30, -2);
+							d.omni(60, 45, -2);
 						}
 					}
 					else
-						d.omni(speed_controller.step(fabs(goal->angle)), sign(goal->angle) * (-90), rotate_controller.step(goal->angle));
+						d.omni(speed_pid.step(fabs(goal->angle)), sign(goal->angle) * (-45), rotate_pid.step(goal->angle));
 				}
 				else
 					SET_STATE(GoalFind)
@@ -305,7 +315,7 @@ module::type player_module::run(const module::type &prev_module)
 				{
 					goals.draw(display);
 
-					d.omni(100, 0, rotate_controller.step(goal->angle));
+					d.omni(100, 0, rotate_pid.step(goal->angle));
 
 					if (goal->area > 485.f)
 					{
