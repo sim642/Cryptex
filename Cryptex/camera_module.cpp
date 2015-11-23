@@ -21,10 +21,16 @@ camera_module::~camera_module()
 
 void mousecb(int event, int x, int y, int flags, void *userdata)
 {
+	static cv::Point2f prev(0, 0);
+
 	cv::Size &framesize = *static_cast<cv::Size*>(userdata);
 	if (event == cv::EVENT_LBUTTONUP)
 	{
-		cout << cam2rel({x, y}, framesize) << endl;
+		auto rel = cam2rel({x, y}, framesize);
+		auto pol = rect2pol(rel);
+		cout << rel << " " << pol << " " << cv::norm(rel - prev) << endl;
+
+		prev = rel;
 	}
 }
 
@@ -34,12 +40,12 @@ module::type camera_module::run(const module::type &prev_module)
 
 	cv::namedWindow("camera");
 
-	int hfov = global::hfov, vfov = global::vfov, h = global::h * 1000, alpha = global::alpha;
+	int hfov = global::hfov * 10, vfov = global::vfov * 10, h = global::h * 1000, alpha = global::alpha * 10;
 
-	cv::createTrackbar("hfov", "camera", &hfov, 100);
-	cv::createTrackbar("vfov", "camera", &vfov, 100);
+	cv::createTrackbar("hfov", "camera", &hfov, 1000);
+	cv::createTrackbar("vfov", "camera", &vfov, 1000);
 	cv::createTrackbar("h", "camera", &h, 1000);
-	cv::createTrackbar("alpha", "camera", &alpha, 90);
+	cv::createTrackbar("alpha", "camera", &alpha, 900);
 
 	cv::Size framesize;
 	{
@@ -58,12 +64,12 @@ module::type camera_module::run(const module::type &prev_module)
 		cv::Mat display;
 		frame.copyTo(display);
 
-		global::hfov = hfov;
-		global::vfov = vfov;
+		global::hfov = hfov / 10.f;
+		global::vfov = vfov / 10.f;
 		global::h = h / 1000.f;
-		global::alpha = alpha;
+		global::alpha = alpha / 10.f;
 
-		float delta = 0.2f;
+		float delta = 0.33f;
 		for (float dx = 0.f; dx <= 10.f; dx += delta)
 		{
 			for (float dy = -3.f; dy <= 3.f; dy += delta)

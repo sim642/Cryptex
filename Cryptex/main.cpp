@@ -21,10 +21,10 @@ int main()
 	global::id = 'D';
 	global::coilgun = true;
 	global::referee = false;
-	global::hfov = 75;
-	global::vfov = 56;
-	global::h = 0.23;
-	global::alpha = 90 - 23;
+	global::hfov = 58.0f;
+	global::vfov = 42.7f;
+	global::h = 0.255;
+	global::alpha = 68.1;
 
 	system("v4l2ctrl -l calibs/pseye.v4l2"); // load camera config
 
