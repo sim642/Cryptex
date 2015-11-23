@@ -251,15 +251,21 @@ module::type player_module::run(const module::type &prev_module)
 				{
 					goals.draw(display);
 
-					if (abs(goal->angle) < max(0.1f, (1 - goal->dist) / 2.f))
+					auto goalleft = cam2rel(goal->rect.tl() + cv::Point(0, goal->rect.height), frame.size());
+					auto goalright = cam2rel(goal->rect.br(), frame.size());
+					float goalleftangle = rect2pol(goalleft).y;
+					float goalrightangle = rect2pol(goalright).y;
+
+					if (goalleftangle > 0 && goalrightangle < 0)
 					{
 						blobs_t balls;
 						baller.detect_frame(frame, balls);
 
 						bool good = true;
+						auto goalpoint = (goalleft + goalright) / 2;
 						for (auto &ball : balls)
 						{
-							if (dist_lineseg_point({0.f, 0.f}, goal->rel, ball.rel) < 0.05f)
+							if (dist_lineseg_point({0.f, 0.f}, goalpoint, ball.rel) < 0.05f)
 							{
 								good = false;
 								break;
