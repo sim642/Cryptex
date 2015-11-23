@@ -7,8 +7,8 @@ using namespace std;
 driver::driver(device_manager &manager)
 {
 	motors.push_back(make_pair(manager[device_id::motor_left], 60));
-	motors.push_back(make_pair(manager[device_id::motor_left], 180));
-	motors.push_back(make_pair(manager[device_id::motor_left], -60));
+	motors.push_back(make_pair(manager[device_id::motor_back], 180));
+	motors.push_back(make_pair(manager[device_id::motor_right], -60));
 }
 
 driver::~driver()
