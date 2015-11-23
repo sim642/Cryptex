@@ -125,7 +125,6 @@ module::type player_module::run(const module::type &prev_module)
 
 	transitions[BallGrab] = [&](state_t prev_state)
 	{
-		m.dribbler(dribblerspeed);
 		balls.reset();
 	};
 
@@ -183,8 +182,8 @@ module::type player_module::run(const module::type &prev_module)
 			case BallFind:
 			case BallDrive:
 			{
-				if (m.ball())
-					SET_STATE(GoalFind)
+				/*if (m.ball())
+					SET_STATE(GoalFind)*/
 
 				auto ball = balls.update(frame);
 				balls.draw(display);
@@ -200,6 +199,7 @@ module::type player_module::run(const module::type &prev_module)
 				{
 					d.omni(speed_pid.step(ball->dist), angle_pid.step(ball->angle), rotate_pid.step(ball->angle));
 
+					m.dribbler(ball->dist < 0.75 ? dribblerspeed : 0);
 					if (ball->dist < 0.38)
 						SET_STATE(BallGrab)
 				}
