@@ -1,4 +1,5 @@
 #include "motor_controller.hpp"
+#include "math.hpp"
 
 motor_controller::motor_controller(device_controller *new_controller) : controller(new_controller)
 {
@@ -12,7 +13,7 @@ motor_controller::~motor_controller()
 
 void motor_controller::drive(const int &speed)
 {
-	controller->send("sd", speed);
+	controller->send("sd", clamp(speed, {-190, 190}));
 }
 
 int motor_controller::encoder()
