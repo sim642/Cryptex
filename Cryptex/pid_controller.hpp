@@ -14,6 +14,7 @@ class pid_controller : public error_controller
 		virtual double step(double error);
 
 		double Kp, Ki, Kd;
+		void set(double nKp = 0, double nKi = 0, double nKd = 0);
 
 	private:
 		using clock = std::chrono::high_resolution_clock;

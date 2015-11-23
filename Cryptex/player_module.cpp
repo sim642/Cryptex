@@ -57,23 +57,18 @@ void player_module::set_state(const state_t &new_state, const string &changer)
 		case BallDrive:
 			speed_controller.reset();
 			rotate_controller.reset();
-			speed_controller.Kp = 95;
-			rotate_controller.Kp = 30;
-			speed_controller.Ki = 0;
-			rotate_controller.Ki = 0;
-			//speed_controller.Kd = 0;
-			//rotate_controller.Kd = 0;
+
+			speed_controller.set(95);
+			rotate_controller.set(30);
 			break;
 
 		case GoalAim:
 		case GoalDrive:
 			speed_controller.reset();
 			rotate_controller.reset();
-			speed_controller.Kp = 26;
-			rotate_controller.Kp = 19;
-			speed_controller.Ki = 0;
-			rotate_controller.Ki = 0;
-			//speed_controller.Kd = rotate_controller.Kd = 0;
+
+			speed_controller.set(26);
+			rotate_controller.set(19);
 			break;
 	}
 
