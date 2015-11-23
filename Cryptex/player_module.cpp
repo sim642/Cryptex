@@ -23,6 +23,19 @@
 
 using namespace std;
 
+const std::map<player_module::state_t, std::string> player_module::state_name =
+{
+	{Undefined, "Undefined"},
+	{Start, "Start"},
+	{Manual, "Manual"},
+	{BallFind, "BallFind"},
+	{BallDrive, "BallDrive"},
+	{BallGrab, "BallGrab"},
+	{GoalFind, "GoalFind"},
+	{GoalAim, "GoalAim"},
+	{GoalDrive, "GoalDrive"}
+};
+
 player_module::player_module() : state(Undefined)
 {
 
@@ -38,19 +51,10 @@ void player_module::set_state(const state_t &new_state, const string &changer)
 	cout << "state";
 	if (!changer.empty())
 		cout << " [" << changer << "]";
-	cout << ": ";
+	cout << ": " << state_name.at(new_state) << endl;
 	switch (new_state)
 	{
-		case Start:
-			cout << "Start";
-			break;
-
-		case Manual:
-			cout << "Manual";
-			break;
-
-		case Ball:
-			cout << "Ball";
+		case BallDrive:
 			speed_controller.reset();
 			rotate_controller.reset();
 			speed_controller.Kp = 95;
@@ -61,12 +65,8 @@ void player_module::set_state(const state_t &new_state, const string &changer)
 			//rotate_controller.Kd = 0;
 			break;
 
-		case BallGrab:
-			cout << "BallGrab";
-			break;
-
-		case GoalFind:
-			cout << "GoalFind";
+		case GoalAim:
+		case GoalDrive:
 			speed_controller.reset();
 			rotate_controller.reset();
 			speed_controller.Kp = 26;
@@ -75,15 +75,7 @@ void player_module::set_state(const state_t &new_state, const string &changer)
 			rotate_controller.Ki = 0;
 			//speed_controller.Kd = rotate_controller.Kd = 0;
 			break;
-
-		case Goal:
-			cout << "Goal";
-			break;
-
-		default:
-			throw domain_error("player going to invalid state");
 	}
-	cout << endl;
 
 	state = new_state;
 	reset_statestart();
@@ -145,7 +137,7 @@ module::type player_module::run(const module::type &prev_module)
 					break;
 
 				case referee_controller::Start:
-					set_state(Ball, "referee");
+					set_state(BallFind, "referee");
 					break;
 
 				case referee_controller::Stop:
@@ -161,55 +153,89 @@ module::type player_module::run(const module::type &prev_module)
 		cv::Mat display;
 		frame.copyTo(display);
 
-		if (state == Ball)
+#define SET_STATE(state)	{ \
+								set_state(state, "play"); \
+								break; \
+							}
+
+		switch (state)
 		{
-			if (m.ball())
-				set_state(GoalFind, "play");
-
-			//m.dribbler(0);
-			m.dribbler(dribblerspeed);
-
-			auto ball = balls.update(frame);
-			balls.draw(display);
-
-			if (ball)
+			case BallFind:
+			case BallDrive:
 			{
-				d.omni(speed_controller.step(ball->dist), 0, rotate_controller.step(ball->factor));
+				if (m.ball())
+					SET_STATE(GoalFind)
 
-				if (ball->dist < 0.25)
-					set_state(BallGrab, "play");
-			}
-			else
-				d.rotate(max(10.f, 35 - get_statestart() / 2.f * 10));
-		}
-		else if (state == BallGrab)
-		{
-			//m.dribbler(dribblerspeed);
-			balls.reset();
+				m.dribbler(0);
 
-			d.straight(60);
+				auto ball = balls.update(frame);
+				balls.draw(display);
 
-			if (m.ball())
-			{
-				this_thread::sleep_for(chrono::milliseconds(250));
-				set_state(GoalFind, "play");
-			}
-			else if (get_statestart() > 0.65f)
-				set_state(Ball, "play");
-		}
-		else if (state == GoalFind || state == Goal)
-		{
-			if (!m.ball())
-				set_state(Ball, "play");
+				if (state == BallFind && ball)
+					SET_STATE(BallDrive)
+				else if (state == BallDrive && !ball)
+					SET_STATE(BallFind)
 
-			auto goal = goals.update(frame);
-
-			if (goal)
-			{
-				goals.draw(display);
-
-				if (state == GoalFind)
+				if (state == BallFind)
+					d.rotate(max(10.f, 35 - get_statestart() / 2.f * 10));
+				else if (state == BallDrive)
 				{
+					d.omni(speed_controller.step(ball->dist), 0, rotate_controller.step(ball->factor));
+
+					if (ball->dist < 0.25)
+						SET_STATE(BallGrab)
+				}
+
+				break;
+			}
+
+			case BallGrab:
+			{
+				balls.reset();
+
+				m.dribbler(dribblerspeed);
+				d.straight(60);
+
+				if (m.ball())
+				{
+					this_thread::sleep_for(chrono::milliseconds(250));
+					SET_STATE(GoalFind)
+				}
+				else if (get_statestart() > 0.65f)
+					SET_STATE(BallFind)
+
+				break;
+			}
+
+			case GoalFind:
+			{
+				if (!m.ball())
+					SET_STATE(BallFind)
+
+				auto goal = goals.update(frame);
+				if (goal)
+					SET_STATE(GoalAim)
+				else
+				{
+					if (goalside == half::left)
+						d.omni(35, -45, 30);
+					else
+						d.omni(35, 45, -30);
+				}
+
+				break;
+			}
+
+			case GoalAim:
+			{
+				if (!m.ball())
+					SET_STATE(BallFind)
+
+				auto goal = goals.update(frame);
+				if (goal)
+				{
+					goals.draw(display);
+
 					if (abs(goal->factor) < max(0.1f, (1 - goal->dist) / 2.f))
 					{
 						blobs_t balls;
@@ -244,24 +270,36 @@ module::type player_module::run(const module::type &prev_module)
 								}
 
 								m.dribbler(dribblerspeed);
-								set_state(Ball, "play");
+								SET_STATE(BallFind)
 							}
 							else
-								set_state(Goal, "play");
+								SET_STATE(GoalDrive)
 						}
 						else
 						{
 							cout << "kick block" << endl;
 							d.omni(60, 30, -2);
-							//this_thread::sleep_for(chrono::milliseconds(100)); // TODO: smooth driving, not time
-							set_state(GoalFind, "play");
 						}
 					}
 					else
 						d.omni(speed_controller.step(fabs(goal->factor)), sign(goal->factor) * (-90), rotate_controller.step(goal->factor));
 				}
 				else
+					SET_STATE(GoalFind)
+
+				break;
+			}
+
+			case GoalDrive:
+			{
+				if (!m.ball())
+					SET_STATE(BallFind)
+
+				auto goal = goals.update(frame);
+				if (goal)
 				{
+					goals.draw(display);
+
 					d.omni(100, 0, rotate_controller.step(goal->factor));
 
 					if (goal->kp.size > 485.f)
@@ -269,23 +307,13 @@ module::type player_module::run(const module::type &prev_module)
 						m.dribbler(0);
 						this_thread::sleep_for(chrono::milliseconds(500));
 						m.dribbler(dribblerspeed);
-						set_state(Ball, "play");
+						SET_STATE(BallFind)
 					}
 				}
-			}
-			else
-			{
-				if (state == GoalFind)
-				{
-					cout << "goalside: " << (goalside == half::left ? "left" : "right") << endl;
-					if (goalside == half::left)
-						d.omni(35, -45, 30);
-					else
-						d.omni(35, 45, -30);
-					//d.rotate(17);
-				}
 				else
-					d.straight(30);
+					SET_STATE(GoalFind)
+
+				break;
 			}
 		}
 
@@ -323,7 +351,7 @@ module::type player_module::run(const module::type &prev_module)
 			case 'e':
 				if (state == Manual)
 				{
-					set_state(Ball, "manual");
+					set_state(BallFind, "manual");
 				}
 				else
 				{

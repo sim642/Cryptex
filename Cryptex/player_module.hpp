@@ -7,6 +7,7 @@
 #include <string>
 #include <vector>
 #include <chrono>
+#include <map>
 
 class player_module : public module
 {
@@ -22,11 +23,14 @@ class player_module : public module
 			Undefined,
 			Start,
 			Manual,
-			Ball,
+			BallFind,
+			BallDrive,
 			BallGrab,
 			GoalFind,
-			Goal
+			GoalAim,
+			GoalDrive
 		};
+		static const std::map<state_t, std::string> state_name;
 
 		enum class half
 		{
