@@ -34,6 +34,7 @@
 			<Add option="-Wall" />
 			<Add option="-fexceptions" />
 			<Add option="-Wno-unused-parameter" />
+			<Add option="-Wno-switch" />
 		</Compiler>
 		<Linker>
 			<Add option="-lboost_system" />

@@ -52,25 +52,10 @@ void player_module::set_state(const state_t &new_state, const string &changer)
 	if (!changer.empty())
 		cout << " [" << changer << "]";
 	cout << ": " << state_name.at(new_state) << endl;
-	switch (new_state)
-	{
-		case BallDrive:
-			speed_controller.reset();
-			rotate_controller.reset();
 
-			speed_controller.set(95);
-			rotate_controller.set(30);
-			break;
-
-		case GoalAim:
-		case GoalDrive:
-			speed_controller.reset();
-			rotate_controller.reset();
-
-			speed_controller.set(26);
-			rotate_controller.set(19);
-			break;
-	}
+	auto it = transitions.find(new_state);
+	if (it != transitions.end())
+		it->second(state);
 
 	state = new_state;
 	reset_statestart();
@@ -112,6 +97,35 @@ module::type player_module::run(const module::type &prev_module)
 	cv::namedWindow("Remote");
 
 	set_state(Start, "init");
+
+	transitions[BallFind] = [&](state_t prev_state)
+	{
+		m.dribbler(0);
+	};
+
+	transitions[BallDrive] = [&](state_t prev_state)
+	{
+		speed_controller.reset();
+		rotate_controller.reset();
+
+		speed_controller.set(95);
+		rotate_controller.set(30);
+	};
+
+	transitions[BallGrab] = [&](state_t prev_state)
+	{
+		m.dribbler(dribblerspeed);
+		balls.reset();
+	};
+
+	transitions[GoalAim] = transitions[GoalDrive] = [&](state_t prev_state)
+	{
+		speed_controller.reset();
+		rotate_controller.reset();
+
+		speed_controller.set(26);
+		rotate_controller.set(19);
+	};
 
 	if (global::coilgun)
 		m.charge();
@@ -161,8 +175,6 @@ module::type player_module::run(const module::type &prev_module)
 				if (m.ball())
 					SET_STATE(GoalFind)
 
-				m.dribbler(0);
-
 				auto ball = balls.update(frame);
 				balls.draw(display);
 
@@ -186,9 +198,6 @@ module::type player_module::run(const module::type &prev_module)
 
 			case BallGrab:
 			{
-				balls.reset();
-
-				m.dribbler(dribblerspeed);
 				d.straight(60);
 
 				if (m.ball())

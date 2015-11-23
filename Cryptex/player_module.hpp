@@ -8,6 +8,7 @@
 #include <vector>
 #include <chrono>
 #include <map>
+#include <functional>
 
 class player_module : public module
 {
@@ -43,6 +44,8 @@ class player_module : public module
 		//const std::vector<int> kicks = {2500, 8000};
 		const std::vector<int> kicks = {4000};
 
+		typedef std::function<void(state_t)> transition_t;
+		std::map<state_t, transition_t> transitions;
 		void set_state(const state_t &new_state, const std::string &changer = "");
 		void reset_statestart();
 		float get_statestart();
