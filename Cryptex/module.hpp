@@ -12,7 +12,8 @@ class module
 			calibrator,
 			player,
 			test,
-			psmove
+			psmove,
+			camera
 		};
 
 		module();
