@@ -323,6 +323,8 @@ module::type player_module::run(const module::type &prev_module)
 		}
 
 		int dt = chrono::duration_cast<chrono::milliseconds>(chrono::high_resolution_clock::now() - framestart).count();
+		float fps = 1000.f / dt;
+		cv::putText(display, to_string(fps), cv::Point(10, 30), cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(255, 255, 255));
 
 		imshow("Remote", display);
 
