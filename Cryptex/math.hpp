@@ -4,6 +4,9 @@
 #include <cmath>
 #include <opencv2/core/types.hpp>
 
+template<typename T>
+using range_t = std::pair<T, T>;
+
 inline float deg2rad(float deg)
 {
 	return deg * M_PI / 180;

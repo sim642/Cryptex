@@ -28,11 +28,11 @@ void goal_targeter::draw(cv::Mat& display)
 	for (auto &b : goals)
 	{
 		if (b == *target)
-			cv::circle(display, b.kp.pt, b.kp.size / 2, cv::Scalar(255, 255, 0), 5);
+			cv::rectangle(display, b.rect, cv::Scalar(255, 255, 0), 5);
 		else
-			cv::circle(display, b.kp.pt, b.kp.size / 2, cv::Scalar(255, 255, 0), 3);
+			cv::rectangle(display, b.rect, cv::Scalar(255, 255, 0), 3);
 	}
 
 	for (auto &b : goals2)
-		cv::circle(display, b.kp.pt, b.kp.size / 2, cv::Scalar(0, 255, 255), 3);
+		cv::rectangle(display, b.rect, cv::Scalar(0, 255, 255), 3);
 }

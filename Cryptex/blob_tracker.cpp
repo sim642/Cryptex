@@ -20,10 +20,10 @@ void blob_tracker::update(const blobs_t& blobs)
 	{
 		auto it = min_element(tracked.begin(), tracked.end(), [&b](const pair<int, blob> &lhs, const pair<int, blob> &rhs)
 		{
-			return cv::norm(lhs.second.kp.pt - b.kp.pt) < cv::norm(rhs.second.kp.pt - b.kp.pt);
+			return cv::norm(lhs.second.center - b.center) < cv::norm(rhs.second.center - b.center);
 		});
 
-		if (it != tracked.end() && cv::norm(it->second.kp.pt - b.kp.pt) < maxdist)
+		if (it != tracked.end() && cv::norm(it->second.center - b.center) < maxdist)
 		{
 			ntracked.insert(make_pair(it->first, b));
 		}

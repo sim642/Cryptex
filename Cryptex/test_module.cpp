@@ -70,8 +70,8 @@ module::type test_module::run(const module::type &prev_module)
 			int id = p.first;
 			const blob &b = p.second;
 
-			cv::circle(display, b.kp.pt, b.kp.size / 2, cv::Scalar(0, 255, 0), 2);
-			cv::putText(display, to_string(id), b.kp.pt, cv::FONT_HERSHEY_PLAIN, 1.5, cv::Scalar(0, 0, 255), 2);
+			cv::circle(display, b.center, b.radius, cv::Scalar(0, 255, 0), 2);
+			cv::putText(display, to_string(id), b.center, cv::FONT_HERSHEY_PLAIN, 1.5, cv::Scalar(0, 0, 255), 2);
 		}
 
 		imshow("tracking", display);

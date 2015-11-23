@@ -6,15 +6,23 @@
 
 struct blob
 {
-	cv::KeyPoint kp;
-	float factor, dist;
+	// frame attributes
+	float area;
+	cv::Point2f center;
+	float radius;
+	cv::Rect rect;
+
+	// physical attributes
 	cv::Point2f rel;
+	float dist, angle;
+
+	// other attribues
 	float score;
 };
 
 inline bool operator== (const blob &lhs, const blob &rhs)
 {
-	return lhs.kp.pt == rhs.kp.pt;
+	return lhs.center == rhs.center;
 }
 
 typedef std::vector<blob> blobs_t;

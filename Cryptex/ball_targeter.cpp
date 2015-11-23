@@ -45,9 +45,9 @@ void ball_targeter::draw(cv::Mat &display)
 		int id = p.first;
 		const blob &b = p.second;
 
-		cv::circle(display, b.kp.pt, b.kp.size / 2, cv::Scalar(0, 255, id == ballid ? 255 : 0), 2);
-		cv::putText(display, to_string(id), b.kp.pt, cv::FONT_HERSHEY_PLAIN, 1, cv::Scalar(0, 0, 255), 1);
-		cv::putText(display, to_string(b.score), b.kp.pt + cv::Point2f(0, 15), cv::FONT_HERSHEY_PLAIN, 1, cv::Scalar(255, 0, 0), 1);
+		cv::circle(display, b.center, b.radius, cv::Scalar(0, 255, id == ballid ? 255 : 0), 2);
+		cv::putText(display, to_string(id), b.center, cv::FONT_HERSHEY_PLAIN, 1, cv::Scalar(0, 0, 255), 1);
+		cv::putText(display, to_string(b.score), b.center + cv::Point2f(0, 15), cv::FONT_HERSHEY_PLAIN, 1, cv::Scalar(255, 0, 0), 1);
 	}
 }
 

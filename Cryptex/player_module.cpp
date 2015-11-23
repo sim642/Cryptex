@@ -82,7 +82,7 @@ module::type player_module::run(const module::type &prev_module)
 	blob_finder baller("oranz", "ball");
 	ball_targeter::scorer_t scorer = [](const blob &b)
 	{
-		return b.dist + fabs(b.factor) / 7;
+		return b.dist + fabs(b.angle) / 7;
 	};
 	ball_targeter balls(baller, 50, scorer, 0.05f);
 
@@ -187,7 +187,7 @@ module::type player_module::run(const module::type &prev_module)
 					d.rotate(max(10.f, 35 - get_statestart() / 2.f * 10));
 				else if (state == BallDrive)
 				{
-					d.omni(speed_controller.step(ball->dist), 0, rotate_controller.step(ball->factor));
+					d.omni(speed_controller.step(ball->dist), 0, rotate_controller.step(ball->angle));
 
 					if (ball->dist < 0.25)
 						SET_STATE(BallGrab)
@@ -240,7 +240,7 @@ module::type player_module::run(const module::type &prev_module)
 				{
 					goals.draw(display);
 
-					if (abs(goal->factor) < max(0.1f, (1 - goal->dist) / 2.f))
+					if (abs(goal->angle) < max(0.1f, (1 - goal->dist) / 2.f))
 					{
 						blobs_t balls;
 						baller.detect_frame(frame, balls);
@@ -286,7 +286,7 @@ module::type player_module::run(const module::type &prev_module)
 						}
 					}
 					else
-						d.omni(speed_controller.step(fabs(goal->factor)), sign(goal->factor) * (-90), rotate_controller.step(goal->factor));
+						d.omni(speed_controller.step(fabs(goal->angle)), sign(goal->angle) * (-90), rotate_controller.step(goal->angle));
 				}
 				else
 					SET_STATE(GoalFind)
@@ -304,9 +304,9 @@ module::type player_module::run(const module::type &prev_module)
 				{
 					goals.draw(display);
 
-					d.omni(100, 0, rotate_controller.step(goal->factor));
+					d.omni(100, 0, rotate_controller.step(goal->angle));
 
-					if (goal->kp.size > 485.f)
+					if (goal->area > 485.f)
 					{
 						m.dribbler(0);
 						this_thread::sleep_for(chrono::milliseconds(500));
