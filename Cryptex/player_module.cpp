@@ -82,10 +82,11 @@ module::type player_module::run(const module::type &prev_module)
 	blob_finder baller("oranz", "ball");
 	ball_targeter::scorer_t scorer = [](const blob &b)
 	{
-		return b.dist + fabs(b.angle) / 7;
+		return b.dist/* + fabs(b.angle) / 7*/;
 	};
 	ball_targeter balls(baller, 50, scorer, 0.05f);
 
+	cout << "waiting button" << endl;
 	bool team = m.button(btn_team);
 	string team_str = team ? "kollane" : "sinine";
 	cout << "team: " << team_str << endl;
