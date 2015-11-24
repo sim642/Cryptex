@@ -64,6 +64,31 @@ device_controller::recv_t rs485_dongle::parse_recv(const std::string &line)
 std::string rs485_dongle::read_line()
 {
 	std::string line;
-	stream >> line;
+
+	io.reset();
+
+	boost::asio::deadline_timer timeout(io);
+	timeout.expires_from_now(boost::posix_time::milliseconds(5));
+	timeout.async_wait([&](const boost::system::error_code &error)
+	{
+		if (error)
+			return;
+
+		port.cancel();
+	});
+
+	boost::asio::async_read_until(port, buf, "\n", [&](const boost::system::error_code &error, size_t bytes_transferred)
+	{
+		if (error || !bytes_transferred)
+			return;
+
+		timeout.cancel();
+
+		istream is(&buf);
+		getline(is, line);
+	});
+
+	io.run_one();
+
 	return line;
 }

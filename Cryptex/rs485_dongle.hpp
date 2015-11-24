@@ -25,6 +25,7 @@ class rs485_dongle : public device_manager
 		boost::asio::io_service &io;
 		boost::asio::serial_port port;
 		serial_stream stream;
+		boost::asio::streambuf buf;
 };
 
 #endif // RS485_DONGLE_H
