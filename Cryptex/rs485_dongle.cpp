@@ -5,6 +5,9 @@
 #include <boost/algorithm/string/join.hpp>
 #include <boost/algorithm/string/classification.hpp>
 
+#include <thread>
+#include <chrono>
+
 using namespace std;
 
 rs485_dongle::rs485_dongle(boost::asio::io_service &new_io, const std::string &dev) : io(new_io), port(io, dev), stream(port)
@@ -19,11 +22,13 @@ rs485_dongle::~rs485_dongle()
 
 void rs485_dongle::send(const int &id, const std::string &cmd)
 {
+	this_thread::sleep_for(chrono::milliseconds(1));
 	stream << id << ":" << cmd << endl;
 }
 
 void rs485_dongle::send(const int &id, const std::string &cmd, const int &val)
 {
+	this_thread::sleep_for(chrono::milliseconds(1));
 	stream << id << ":" << cmd << val << endl;
 }
 
