@@ -4,6 +4,7 @@
 #include <ostream>
 #include <initializer_list>
 #include <vector>
+#include <chrono>
 
 class logger
 {
@@ -44,9 +45,10 @@ class logger
 		}
 
 	private:
-		std::string timestamp();
+		std::string timestamp(bool fromstart = true);
 
 		std::vector<std::ostream*> ostreams;
+		std::chrono::system_clock::time_point starttime;
 };
 
 extern logger log;

@@ -4,19 +4,19 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
-#include <iomanip>
+#include <cstring>
 
 using namespace std;
 
 ofstream logfile("log.txt", ios_base::app);
 logger log = {&cout, &logfile};
 
-logger::logger()
+logger::logger() : starttime(std::chrono::system_clock::now())
 {
 
 }
 
-logger::logger(std::initializer_list<std::ostream*> nostreams) : ostreams(nostreams)
+logger::logger(std::initializer_list<std::ostream*> nostreams) : ostreams(nostreams), starttime(std::chrono::system_clock::now())
 {
 
 }
@@ -33,12 +33,23 @@ logger& logger::operator<< (std::ostream& (&func)(std::ostream&))
 	return *this;
 }
 
-std::string logger::timestamp()
+std::string logger::timestamp(bool fromstart)
 {
 	auto now = chrono::system_clock::now();
 	auto now_c = chrono::system_clock::to_time_t(now);
 
-	string str(64, '\0');
-	strftime(&*str.begin(), str.size(), "%F %T", localtime(&now_c));
-	return str;
+	char str[128];
+	strftime(str, 128, "%F %T", localtime(&now_c));
+
+	if (fromstart)
+	{
+		char str2[64];
+
+		time_t dur = chrono::duration_cast<chrono::seconds>(now - starttime).count();
+		auto dur_c = gmtime(&dur);
+
+		strftime(str2, 64, " %M:%S", dur_c);
+		strcat(str, str2);
+	}
+	return string(str);
 }
