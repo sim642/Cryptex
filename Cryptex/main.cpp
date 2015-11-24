@@ -15,16 +15,16 @@ using namespace std;
 
 int main()
 {
-	global::env = "301";
+	global::env = "test";
 	global::video_id = 0;
 	global::field = 'B';
 	global::id = 'D';
-	global::coilgun = true;
+	global::coilgun = false;
 	global::referee = false;
 	global::hfov = 58.0f;
 	global::vfov = 42.7f;
-	global::h = 0.255;
-	global::alpha = 68.1;
+	global::h = 0.220;
+	global::alpha = 67.5;
 
 	system("v4l2ctrl -l calibs/pseye.v4l2"); // load camera config
 

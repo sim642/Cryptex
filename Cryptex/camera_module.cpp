@@ -69,7 +69,7 @@ module::type camera_module::run(const module::type &prev_module)
 		global::h = h / 1000.f;
 		global::alpha = alpha / 10.f;
 
-		float delta = 0.33f;
+		float delta = 0.1f;
 		for (float dx = 0.f; dx <= 10.f; dx += delta)
 		{
 			for (float dy = -3.f; dy <= 3.f; dy += delta)
