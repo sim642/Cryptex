@@ -58,7 +58,14 @@ void main_controller::charge()
 
 bool main_controller::ball()
 {
-	return stoi(controller->send_recv("bl", "bl")->second);
+	static bool prev = false;
+
+	auto recv = controller->send_recv("bl", "bl");
+
+	if (recv)
+		return prev = stoi(recv->second);
+	else
+		return prev;
 }
 
 bool main_controller::button(const int &num)
