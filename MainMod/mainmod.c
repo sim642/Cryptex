@@ -21,6 +21,7 @@
 
 bool failsafe = true;
 volatile uint16_t failsafe_counter = 0;
+volatile uint16_t discharge_counter = 0;
 
 void discharge(uint8_t cycles)
 {
@@ -226,6 +227,7 @@ ISR(TIMER0_COMPA_vect)
 	//bit_flip(PORTF, BIT(LED2R));
 
 	failsafe_counter++;
+	discharge_counter++;
 }
 
 ISR(PCINT0_vect)
@@ -325,14 +327,21 @@ int main(void)
 		if (failsafe && (failsafe_counter >= FAILSAFE))
 		{
 			// failsafe triggered
-			bit_clear(PORTD, BIT(CHARGE));
-			bit_set(PORTD, BIT(KICK));
-			_delay_us(DISCHARGETIME);
-			bit_clear(PORTD, BIT(KICK));
-			_delay_ms(DISCHARGEWAIT);
+			bit_clear(PORTF, BIT(LED1R));
+
+			if (discharge_counter >= (DISCHARGEWAIT * 100 / 1600))
+			{
+				bit_clear(PORTD, BIT(CHARGE));
+				bit_set(PORTD, BIT(KICK));
+				_delay_us(DISCHARGETIME);
+				bit_clear(PORTD, BIT(KICK));
+				discharge_counter = 0;
+			}
 
 			OCR3AL = 0;
 		}
+		else
+			bit_set(PORTF, BIT(LED1R));
 
 		if (usb_serial_available())
 		{
