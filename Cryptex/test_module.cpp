@@ -5,12 +5,15 @@
 #include <chrono>
 #include <thread>
 
+#include "util.hpp"
+
 #include "global.hpp"
 #include "device_id.hpp"
 
 #include "rs485_dongle.hpp"
 #include "driver.hpp"
 #include "main_controller.hpp"
+#include "serial_controller.hpp"
 
 #include "calibrator_window.hpp"
 #include "blob_finder.hpp"
@@ -30,58 +33,24 @@ test_module::~test_module()
 
 module::type test_module::run(const module::type &prev_module)
 {
-	global::env = "test";
-	cv::VideoCapture capture(0);
+	boost::asio::io_service io;
 
-	calibrator_window calibrator(capture);
-	calibrator.calibrate("red", "cap");
+	rs485_dongle dongle(io, "/dev/ttyUSB0");
+	main_controller m(dongle[device_id::main]);
+	/*serial_controller s(io, "/dev/ttyACM1");
+	main_controller m(&s);*/
 
-	cv::namedWindow("tracking");
-
-	blob_finder finder("red", "cap");
-	blob_tracker tracker(100);
-
-	cv::VideoWriter writer("tracking.avi",
-							//CV_FOURCC('M', 'J', 'P', 'G'),
-							CV_FOURCC('P', 'I', 'M', '1'),
-							30,
-							cv::Size(capture.get(CV_CAP_PROP_FRAME_WIDTH),
-										capture.get(CV_CAP_PROP_FRAME_HEIGHT)),
-							true);
-
-
-	while (1)
+	for (int i = 0;; i++)
 	{
-		auto framestart = chrono::high_resolution_clock::now();
-		cv::Mat frame;
-		capture >> frame;
+		m.ping();
+		//this_thread::sleep_for(chrono::milliseconds(50));
 
-		cv::Mat display;
-		frame.copyTo(display);
+		//cout << i << endl;
+		cout << i << ": " << flush;
+		cout << m.button(1) << " " << flush;
+		cout << m.ball() << " " << endl;
 
-		blobs_t blobs;
-		finder.detect_frame(frame, blobs);
-		tracker.update(blobs);
-
-		for (auto &p : tracker.get_all())
-		{
-			int id = p.first;
-			const blob &b = p.second;
-
-			cv::circle(display, b.kp.pt, b.kp.size / 2, cv::Scalar(0, 255, 0), 2);
-			cv::putText(display, to_string(id), b.kp.pt, cv::FONT_HERSHEY_PLAIN, 1.5, cv::Scalar(0, 0, 255), 2);
-		}
-
-		imshow("tracking", display);
-		writer << display;
-
-		int dt = chrono::duration_cast<chrono::milliseconds>(chrono::high_resolution_clock::now() - framestart).count();
-		char key = cv::waitKey(max(1, 1000 / 30 - dt));
-		switch (key)
-		{
-			case 'q':
-				return module::type::menu;
-		}
+		//this_thread::sleep_for(chrono::milliseconds(1000 / 30));
 	}
 
 	return module::type::menu;

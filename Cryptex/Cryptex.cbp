@@ -34,6 +34,7 @@
 			<Add option="-Wall" />
 			<Add option="-fexceptions" />
 			<Add option="-Wno-unused-parameter" />
+			<Add option="-Wno-switch" />
 		</Compiler>
 		<Linker>
 			<Add option="-lboost_system" />
@@ -46,15 +47,23 @@
 			<Add option="-lpsmoveapi" />
 			<Add option="-lpthread" />
 		</Linker>
+		<Unit filename="ball_targeter.cpp" />
+		<Unit filename="ball_targeter.hpp" />
 		<Unit filename="blob.hpp" />
+		<Unit filename="blob_detector.cpp" />
+		<Unit filename="blob_detector.hpp" />
 		<Unit filename="blob_finder.cpp" />
 		<Unit filename="blob_finder.hpp" />
+		<Unit filename="blob_targeter.cpp" />
+		<Unit filename="blob_targeter.hpp" />
 		<Unit filename="blob_tracker.cpp" />
 		<Unit filename="blob_tracker.hpp" />
 		<Unit filename="calibrator_module.cpp" />
 		<Unit filename="calibrator_module.hpp" />
 		<Unit filename="calibrator_window.cpp" />
 		<Unit filename="calibrator_window.hpp" />
+		<Unit filename="camera_module.cpp" />
+		<Unit filename="camera_module.hpp" />
 		<Unit filename="config_module.cpp" />
 		<Unit filename="config_module.hpp" />
 		<Unit filename="device_controller.cpp" />
@@ -68,11 +77,14 @@
 		<Unit filename="error_controller.hpp" />
 		<Unit filename="global.cpp" />
 		<Unit filename="global.hpp" />
+		<Unit filename="goal_targeter.cpp" />
+		<Unit filename="goal_targeter.hpp" />
 		<Unit filename="logger.cpp" />
 		<Unit filename="logger.hpp" />
 		<Unit filename="main.cpp" />
 		<Unit filename="main_controller.cpp" />
 		<Unit filename="main_controller.hpp" />
+		<Unit filename="math.cpp" />
 		<Unit filename="math.hpp" />
 		<Unit filename="menu_module.cpp" />
 		<Unit filename="menu_module.hpp" />
@@ -106,6 +118,7 @@
 		<Unit filename="srf_dongle.hpp" />
 		<Unit filename="test_module.cpp" />
 		<Unit filename="test_module.hpp" />
+		<Unit filename="util.hpp" />
 		<Extensions>
 			<code_completion />
 			<debugger />

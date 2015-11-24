@@ -20,7 +20,8 @@ class config_module : public module
 			string_t,
 			char_t,
 			int_t,
-			bool_t
+			bool_t,
+			float_t
 		};
 		typedef std::tuple<std::string, var_type, void*> choice_t;
 

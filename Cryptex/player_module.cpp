@@ -15,12 +15,26 @@
 #include <opencv2/highgui.hpp>
 #include <opencv2/video.hpp>
 #include "blob_finder.hpp"
-#include "blob_tracker.hpp"
+#include "ball_targeter.hpp"
+#include "goal_targeter.hpp"
 
 #include "math.hpp"
 
 
 using namespace std;
+
+const std::map<player_module::state_t, std::string> player_module::state_name =
+{
+	{Undefined, "Undefined"},
+	{Start, "Start"},
+	{Manual, "Manual"},
+	{BallFind, "BallFind"},
+	{BallDrive, "BallDrive"},
+	{BallGrab, "BallGrab"},
+	{GoalFind, "GoalFind"},
+	{GoalAim, "GoalAim"},
+	{GoalDrive, "GoalDrive"}
+};
 
 player_module::player_module() : state(Undefined)
 {
@@ -32,47 +46,16 @@ player_module::~player_module()
 
 }
 
-void player_module::set_state(const state_t &new_state)
+void player_module::set_state(const state_t &new_state, const string &changer)
 {
-	cout << "state: ";
-	switch (new_state)
-	{
-		case Start:
-			cout << "Start";
-			break;
+	cout << "state";
+	if (!changer.empty())
+		cout << " [" << changer << "]";
+	cout << ": " << state_name.at(new_state) << endl;
 
-		case Manual:
-			cout << "Manual";
-			break;
-
-		case Ball:
-			cout << "Ball";
-			speed_controller.reset();
-			rotate_controller.reset();
-			speed_controller.Kp = 80;
-			rotate_controller.Kp = 30;
-			break;
-
-		case BallGrab:
-			cout << "BallGrab";
-			break;
-
-		case GoalFind:
-			cout << "GoalFind";
-			speed_controller.reset();
-			rotate_controller.reset();
-			speed_controller.Kp = 17;
-			rotate_controller.Kp = 13;
-			break;
-
-		case Goal:
-			cout << "Goal";
-			break;
-
-		default:
-			throw domain_error("player going to invalid state");
-	}
-	cout << endl;
+	auto it = transitions.find(new_state);
+	if (it != transitions.end())
+		it->second(state);
 
 	state = new_state;
 	reset_statestart();
@@ -97,20 +80,62 @@ module::type player_module::run(const module::type &prev_module)
 	referee_controller referee(srf);
 
 	blob_finder baller("oranz", "ball");
-	blob_tracker balltr(50);
+	ball_targeter::scorer_t scorer = [](const blob &b)
+	{
+		return b.dist/* + fabs(b.angle) / 7*/;
+	};
+	ball_targeter balls(baller, 50, scorer, 0.05f);
 
+	cout << "waiting button" << endl;
 	bool team = m.button(btn_team);
 	string team_str = team ? "kollane" : "sinine";
 	cout << "team: " << team_str << endl;
 	blob_finder goaler(team_str, "goal");
 	blob_finder goaler2(team ? "sinine" : "kollane", "goal");
-	half goalside;
+	goal_targeter goals(goaler, goaler2, 70);
+	half goalside = half::right;
 
 	cv::namedWindow("Remote");
 
-	set_state(Start);
+	set_state(Start, "init");
 
-	int ballid = 0;
+	transitions[Manual] = [&](state_t prev_state)
+	{
+		d.stop();
+		m.dribbler(0);
+	};
+
+	transitions[BallFind] = [&](state_t prev_state)
+	{
+		m.dribbler(0);
+	};
+
+	transitions[BallDrive] = [&](state_t prev_state)
+	{
+		speed_pid.reset();
+		angle_pid.reset();
+		rotate_pid.reset();
+
+		speed_pid.set(100);
+		//angle_pid.set(0.5);
+		//rotate_pid.set(1.25);
+		angle_pid.set(0.1);
+		rotate_pid.set(1.5);
+	};
+
+	transitions[BallGrab] = [&](state_t prev_state)
+	{
+		balls.reset();
+	};
+
+	transitions[GoalAim] = transitions[GoalDrive] = [&](state_t prev_state)
+	{
+		speed_pid.reset();
+		rotate_pid.reset();
+
+		speed_pid.set(1.5);
+		rotate_pid.set(0.7, 0.5, 0);
+	};
 
 	if (global::coilgun)
 		m.charge();
@@ -123,107 +148,124 @@ module::type player_module::run(const module::type &prev_module)
 
 		m.ping();
 
-		switch (referee.poll()) // only one per cycle
+		if (global::referee)
 		{
-			case referee_controller::None:
-				break;
+			switch (referee.poll()) // only one per cycle
+			{
+				case referee_controller::None:
+					break;
 
-			case referee_controller::Start:
-				set_state(Ball);
-				break;
+				case referee_controller::Start:
+					set_state(BallFind, "referee");
+					break;
 
-			case referee_controller::Stop:
-				set_state(Manual);
-				d.stop();
-				break;
+				case referee_controller::Stop:
+					set_state(Manual, "referee");
+					d.stop();
+					break;
+			}
 		}
 
 		cv::Mat frame;
 		capture >> frame;
 
-		cv::Mat keyframe;
-		frame.copyTo(keyframe);
+		cv::Mat display;
+		frame.copyTo(display);
 
-		cv::Mat framelow;
-		cv::resize(frame, framelow, cv::Size(), scalelow, scalelow, CV_INTER_AREA);
+#define SET_STATE(state)	{ \
+								set_state(state, "play"); \
+								break; \
+							}
 
-		blobs_t gblobs, g2blobs;
-
-		// detect all goal blobs
-		goaler.detect_frame(frame, gblobs);
-		goaler2.detect_frame(frame, g2blobs);
-
-		// filter robot markings
-		blob_finder::angle_filter_out(gblobs, g2blobs, 90, 45);
-
-		auto glarge = blob_finder::largest(gblobs);
-		auto g2large = blob_finder::largest(g2blobs);
-
-		if (glarge)
+		switch (state)
 		{
-			goalside = glarge->factor >= 0 ? half::left : half::right;
-		}
-		else if (g2large)
-		{
-			goalside = g2large->factor >= 0 ? half::right : half::left;
-		}
-
-		if (state == Ball)
-		{
-			m.dribbler(dribblerspeed);
-
-			blobs_t balls;
-			baller.detect_frame(frame, balls);
-			balltr.update(balls);
-			int bestid = balltr.best();
-
-			if (!bestid || !ballid || !balltr[ballid] || (balltr[bestid]->score + 0.2f < balltr[ballid]->score))
-				ballid = bestid;
-
-			auto largest = balltr[ballid];
-			if (largest) // if ball found
+			case BallFind:
+			case BallDrive:
 			{
-				cv::circle(keyframe, largest->kp.pt, largest->kp.size / 2, cv::Scalar(255, 0, 255), 5);
+				/*if (m.ball())
+					SET_STATE(GoalFind)*/
 
-				d.omni(speed_controller.step(largest->dist), 0, rotate_controller.step(largest->factor));
+				auto ball = balls.update(frame);
+				balls.draw(display);
 
-				if (largest->dist < 0.1)
-					set_state(BallGrab);
-			}
-			else
-				d.rotate(max(5.f, 25 - get_statestart() / 1.5f * 10));
-		}
-		else if (state == BallGrab)
-		{
-			balltr.clear();
+				if (state == BallFind && ball)
+					SET_STATE(BallDrive)
+				else if (state == BallDrive && !ball)
+					SET_STATE(BallFind)
 
-			d.straight(50);
-
-			if (m.ball())
-			{
-				this_thread::sleep_for(chrono::milliseconds(500));
-				set_state(GoalFind);
-			}
-			else if (get_statestart() > 2.f)
-				set_state(Ball);
-		}
-		else if (state == GoalFind || state == Goal)
-		{
-			if (glarge) // if goal found
-			{
-				cv::circle(keyframe, glarge->kp.pt / scalelow, glarge->kp.size / 2 / scalelow, cv::Scalar(255, 0, 255), 5);
-
-				if (state == GoalFind)
+				if (state == BallFind)
+					d.rotate(max(10.f, 35 - get_statestart() / 2.f * 10));
+				else if (state == BallDrive)
 				{
-					if (abs(glarge->factor) < 0.1)
+					d.omni(speed_pid.step(ball->dist), angle_pid.step(ball->angle), rotate_pid.step(ball->angle));
+
+					m.dribbler(ball->dist < 0.75 ? dribblerspeed : 0);
+					if (ball->dist < 0.38)
+						SET_STATE(BallGrab)
+				}
+
+				break;
+			}
+
+			case BallGrab:
+			{
+				d.straight(60);
+
+				if (m.ball())
+				{
+					this_thread::sleep_for(chrono::milliseconds(250));
+					SET_STATE(GoalFind)
+				}
+				else if (get_statestart() > 0.65f)
+					SET_STATE(BallFind)
+
+				break;
+			}
+
+			case GoalFind:
+			{
+				if (!m.ball())
+					SET_STATE(BallFind)
+
+				auto goal = goals.update(frame);
+				if (goal)
+					SET_STATE(GoalAim)
+				else
+				{
+					if (goalside == half::left)
+						d.omni(35, -45, 30);
+					else
+						d.omni(35, 45, -30);
+				}
+
+				break;
+			}
+
+			case GoalAim:
+			{
+				if (!m.ball())
+					SET_STATE(BallFind)
+
+				auto goal = goals.update(frame);
+				if (goal)
+				{
+					goals.draw(display);
+
+					auto goalleft = cam2rel(goal->rect.tl() + cv::Point(0, goal->rect.height), frame.size());
+					auto goalright = cam2rel(goal->rect.br(), frame.size());
+					float goalleftangle = rect2pol(goalleft).y;
+					float goalrightangle = rect2pol(goalright).y;
+
+					if (goalleftangle > 0 && goalrightangle < 0)
 					{
 						blobs_t balls;
 						baller.detect_frame(frame, balls);
 
 						bool good = true;
+						auto goalpoint = (goalleft + goalright) / 2;
 						for (auto &ball : balls)
 						{
-							if (abs(ball.factor) < 0.1)
+							if (dist_lineseg_point({0.f, 0.f}, goalpoint, ball.rel) < 0.05f)
 							{
 								good = false;
 								break;
@@ -235,12 +277,12 @@ module::type player_module::run(const module::type &prev_module)
 							if (global::coilgun)
 							{
 								d.stop();
-								this_thread::sleep_for(chrono::milliseconds(500));
+								this_thread::sleep_for(chrono::milliseconds(300));
 								m.dribbler(0);
-								this_thread::sleep_for(chrono::milliseconds(250));
+								this_thread::sleep_for(chrono::milliseconds(150));
 								m.kick(*kickit);
 								kickit++;
-								this_thread::sleep_for(chrono::milliseconds(100));
+								this_thread::sleep_for(chrono::milliseconds(50));
 
 								if (kickit == kicks.end())
 								{
@@ -249,53 +291,58 @@ module::type player_module::run(const module::type &prev_module)
 								}
 
 								m.dribbler(dribblerspeed);
-								set_state(Ball);
+								SET_STATE(BallFind)
 							}
 							else
-								set_state(Goal);
+								SET_STATE(GoalDrive)
 						}
 						else
 						{
 							cout << "kick block" << endl;
-							d.omni(50, 45, -2);
-							//this_thread::sleep_for(chrono::milliseconds(100)); // TODO: smooth driving, not time
-							set_state(GoalFind);
+							d.omni(60, 45, -2);
 						}
 					}
 					else
-						d.omni(speed_controller.step(fabs(glarge->factor)), sign(glarge->factor) * (-90), rotate_controller.step(glarge->factor));
+						d.omni(speed_pid.step(fabs(goal->angle)), sign(goal->angle) * (-45), rotate_pid.step(goal->angle));
 				}
 				else
-				{
-					d.omni(100, 0, rotate_controller.step(glarge->factor));
+					SET_STATE(GoalFind)
 
-					if (glarge->kp.size > 485.f * pow(scalelow, 2))
+				break;
+			}
+
+			case GoalDrive:
+			{
+				if (!m.ball())
+					SET_STATE(BallFind)
+
+				auto goal = goals.update(frame);
+				if (goal)
+				{
+					goals.draw(display);
+
+					d.omni(100, 0, rotate_pid.step(goal->angle));
+
+					if (goal->area > 485.f)
 					{
 						m.dribbler(0);
 						this_thread::sleep_for(chrono::milliseconds(500));
 						m.dribbler(dribblerspeed);
-						set_state(Ball);
+						SET_STATE(BallFind)
 					}
 				}
-			}
-			else
-			{
-				if (state == GoalFind)
-				{
-					cout << "goalside: " << (goalside == half::left ? "left" : "right") << endl;
-					if (goalside == half::left)
-						d.omni(17, -90, 13);
-					else
-						d.omni(17, 90, -13);
-				}
 				else
-					d.straight(30);
+					SET_STATE(GoalFind)
+
+				break;
 			}
 		}
 
 		int dt = chrono::duration_cast<chrono::milliseconds>(chrono::high_resolution_clock::now() - framestart).count();
+		float fps = 1000.f / dt;
+		cv::putText(display, to_string(fps), cv::Point(10, 30), cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(255, 255, 255));
 
-		imshow("Remote", keyframe);
+		imshow("Remote", display);
 
 		char key = cv::waitKey(max(1, 1000 / 60 - dt));
 		switch (key)
@@ -327,11 +374,11 @@ module::type player_module::run(const module::type &prev_module)
 			case 'e':
 				if (state == Manual)
 				{
-					set_state(Ball);
+					set_state(BallFind, "manual");
 				}
 				else
 				{
-					set_state(Manual);
+					set_state(Manual, "manual");
 					d.stop();
 				}
 
@@ -345,7 +392,7 @@ module::type player_module::run(const module::type &prev_module)
 				m.kick();
 				break;
 
-			case '1':
+			/*case '1':
 				set_state(Start);
 				break;
 
@@ -367,7 +414,7 @@ module::type player_module::run(const module::type &prev_module)
 
 			case '6':
 				set_state(Goal);
-				break;
+				break;*/
 		}
 
 		/*bool polled = move.poll();

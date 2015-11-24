@@ -2,14 +2,13 @@
 #include "device_id.hpp"
 #include "math.hpp"
 
+using namespace std;
+
 driver::driver(device_manager &manager)
 {
-	motors.emplace_back(manager[device_id::motor_left]);
-	angles.push_back(60);
-	motors.emplace_back(manager[device_id::motor_back]);
-	angles.push_back(180);
-	motors.emplace_back(manager[device_id::motor_right]);
-	angles.push_back(-60);
+	motors.push_back(make_pair(manager[device_id::motor_left], 60));
+	motors.push_back(make_pair(manager[device_id::motor_back], 180));
+	motors.push_back(make_pair(manager[device_id::motor_right], -60));
 }
 
 driver::~driver()
@@ -19,21 +18,19 @@ driver::~driver()
 
 void driver::straight(const int &speed)
 {
-	motors[0].drive(-speed);
-	motors[1].drive(0);
-	motors[2].drive(speed);
+	omni(speed);
 }
 
 void driver::rotate(const int &speed)
 {
-	for (size_t i = 0; i < motors.size(); i++)
-		motors[i].drive(speed);
+	for (auto &p : motors)
+		p.first.drive(speed);
 }
 
 void driver::omni(const int &speed, const int &angle, const int &rot)
 {
-	for (size_t i = 0; i < motors.size(); i++)
-		motors[i].drive(speed * -sin(deg2rad(angles[i] - angle)) + rot);
+	for (auto &p : motors)
+		p.first.drive(speed * -sin(deg2rad(p.second - angle)) + rot);
 }
 
 void driver::stop()

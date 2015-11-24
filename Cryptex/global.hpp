@@ -9,6 +9,9 @@ namespace global
 	extern int video_id;
 	extern char field, id;
 	extern bool coilgun;
+	extern bool referee;
+
+	extern float hfov, vfov, h, alpha;
 
 	std::string calib_filename(const std::string &name, const std::string &ext = "yml");
 	std::string env_filename(const std::string &name, const std::string &ext = "yml");

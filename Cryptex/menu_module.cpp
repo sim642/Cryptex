@@ -22,7 +22,8 @@ module::type menu_module::run(const module::type &prev_module)
 		cout << "3. player" << endl;
 		cout << "4. test" << endl;
 		cout << "5. psmove" << endl;
-		cout << "6. exit" << endl;
+		cout << "6. camera" << endl;
+		cout << "7. exit" << endl;
 
 		cout << "> ";
 		int selection;
@@ -46,6 +47,9 @@ module::type menu_module::run(const module::type &prev_module)
 				return module::type::psmove;
 
 			case 6:
+				return module::type::camera;
+
+			case 7:
 				return module::type::exit;
 
 			default:

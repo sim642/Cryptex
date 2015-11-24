@@ -4,8 +4,11 @@
 #include "module.hpp"
 
 #include "pid_controller.hpp"
+#include <string>
 #include <vector>
 #include <chrono>
+#include <map>
+#include <functional>
 
 class player_module : public module
 {
@@ -21,11 +24,14 @@ class player_module : public module
 			Undefined,
 			Start,
 			Manual,
-			Ball,
+			BallFind,
+			BallDrive,
 			BallGrab,
 			GoalFind,
-			Goal
+			GoalAim,
+			GoalDrive
 		};
+		static const std::map<state_t, std::string> state_name;
 
 		enum class half
 		{
@@ -34,18 +40,20 @@ class player_module : public module
 		};
 
 		const int btn_team = 1;
-		const double scalelow = 0.5;
 		const int dribblerspeed = 255;
-		const std::vector<int> kicks = {2500, 8000};
+		//const std::vector<int> kicks = {2500, 8000};
+		const std::vector<int> kicks = {4000};
 
-		void set_state(const state_t &new_state);
+		typedef std::function<void(state_t)> transition_t;
+		std::map<state_t, transition_t> transitions;
+		void set_state(const state_t &new_state, const std::string &changer = "");
 		void reset_statestart();
 		float get_statestart();
 
 		state_t state;
 		std::chrono::high_resolution_clock::time_point statestart;
 
-		pid_controller speed_controller, rotate_controller;
+		pid_controller speed_pid, angle_pid, rotate_pid;
 };
 
 #endif // PLAYER_MODULE_H

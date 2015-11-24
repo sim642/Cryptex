@@ -5,6 +5,8 @@
 #include <map>
 #include <boost/optional.hpp>
 
+class ball_targeter; // forward declare to avoid circular dependency
+
 class blob_tracker
 {
 	public:
@@ -15,6 +17,11 @@ class blob_tracker
 		void clear();
 
 		const std::map<int, blob>& get_all() const;
+	private:
+		friend ball_targeter;
+		std::map<int, blob>& get_all();
+
+	public:
 		boost::optional<blob> operator[] (const int &id);
 		int best();
 
