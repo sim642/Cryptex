@@ -20,16 +20,17 @@ device_controller::~device_controller()
 
 device_controller::recv_t device_controller::recv(const std::string &reply)
 {
-	cout << "rec1" << endl;
-	chrono::high_resolution_clock::time_point start = chrono::high_resolution_clock::now();
+	//cout << "rec1" << endl;
+	//chrono::high_resolution_clock::time_point start = chrono::high_resolution_clock::now();
 	recv_t recv;
 	do
 	{
 		recv = parse_recv(read_line());
-		cout << "rec_: " << recv.first << ", " << recv.second << endl;
+		//cout << "rec_: " << recv.first << ", " << recv.second << endl;
 	}
-	while (recv.first != reply && chrono::duration_cast<chrono::milliseconds>(chrono::high_resolution_clock::now() - start).count() < 100);
-	cout << "rec2: " << recv.first << ", " << recv.second << endl;
+	while (recv.first != reply);
+	//while (recv.first != reply && chrono::duration_cast<chrono::milliseconds>(chrono::high_resolution_clock::now() - start).count() < 100);
+	//cout << "rec2: " << recv.first << ", " << recv.second << endl;
 
 	return recv;
 }

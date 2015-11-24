@@ -68,7 +68,11 @@ device_controller::recv_t rs485_dongle::parse_recv(const std::string &line)
 
 std::string rs485_dongle::read_line()
 {
+	//chrono::high_resolution_clock::time_point start = chrono::high_resolution_clock::now();
+
 	std::string line;
 	stream >> line;
+
+	//cout << line << "-t: " << chrono::duration_cast<chrono::milliseconds>(chrono::high_resolution_clock::now() - start).count() << endl;
 	return line;
 }
