@@ -58,14 +58,14 @@ void main_controller::charge()
 
 bool main_controller::ball()
 {
-	return stoi(controller->send_recv("bl", "bl").second);
+	return stoi(controller->send_recv("bl", "bl")->second);
 }
 
 bool main_controller::button(const int &num)
 {
 	string reply = "b";
 	reply += to_string(num);
-	return stoi(controller->send_recv("b", reply, num).second);
+	return stoi(controller->send_recv("b", reply, num)->second);
 }
 
 void main_controller::dribbler(const int& speed)
@@ -77,7 +77,7 @@ bool main_controller::io(const int &num)
 {
 	string reply = "io";
 	reply += to_string(num);
-	return stoi(controller->send_recv("io", reply, num).second);
+	return stoi(controller->send_recv("io", reply, num)->second);
 }
 
 void main_controller::ping()

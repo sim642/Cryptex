@@ -25,7 +25,7 @@ void serial_controller::send(const std::string &cmd, const int &val)
 
 int serial_controller::id()
 {
-	return stoi(send_recv("?", "id").second);
+	return stoi(send_recv("?", "id")->second);
 }
 
 int serial_controller::id(const int &new_id)

@@ -18,7 +18,7 @@ void motor_controller::drive(const int &speed)
 
 int motor_controller::encoder()
 {
-	return stoi(controller->send_recv("e", "e").second);
+	return stoi(controller->send_recv("e", "e")->second);
 }
 
 void motor_controller::reset_encoder()

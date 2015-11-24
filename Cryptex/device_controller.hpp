@@ -3,11 +3,12 @@
 
 #include <string>
 #include <utility>
+#include <boost/optional.hpp>
 
 class device_controller
 {
 	public:
-		typedef std::pair<std::string, std::string> recv_t;
+		typedef boost::optional<std::pair<std::string, std::string>> recv_t;
 
 		device_controller();
 		virtual ~device_controller();
