@@ -1,5 +1,6 @@
 #include "main_controller.hpp"
 #include "global.hpp"
+#include "logger.hpp"
 #include <string>
 #include <stdexcept>
 
@@ -24,24 +25,28 @@ main_controller::~main_controller()
 void main_controller::kick_override(const bool& state)
 {
 	assume_coilgun();
+	LOG("main", "kick override", state);
 	controller->send("ko", state);
 }
 
 void main_controller::charge_override(const bool &state)
 {
 	assume_coilgun();
+	LOG("main", "charge override", state);
 	controller->send("co", state);
 }
 
 void main_controller::kick()
 {
 	assume_coilgun();
+	LOG("main", "kick");
 	controller->send("k");
 }
 
 void main_controller::kick(const int &us)
 {
 	assume_coilgun();
+	LOG("main", "kick", us);
 	controller->send("k", us); // MainMod takes us
 }
 
@@ -53,6 +58,7 @@ void main_controller::kick(const double &ms)
 void main_controller::charge()
 {
 	assume_coilgun();
+	LOG("main", "charge");
 	controller->send("c");
 }
 

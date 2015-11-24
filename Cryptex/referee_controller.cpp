@@ -1,5 +1,6 @@
 #include "referee_controller.hpp"
 #include "global.hpp"
+#include "logger.hpp"
 #include <tuple>
 
 using namespace std;
@@ -22,6 +23,8 @@ referee_controller::poll_t referee_controller::poll()
 		char field, target;
 		string cmd;
 		tie(field, target, cmd) = srf_data;
+
+		LOG("referee", field, target, cmd);
 
 		if (field == global::field && (target == global::id || target == 'X'))
 		{

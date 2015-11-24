@@ -37,9 +37,9 @@ class logger
 		}
 
 		template<typename ...Ts>
-		void operator() (Ts&&... vals)
+		void operator() (const std::string &category, Ts&&... vals)
 		{
-			*this << "[" << timestamp() << "] ";
+			*this << timestamp() << " [" << category << "] ";
 			print(vals...);
 			*this << std::endl;
 		}
@@ -51,6 +51,6 @@ class logger
 		std::chrono::system_clock::time_point starttime;
 };
 
-extern logger log;
+extern logger LOG;
 
 #endif // LOGGER_H

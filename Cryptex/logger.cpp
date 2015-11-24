@@ -9,7 +9,7 @@
 using namespace std;
 
 ofstream logfile("log.txt", ios_base::app);
-logger log = {&cout, &logfile};
+logger LOG = {&cout, &logfile};
 
 logger::logger() : starttime(std::chrono::system_clock::now())
 {
@@ -48,7 +48,7 @@ std::string logger::timestamp(bool fromstart)
 		time_t dur = chrono::duration_cast<chrono::seconds>(now - starttime).count();
 		auto dur_c = gmtime(&dur);
 
-		strftime(str2, 64, " %M:%S", dur_c);
+		strftime(str2, 64, " +%M:%S", dur_c);
 		strcat(str, str2);
 	}
 	return string(str);
