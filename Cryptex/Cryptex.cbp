@@ -68,6 +68,8 @@
 		<Unit filename="error_controller.hpp" />
 		<Unit filename="global.cpp" />
 		<Unit filename="global.hpp" />
+		<Unit filename="logger.cpp" />
+		<Unit filename="logger.hpp" />
 		<Unit filename="main.cpp" />
 		<Unit filename="main_controller.cpp" />
 		<Unit filename="main_controller.hpp" />
