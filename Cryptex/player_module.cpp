@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <boost/asio.hpp>
+#include "logger.hpp"
 
 #include "rs485_dongle.hpp"
 #include "global.hpp"
@@ -120,11 +121,15 @@ module::type player_module::run(const module::type &prev_module)
 		angle_pid.reset();
 		rotate_pid.reset();
 
-		speed_pid.set(100);
+		//speed_pid.set(100);
 		//angle_pid.set(0.5);
 		//rotate_pid.set(1.25);
-		angle_pid.set(0.1);
-		rotate_pid.set(1.5);
+		//angle_pid.set(0.1);
+		//rotate_pid.set(1.5);
+
+		speed_pid.set(150, 0, 0.1);
+		angle_pid.set(0);
+		rotate_pid.set(3, 5, 0.15);
 	};
 
 	transitions[BallGrab] = [&](state_t prev_state)
@@ -139,6 +144,10 @@ module::type player_module::run(const module::type &prev_module)
 
 		speed_pid.set(1.5);
 		rotate_pid.set(0.7, 0.5, 0);
+		//speed_pid.set(1.75);
+		//rotate_pid.set(3, 0, 0.3);
+
+		//rotate_pid.set(1.0, 0, 2.0);
 	};
 
 	if (global::coilgun)
@@ -262,8 +271,8 @@ module::type player_module::run(const module::type &prev_module)
 
 			case GoalAim:
 			{
-				if (!m.ball())
-					SET_STATE(BallFind)
+				/*if (!m.ball())
+					SET_STATE(BallFind)*/
 
 				auto goal = goals.update(frame);
 				if (goal)
@@ -284,7 +293,7 @@ module::type player_module::run(const module::type &prev_module)
 						auto goalpoint = (goalleft + goalright) / 2;
 						for (auto &ball : balls)
 						{
-							if (dist_lineseg_point({0.f, 0.f}, goalpoint, ball.rel) < 0.05f)
+							if (dist_lineseg_point({0.f, 0.f}, {0.f, goalpoint.y}, ball.rel) < 0.05f)
 							{
 								good = false;
 								break;
@@ -293,9 +302,13 @@ module::type player_module::run(const module::type &prev_module)
 
 						if (good)
 						{
+							LOG("player", "shoot");
+							SET_STATE(Manual)
+
 							if (global::coilgun)
 							{
 								d.stop();
+
 								this_thread::sleep_for(chrono::milliseconds(300));
 								m.dribbler(0);
 								this_thread::sleep_for(chrono::milliseconds(150));
