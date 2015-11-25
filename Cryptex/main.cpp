@@ -15,7 +15,7 @@ using namespace std;
 
 int main()
 {
-	global::env = "test";
+	global::env = "301";
 	global::video_id = 0;
 	global::field = 'B';
 	global::id = 'D';
