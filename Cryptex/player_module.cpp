@@ -17,6 +17,7 @@
 #include "blob_finder.hpp"
 #include "ball_targeter.hpp"
 #include "goal_targeter.hpp"
+#include "border_detector.hpp"
 
 #include "math.hpp"
 
@@ -94,6 +95,9 @@ module::type player_module::run(const module::type &prev_module)
 	blob_finder goaler2(team ? "sinine" : "kollane", "goal");
 	goal_targeter goals(goaler, goaler2, 70);
 	half goalside = half::right;
+
+	blob_finder borderer("valge");
+	border_detector borders(borderer);
 
 	cv::namedWindow("Remote");
 
@@ -185,6 +189,21 @@ module::type player_module::run(const module::type &prev_module)
 				/*if (m.ball())
 					SET_STATE(GoalFind)*/
 
+				//if (borders.detect(frame))
+				if (false)
+				{
+					m.dribbler(0);
+					//d.omni(50, 150, -15);
+					//d.omni(80, 180, 0);
+					//d.rotate(-50);
+					//this_thread::sleep_for(chrono::milliseconds(200));
+					d.rotate(20);
+					this_thread::sleep_for(chrono::milliseconds(500));
+
+					LOG("player", "border");
+					break;
+				}
+
 				auto ball = balls.update(frame);
 				balls.draw(display);
 
@@ -194,13 +213,13 @@ module::type player_module::run(const module::type &prev_module)
 					SET_STATE(BallFind)
 
 				if (state == BallFind)
-					d.rotate(max(10.f, 35 - get_statestart() / 2.f * 10));
+					d.rotate(max(5.f, 30 - get_statestart() / 2.f * 10));
 				else if (state == BallDrive)
 				{
 					d.omni(speed_pid.step(ball->dist), angle_pid.step(ball->angle), rotate_pid.step(ball->angle));
 
-					m.dribbler(ball->dist < 0.75 ? dribblerspeed : 0);
-					if (ball->dist < 0.38)
+					m.dribbler(ball->dist < 0.5 ? dribblerspeed : 0);
+					if (ball->dist < 0.25)
 						SET_STATE(BallGrab)
 				}
 

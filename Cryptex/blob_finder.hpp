@@ -34,6 +34,7 @@ class blob_finder
 
 		friend class calibrator_window;
 
+		bool opening;
 		blob_detector detector;
 
 	private:

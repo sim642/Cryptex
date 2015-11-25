@@ -6,7 +6,7 @@
 
 using namespace std;
 
-blob_finder::blob_finder()
+blob_finder::blob_finder() : opening(false)
 {
 
 }
@@ -57,8 +57,17 @@ void blob_finder::threshold(const cv::Mat &frame, cv::Mat &mask)
 	cv::inRange(hsv, cv::Scalar(lower), cv::Scalar(upper), mask);
 
 	auto structuring = cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(struct_size, struct_size));
-	cv::dilate(mask, mask, structuring);
-	cv::erode(mask, mask, structuring);
+
+	if (!opening)
+	{
+		cv::dilate(mask, mask, structuring);
+		cv::erode(mask, mask, structuring);
+	}
+	else
+	{
+		cv::erode(mask, mask, structuring);
+		cv::dilate(mask, mask, structuring);
+	}
 }
 
 void blob_finder::detect(const cv::Mat &mask, blobs_t &blobs)
