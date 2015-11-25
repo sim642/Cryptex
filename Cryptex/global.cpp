@@ -5,7 +5,7 @@ namespace global
 	std::string env;
 	int video_id;
 	char field, id;
-	bool coilgun, referee;
+	bool dribbler, coilgun, referee;
 	float hfov, vfov, h, alpha;
 
 	std::string calib_filename(const std::string &name, const std::string &ext)

@@ -8,7 +8,7 @@ namespace global
 	extern std::string env;
 	extern int video_id;
 	extern char field, id;
-	extern bool coilgun;
+	extern bool dribbler, coilgun;
 	extern bool referee;
 
 	extern float hfov, vfov, h, alpha;

@@ -76,7 +76,8 @@ bool main_controller::button(const int &num)
 
 void main_controller::dribbler(const int& speed)
 {
-	controller->send("dm", speed);
+	if (global::dribbler)
+		controller->send("dm", speed);
 }
 
 bool main_controller::io(const int &num)
