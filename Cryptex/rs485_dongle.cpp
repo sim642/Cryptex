@@ -10,25 +10,28 @@
 
 using namespace std;
 
-rs485_dongle::rs485_dongle(boost::asio::io_service &new_io, const std::string &dev) : io(new_io), port(io, dev), stream(port)
+rs485_dongle::rs485_dongle(boost::asio::io_service &new_io, const std::string &dev) : io(new_io), port(io, dev), stream(port), thr(bind(&rs485_dongle::receiver, this)), thr_running(true)
 {
 	port.set_option(boost::asio::serial_port_base::baud_rate(19200));
 }
 
 rs485_dongle::~rs485_dongle()
 {
-
+	thr_running = false;
+	thr.join();
 }
 
 void rs485_dongle::send(const int &id, const std::string &cmd)
 {
 	this_thread::sleep_for(chrono::milliseconds(1));
+	lock_guard<mutex> lock(stream_mut);
 	stream << id << ":" << cmd << endl;
 }
 
 void rs485_dongle::send(const int &id, const std::string &cmd, const int &val)
 {
 	this_thread::sleep_for(chrono::milliseconds(1));
+	lock_guard<mutex> lock(stream_mut);
 	stream << id << ":" << cmd << val << endl;
 }
 
@@ -55,7 +58,7 @@ device_controller* rs485_dongle::request(const int &id)
 device_controller::recv_t rs485_dongle::parse_recv(const std::string &line)
 {
 	device_controller::recv_t recv;
-	if (line.front() == '<' && line.back() == '>')
+	if (!line.empty() && line.front() == '<' && line.back() == '>')
 	{
 		string inner(line.begin() + 1, line.end() - 1);
 		vector<string> parts;
@@ -68,11 +71,31 @@ device_controller::recv_t rs485_dongle::parse_recv(const std::string &line)
 
 std::string rs485_dongle::read_line()
 {
-	//chrono::high_resolution_clock::time_point start = chrono::high_resolution_clock::now();
+	lock_guard<mutex> lock(lines_mut);
+	if (!lines.empty())
+	{
+		std::string line = lines.front();
+		lines.erase(lines.begin());
+		return line;
+	}
+	else
+		return "";
+}
 
-	std::string line;
-	stream >> line;
+void rs485_dongle::receiver()
+{
+	while (thr_running)
+	{
+		std::string line;
 
-	//cout << line << "-t: " << chrono::duration_cast<chrono::milliseconds>(chrono::high_resolution_clock::now() - start).count() << endl;
-	return line;
+		{
+			lock_guard<mutex> lock(stream_mut);
+			stream >> line;
+		}
+
+		{
+			lock_guard<mutex> lock(lines_mut);
+			lines.push_back(line);
+		}
+	}
 }
