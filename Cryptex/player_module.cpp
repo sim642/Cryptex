@@ -50,10 +50,10 @@ player_module::~player_module()
 
 void player_module::set_state(const state_t &new_state, const string &changer)
 {
-	cout << "state";
 	if (!changer.empty())
-		cout << " [" << changer << "]";
-	cout << ": " << state_name.at(new_state) << endl;
+		LOG("player", "state [" + changer + "]:", state_name.at(state), "->", state_name.at(new_state));
+	else
+		LOG("player", "state:", state_name.at(state), "->", state_name.at(new_state));
 
 	auto it = transitions.find(new_state);
 	if (it != transitions.end())
@@ -94,10 +94,10 @@ module::type player_module::run(const module::type &prev_module)
 	};
 	ball_targeter balls(baller, 50, borders, scorer, 0.1f);
 
-	cout << "waiting button" << endl;
+	LOG("player", "waiting team selection button...");
 	bool team = m.button(btn_team);
 	string team_str = team ? "kollane" : "sinine";
-	cout << "team: " << team_str << endl;
+	LOG("player", "attacking", team_str);
 	blob_finder goaler(team_str, "goal");
 	blob_finder goaler2(team ? "sinine" : "kollane", "goal");
 	goal_targeter goals(goaler, goaler2, 50);
@@ -339,7 +339,7 @@ module::type player_module::run(const module::type &prev_module)
 						}
 						else
 						{
-							cout << "kick block" << endl;
+							LOG("player", "kick tunnel blocked");
 							d.omni(60, 45, -2);
 						}
 					}

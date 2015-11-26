@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <stdexcept>
+#include "logger.hpp"
 #include "psmove.hpp"
 
 #include <boost/asio.hpp>
@@ -28,11 +29,11 @@ psmove_module::~psmove_module()
 
 module::type psmove_module::run(const module::type &prev_module)
 {
-	cout << "PSMove count: " << psmove::connected_count() << endl;
+	LOG("psmove", "connected count:", psmove::connected_count());
 
 	psmove move;
 
-	cout << "PSMove battery: " << move.battery() << endl;
+	LOG("psmove", "battery:", move.battery());
 
 	//psmove_set_rate_limiting(move, PSMove_True);
 
