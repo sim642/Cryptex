@@ -58,16 +58,7 @@ void blob_finder::threshold(const cv::Mat &frame, cv::Mat &mask)
 
 	auto structuring = cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(struct_size, struct_size));
 
-	if (!opening)
-	{
-		cv::dilate(mask, mask, structuring);
-		cv::erode(mask, mask, structuring);
-	}
-	else
-	{
-		cv::erode(mask, mask, structuring);
-		cv::dilate(mask, mask, structuring);
-	}
+	cv::morphologyEx(mask, mask, opening ? cv::MORPH_OPEN : cv::MORPH_CLOSE, structuring);
 }
 
 void blob_finder::detect(const cv::Mat &mask, blobs_t &blobs)
