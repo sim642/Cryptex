@@ -9,12 +9,16 @@ using namespace std;
 config_module::config_module()
 {
 	choices.push_back(make_tuple("env", var_type::string_t, &global::env));
-	choices.push_back(make_tuple("video", var_type::int_t, &global::video_id));
+	choices.push_back(make_tuple("video_id", var_type::int_t, &global::video_id));
+
+	choices.push_back(make_tuple("referee", var_type::bool_t, &global::referee));
 	choices.push_back(make_tuple("field", var_type::char_t, &global::field));
 	choices.push_back(make_tuple("id", var_type::char_t, &global::id));
+
 	choices.push_back(make_tuple("dribbler", var_type::bool_t, &global::dribbler));
 	choices.push_back(make_tuple("coilgun", var_type::bool_t, &global::coilgun));
-	choices.push_back(make_tuple("referee", var_type::bool_t, &global::referee));
+
+	choices.push_back(make_tuple("camera", var_type::string_t, &global::camera));
 	choices.push_back(make_tuple("hfov", var_type::float_t, &global::hfov));
 	choices.push_back(make_tuple("vfov", var_type::float_t, &global::vfov));
 	choices.push_back(make_tuple("h", var_type::float_t, &global::h));

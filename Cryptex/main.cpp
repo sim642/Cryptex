@@ -2,7 +2,6 @@
 #include "module.hpp"
 #include <map>
 #include <stdexcept>
-#include <cstdlib>
 #include "menu_module.hpp"
 #include "config_module.hpp"
 #include "calibrator_module.hpp"
@@ -17,17 +16,16 @@ int main()
 {
 	global::env = "301";
 	global::video_id = 0;
+
+	global::referee = false;
 	global::field = 'B';
 	global::id = 'D';
+
 	global::dribbler = true;
 	global::coilgun = true;
-	global::referee = false;
-	global::hfov = 58.0f;
-	global::vfov = 42.7f;
-	global::h = 0.220;
-	global::alpha = 67.5;
 
-	system("v4l2ctrl -l calibs/pseye.v4l2"); // load camera config
+	global::camera = "pseye";
+	global::load_camera();
 
 	map<module::type, module*> modules;
 	modules[module::type::menu] = new menu_module();
