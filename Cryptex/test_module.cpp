@@ -49,10 +49,11 @@ module::type test_module::run(const module::type &prev_module)
 		images.push_back(cv::imread("pics/" + file));
 
 	cv::namedWindow("walls");
-	cv::namedWindow("edges");
 
+	blob_finder baller("oranz", "ball");
 	blob_finder blobber("valge");
 	blobber.opening = true;
+	border_detector borders(blobber);
 
 	int i = 0;
 	while (1)
@@ -60,29 +61,27 @@ module::type test_module::run(const module::type &prev_module)
 		cv::Mat frame;
 		images[i].copyTo(frame);
 
-		cv::Mat mask;
-		blobber.threshold(frame, mask);
-
-		cv::Mat color(mask.size(), CV_8UC3);
-		color.setTo(cv::Scalar(255, 0, 255));
-
 		cv::Mat display;
 		frame.copyTo(display);
-		color.copyTo(display, mask);
 
-		cv::Mat canny;
-		cv::Canny(mask, canny, 0, 255);
+		blobs_t balls;
+		baller.detect_frame(frame, balls);
 
-		vector<cv::Vec4i> lines;
-		cv::HoughLinesP(canny, lines, 1, CV_PI/180, 30, 50, 100);
-		for (size_t i = 0; i < lines.size(); i++)
+		border_detector::lines_t lines;
+		borders.detect(frame, lines);
+
+		cout << border_detector::dist_closest(lines, cv::Point2f(0, 0)) << endl;
+
+		for (auto &ball : balls)
 		{
-			cv::Vec4i l = lines[i];
-			cv::line(display, cv::Point(l[0], l[1]), cv::Point(l[2], l[3]), cv::Scalar(255, 0, 0), 3, CV_AA);
+			cout << border_detector::dist_closest(lines, ball.rel) << "\t";
 		}
+		cout << endl;
+
+
+		borders.draw(display);
 
 		cv::imshow("walls", display);
-		cv::imshow("edges", canny);
 
 		char key = cv::waitKey(1000 / 30);
 		switch (key)

@@ -1,4 +1,7 @@
 #include "border_detector.hpp"
+#include "math.hpp"
+
+using namespace std;
 
 border_detector::border_detector(blob_finder &nblobber) : blobber(nblobber)
 {
@@ -10,27 +13,38 @@ border_detector::~border_detector()
 
 }
 
-bool border_detector::detect(const cv::Mat &frame)
+void border_detector::detect(const cv::Mat &frame, lines_t &borders)
 {
+	lines.clear();
+	borders.clear();
+
 	cv::Mat mask;
 	blobber.threshold(frame, mask);
 
-	cv::Point2f sum(0, 0);
-	int cnt = 0;
-	for (int y = 0; y < mask.size().height; y += 10)
+	cv::Mat canny;
+	cv::Canny(mask, canny, 0, 255);
+
+	cv::HoughLinesP(canny, lines, 1, CV_PI / 180, 30, 50, 100);
+	for (auto &line : lines)
 	{
-		for (int x = 0; x < mask.size().width; x += 10)
-		{
-			if (mask.at<uchar>(y, x))
-			{
-				auto pol = rect2pol(cam2rel(cv::Point2f(x, y), mask.size()));
-				sum += pol;
-				cnt++;
-			}
-		}
+		borders.push_back(line_t(cam2rel(cv::Point2f(line[0], line[1]), mask.size()), cam2rel(cv::Point2f(line[2], line[3]), mask.size())));
 	}
+}
 
-	auto avg = sum / cnt;
+float border_detector::dist_closest(const lines_t& borders, const cv::Point2f& p)
+{
+	float mindist = numeric_limits<float>::max();
+	for (auto &border : borders)
+	{
+		mindist = min(mindist, dist_line_point(border.first, border.second, p));
+	}
+	return mindist;
+}
 
-	return avg.x / 3.5 < 1.0;
+void border_detector::draw(cv::Mat &display)
+{
+	for (auto &l : lines)
+	{
+		cv::line(display, cv::Point(l[0], l[1]), cv::Point(l[2], l[3]), cv::Scalar(255, 0, 0), 3, CV_AA);
+	}
 }
