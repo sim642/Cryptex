@@ -19,8 +19,8 @@ int main()
 	global::video_id = 0;
 	global::field = 'B';
 	global::id = 'D';
-	global::dribbler = false;
-	global::coilgun = false;
+	global::dribbler = true;
+	global::coilgun = true;
 	global::referee = false;
 	global::hfov = 58.0f;
 	global::vfov = 42.7f;

@@ -30,9 +30,9 @@ void goal_targeter::draw(cv::Mat& display)
 		if (b == *target)
 			cv::rectangle(display, b.rect, cv::Scalar(255, 255, 0), 5);
 		else
-			cv::rectangle(display, b.rect, cv::Scalar(255, 255, 0), 3);
+			cv::rectangle(display, b.rect, cv::Scalar(255, 255, 0), 1);
 	}
 
 	for (auto &b : goals2)
-		cv::rectangle(display, b.rect, cv::Scalar(0, 255, 255), 3);
+		cv::rectangle(display, b.rect, cv::Scalar(0, 255, 255), 1);
 }

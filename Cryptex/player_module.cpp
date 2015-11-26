@@ -87,12 +87,12 @@ module::type player_module::run(const module::type &prev_module)
 	blob_finder baller("oranz", "ball");
 	ball_targeter::scorer_t scorer = [](const blob &b)
 	{
-		if (b.borderdist < 0.5f)
+		if (b.borderdist < 0.7f)
 			return numeric_limits<float>::max();
 		else
 			return b.dist + fabs(b.angle) / 100;
 	};
-	ball_targeter balls(baller, 50, borders, scorer, 0.05f);
+	ball_targeter balls(baller, 50, borders, scorer, 0.1f);
 
 	cout << "waiting button" << endl;
 	bool team = m.button(btn_team);
@@ -100,7 +100,7 @@ module::type player_module::run(const module::type &prev_module)
 	cout << "team: " << team_str << endl;
 	blob_finder goaler(team_str, "goal");
 	blob_finder goaler2(team ? "sinine" : "kollane", "goal");
-	goal_targeter goals(goaler, goaler2, 70);
+	goal_targeter goals(goaler, goaler2, 50);
 	half goalside = half::right;
 
 	cv::namedWindow("Remote");
@@ -130,9 +130,9 @@ module::type player_module::run(const module::type &prev_module)
 		//angle_pid.set(0.1);
 		//rotate_pid.set(1.5);
 
-		speed_pid.set(150, 0, 0.1);
+		speed_pid.set(110, 0, 0.2);
 		angle_pid.set(0);
-		rotate_pid.set(3, 5, 0.15);
+		rotate_pid.set(2.5, 0.5, 0.15);
 	};
 
 	transitions[BallGrab] = [&](state_t prev_state)
@@ -145,12 +145,18 @@ module::type player_module::run(const module::type &prev_module)
 		speed_pid.reset();
 		rotate_pid.reset();
 
-		speed_pid.set(1.5);
-		rotate_pid.set(0.7, 0.5, 0);
-		//speed_pid.set(1.75);
-		//rotate_pid.set(3, 0, 0.3);
+		/*speed_pid.set(1.5);
+		rotate_pid.set(0.7, 0.5, 0);*/
+		/*speed_pid.set(1.75);
+		rotate_pid.set(3, 0, 0.3);*/
 
 		//rotate_pid.set(1.0, 0, 2.0);
+
+		/*speed_pid.set(1.5);
+		rotate_pid.set(2, 0.7, 0.15);*/
+
+		speed_pid.set(1.5);
+		rotate_pid.set(1.5, 0, 0.22);
 	};
 
 	if (global::coilgun)
@@ -231,7 +237,7 @@ module::type player_module::run(const module::type &prev_module)
 					d.omni(speed_pid.step(ball->dist), angle_pid.step(ball->angle), rotate_pid.step(ball->angle));
 
 					m.dribbler(ball->dist < 0.5 ? dribblerspeed : 0);
-					if (ball->dist < 0.25)
+					if (ball->dist < 0.28)
 						SET_STATE(BallGrab)
 				}
 
@@ -240,7 +246,7 @@ module::type player_module::run(const module::type &prev_module)
 
 			case BallGrab:
 			{
-				d.straight(60);
+				d.straight(50);
 
 				if (m.ball())
 				{
@@ -264,9 +270,9 @@ module::type player_module::run(const module::type &prev_module)
 				else
 				{
 					if (goalside == half::left)
-						d.omni(35, -45, 30);
+						d.omni(50, -45, 37);
 					else
-						d.omni(35, 45, -30);
+						d.omni(50, 45, -37);
 				}
 
 				break;
@@ -296,7 +302,7 @@ module::type player_module::run(const module::type &prev_module)
 						auto goalpoint = (goalleft + goalright) / 2;
 						for (auto &ball : balls)
 						{
-							if (dist_lineseg_point({0.f, 0.f}, {0.f, goalpoint.y}, ball.rel) < 0.05f)
+							if (dist_lineseg_point({0.f, 0.f}, {0.f, goalpoint.y}, ball.rel) < 0.1f)
 							{
 								good = false;
 								break;
@@ -306,14 +312,14 @@ module::type player_module::run(const module::type &prev_module)
 						if (good)
 						{
 							LOG("player", "shoot");
-							SET_STATE(Manual)
+							//SET_STATE(Manual)
 
 							if (global::coilgun)
 							{
 								d.stop();
 
-								this_thread::sleep_for(chrono::milliseconds(300));
-								m.dribbler(0);
+								//this_thread::sleep_for(chrono::milliseconds(300));
+								//m.dribbler(0);
 								this_thread::sleep_for(chrono::milliseconds(150));
 								m.kick(*kickit);
 								kickit++;
