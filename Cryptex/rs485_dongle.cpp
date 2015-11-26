@@ -90,9 +90,33 @@ void rs485_dongle::receiver()
 
 		{
 			lock_guard<mutex> lock(stream_mut);
-			stream >> line;
+			io.reset();
+
+			boost::asio::deadline_timer timeout(io);
+			timeout.expires_from_now(boost::posix_time::milliseconds(5));
+			timeout.async_wait([&](const boost::system::error_code &error)
+			{
+				if (error)
+					return;
+
+				port.cancel();
+			});
+
+			boost::asio::async_read_until(port, buf, "\n", [&](const boost::system::error_code &error, size_t bytes_transferred)
+			{
+				if (error || !bytes_transferred)
+					return;
+
+				timeout.cancel();
+
+				istream is(&buf);
+				getline(is, line);
+			});
+
+			io.run();
 		}
 
+		if (!line.empty())
 		{
 			lock_guard<mutex> lock(lines_mut);
 			lines.push_back(line);

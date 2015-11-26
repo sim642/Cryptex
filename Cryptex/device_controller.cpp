@@ -50,7 +50,7 @@ device_controller::recv_t device_controller::send_recv(const std::string &cmd, c
 device_controller::recv_t device_controller::parse_recv(const std::string &line)
 {
 	recv_t recv;
-	if (line.front() == '<' && line.back() == '>')
+	if (!line.empty() && line.front() == '<' && line.back() == '>')
 	{
 		string inner(line.begin() + 1, line.end() - 1);
 		vector<string> parts;

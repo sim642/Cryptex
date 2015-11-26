@@ -30,6 +30,7 @@ class rs485_dongle : public device_manager
 		boost::asio::serial_port port;
 		serial_stream stream;
 		std::mutex stream_mut;
+		boost::asio::streambuf buf;
 
 		std::thread thr;
 		std::atomic_bool thr_running;
