@@ -15,9 +15,11 @@ class border_detector
 		border_detector(blob_finder &nblobber);
 		virtual ~border_detector();
 
+		void detect(const cv::Mat &frame);
 		void detect(const cv::Mat &frame, lines_t &borders);
 
 		static float dist_closest(const lines_t &borders, const cv::Point2f &p);
+		float dist_closest(const cv::Point2f &p);
 
 		void draw(cv::Mat &display);
 
@@ -25,6 +27,7 @@ class border_detector
 		blob_finder &blobber;
 
 		std::vector<cv::Vec4i> lines;
+		lines_t borders;
 };
 
 #endif // BORDER_DETECTOR_H

@@ -13,7 +13,13 @@ border_detector::~border_detector()
 
 }
 
-void border_detector::detect(const cv::Mat &frame, lines_t &borders)
+void border_detector::detect(const cv::Mat &frame)
+{
+	lines_t oborders;
+	detect(frame, oborders);
+}
+
+void border_detector::detect(const cv::Mat &frame, lines_t &oborders)
 {
 	lines.clear();
 	borders.clear();
@@ -29,6 +35,8 @@ void border_detector::detect(const cv::Mat &frame, lines_t &borders)
 	{
 		borders.push_back(line_t(cam2rel(cv::Point2f(line[0], line[1]), mask.size()), cam2rel(cv::Point2f(line[2], line[3]), mask.size())));
 	}
+
+	oborders = borders;
 }
 
 float border_detector::dist_closest(const lines_t& borders, const cv::Point2f& p)
@@ -39,6 +47,11 @@ float border_detector::dist_closest(const lines_t& borders, const cv::Point2f& p
 		mindist = min(mindist, dist_line_point(border.first, border.second, p));
 	}
 	return mindist;
+}
+
+float border_detector::dist_closest(const cv::Point2f& p)
+{
+	return dist_closest(borders, p);
 }
 
 void border_detector::draw(cv::Mat &display)
