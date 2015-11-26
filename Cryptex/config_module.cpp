@@ -60,8 +60,10 @@ std::string config_module::get_var(const var_type& type, void* ptr)
 			return string(1, *(static_cast<char*>(ptr)));
 
 		case var_type::int_t:
-		case var_type::bool_t:
 			return to_string(*(static_cast<int*>(ptr)));
+
+		case var_type::bool_t:
+			return to_string(*(static_cast<bool*>(ptr)));
 
 		case var_type::float_t:
 			return to_string(*(static_cast<float*>(ptr)));
@@ -83,8 +85,11 @@ void config_module::set_var(const var_type& type, void* ptr, const std::string &
 			break;
 
 		case var_type::int_t:
-		case var_type::bool_t:
 			*(static_cast<int*>(ptr)) = stoi(val);
+			break;
+
+		case var_type::bool_t:
+			*(static_cast<bool*>(ptr)) = stoi(val);
 			break;
 
 		case var_type::float_t:
