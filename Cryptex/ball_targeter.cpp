@@ -42,7 +42,12 @@ boost::optional<blob> ball_targeter::update(const cv::Mat& frame)
 
 	int bestid = tracker.best();
 	if (!bestid || !ballid || !tracker[ballid] || (tracker[bestid]->score + gap < tracker[ballid]->score))
-		ballid = bestid;
+	{
+		if (bestid && tracker[bestid]->score < 1000.f)
+			ballid = bestid;
+		else if (!bestid)
+			ballid = bestid;
+	}
 
 	return tracker[ballid];
 }
