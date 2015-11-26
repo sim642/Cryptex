@@ -24,6 +24,7 @@ rs485_dongle::~rs485_dongle()
 void rs485_dongle::send(const int &id, const std::string &cmd)
 {
 	this_thread::sleep_for(chrono::milliseconds(1));
+	port.cancel();
 	lock_guard<mutex> lock(stream_mut);
 	stream << id << ":" << cmd << endl;
 }
@@ -31,6 +32,7 @@ void rs485_dongle::send(const int &id, const std::string &cmd)
 void rs485_dongle::send(const int &id, const std::string &cmd, const int &val)
 {
 	this_thread::sleep_for(chrono::milliseconds(1));
+	port.cancel();
 	lock_guard<mutex> lock(stream_mut);
 	stream << id << ":" << cmd << val << endl;
 }
