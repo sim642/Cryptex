@@ -44,6 +44,7 @@
 			<Add option="-lopencv_videoio" />
 			<Add option="-lopencv_imgproc" />
 			<Add option="-lopencv_features2d" />
+			<Add option="-lopencv_imgcodecs" />
 			<Add option="-lpsmoveapi" />
 			<Add option="-lpthread" />
 		</Linker>
