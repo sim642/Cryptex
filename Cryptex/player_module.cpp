@@ -81,8 +81,6 @@ module::type player_module::run(const module::type &prev_module)
 	srf_dongle srf(io, "/dev/ttyACM0");
 	referee_controller referee(srf);
 
-	blob_finder borderer("valge");
-	border_detector borders(borderer);
 
 	blob_finder baller("oranz", "ball");
 	ball_targeter::scorer_t scorer = [](const blob &b)
@@ -92,7 +90,7 @@ module::type player_module::run(const module::type &prev_module)
 		else
 			return b.dist + fabs(b.angle) / 100;
 	};
-	ball_targeter balls(baller, 50, borders, scorer, 0.1f);
+	ball_targeter balls(baller, 50, scorer, 0.1f);
 
 	LOG("player", "waiting team selection button...");
 	bool team = m.button(btn_team);
@@ -102,6 +100,10 @@ module::type player_module::run(const module::type &prev_module)
 	blob_finder goaler2(team ? "sinine" : "kollane", "goal");
 	goal_targeter goals(goaler, goaler2, 50);
 	half goalside = half::right;
+
+	blob_finder borderer("valge");
+	border_detector borders(borderer);
+	balls.add_modifier(borders);
 
 	cv::namedWindow("Remote");
 

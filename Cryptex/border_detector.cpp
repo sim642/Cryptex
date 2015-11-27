@@ -61,3 +61,8 @@ void border_detector::draw(cv::Mat &display)
 		cv::line(display, cv::Point(l[0], l[1]), cv::Point(l[2], l[3]), cv::Scalar(255, 0, 0), 3, CV_AA);
 	}
 }
+
+void border_detector::modify(blob& b)
+{
+	b.borderdist = dist_closest(b.rel);
+}

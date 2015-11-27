@@ -2,11 +2,12 @@
 #define BORDER_DETECTOR_H
 
 #include "blob_finder.hpp"
+#include "blob_modifier.hpp"
 #include <opencv2/opencv.hpp>
 #include <vector>
 #include <utility>
 
-class border_detector
+class border_detector : public blob_modifier
 {
 	public:
 		typedef std::pair<cv::Vec2f, cv::Vec2f> line_t;
@@ -22,6 +23,8 @@ class border_detector
 		float dist_closest(const cv::Point2f &p);
 
 		void draw(cv::Mat &display);
+
+		virtual void modify(blob &b);
 
 	private:
 		blob_finder &blobber;

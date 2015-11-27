@@ -55,6 +55,8 @@
 		<Unit filename="blob_detector.hpp" />
 		<Unit filename="blob_finder.cpp" />
 		<Unit filename="blob_finder.hpp" />
+		<Unit filename="blob_modifier.cpp" />
+		<Unit filename="blob_modifier.hpp" />
 		<Unit filename="blob_targeter.cpp" />
 		<Unit filename="blob_targeter.hpp" />
 		<Unit filename="blob_tracker.cpp" />
