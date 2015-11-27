@@ -94,7 +94,7 @@ boost::optional<blob> blob_finder::largest(const blobs_t &blobs)
 		return boost::none;
 }
 
-void blob_finder::angle_filter_out(blobs_t& bs1, blobs_t &bs2, float angle, float delta)
+void blob_finder::angle_filter_out(blobs_t& bs1, blobs_t &bs2, blobs_t &os, float angle, float delta)
 {
 	vector<bool> keep1(bs1.size(), true), keep2(bs2.size(), true);
 
@@ -109,18 +109,17 @@ void blob_finder::angle_filter_out(blobs_t& bs1, blobs_t &bs2, float angle, floa
 		}
 	}
 
-	blobs_t nbs1, nbs2;
+	blobs_t nbs1, nbs2, nos;
 	for (unsigned int i = 0; i < bs1.size(); i++)
 	{
-		if (keep1[i])
-			nbs1.push_back(bs1[i]);
+		(keep1[i] ? nbs1 : os).push_back(bs1[i]);
 	}
 	for (unsigned int j = 0; j < bs2.size(); j++)
 	{
-		if (keep2[j])
-			nbs2.push_back(bs2[j]);
+		(keep2[j] ? nbs2 : os).push_back(bs2[j]);
 	}
 
 	bs1 = move(nbs1);
 	bs2 = move(nbs2);
+	os = move(nos);
 }

@@ -30,7 +30,7 @@ class blob_finder
 		void detect_frame(const cv::Mat &frame, blobs_t &blobs);
 		static boost::optional<blob> largest(const blobs_t &blobs);
 
-		static void angle_filter_out(blobs_t &bs1, blobs_t &bs2, float angle, float delta);
+		static void angle_filter_out(blobs_t &bs1, blobs_t &bs2, blobs_t &os, float angle, float delta);
 
 		friend class calibrator_window;
 
