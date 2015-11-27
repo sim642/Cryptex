@@ -9,7 +9,7 @@ class blob_modifier
 		blob_modifier();
 		virtual ~blob_modifier();
 
-		virtual void modify(blob &b) = 0;
+		virtual void modify(blob &b);
 };
 
 #endif // BLOB_MODIFIER_H
