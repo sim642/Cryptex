@@ -95,6 +95,8 @@
 		<Unit filename="menu_module.hpp" />
 		<Unit filename="merge_manager.cpp" />
 		<Unit filename="merge_manager.hpp" />
+		<Unit filename="merge_modifier.cpp" />
+		<Unit filename="merge_modifier.hpp" />
 		<Unit filename="module.cpp" />
 		<Unit filename="module.hpp" />
 		<Unit filename="motor_controller.cpp" />

@@ -3,7 +3,7 @@
 
 using namespace std;
 
-ball_targeter::ball_targeter(blob_finder &finder, int maxdist, scorer_t &nscorer, float ngap) : blob_targeter(finder), tracker(maxdist), scorer(nscorer), gap(ngap), ballid(0)
+ball_targeter::ball_targeter(blob_finder &finder, int maxdist, blob_modifier &nmodifier, scorer_t &nscorer, float ngap) : blob_targeter(finder), tracker(maxdist), modifier(nmodifier), scorer(nscorer), gap(ngap), ballid(0)
 {
 
 }
@@ -20,10 +20,7 @@ boost::optional<blob> ball_targeter::update(const cv::Mat& frame)
 	tracker.update(balls);
 
 	for (auto &p : tracker.get_all())
-	{
-		for (blob_modifier *modifier : modifiers)
-			modifier->modify(p.second);
-	}
+		modifier.modify(p.second);
 
 	for (auto &p : tracker.get_all())
 	{
@@ -60,9 +57,4 @@ void ball_targeter::draw(cv::Mat &display)
 		cv::putText(display, to_string(id), b.center, cv::FONT_HERSHEY_PLAIN, 1, cv::Scalar(0, 0, 255), 1);
 		cv::putText(display, to_string(b.score), b.center + cv::Point2f(0, 15), cv::FONT_HERSHEY_PLAIN, 1, cv::Scalar(255, 0, 0), 1);
 	}
-}
-
-void ball_targeter::add_modifier(blob_modifier& modifier)
-{
-	modifiers.push_back(&modifier);
 }

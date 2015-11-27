@@ -6,14 +6,13 @@
 #include "border_detector.hpp"
 #include "blob_modifier.hpp"
 #include <functional>
-#include <vector>
 
 class ball_targeter : public blob_targeter
 {
 	public:
 		typedef std::function<float(const blob&)> scorer_t;
 
-		ball_targeter(blob_finder &finder, int maxdist, scorer_t &nscorer, float gap);
+		ball_targeter(blob_finder &finder, int maxdist, blob_modifier &nmodifier, scorer_t &nscorer, float gap);
 		virtual ~ball_targeter();
 
 		virtual boost::optional<blob> update(const cv::Mat &frame);
@@ -25,7 +24,7 @@ class ball_targeter : public blob_targeter
 
 	private:
 		blob_tracker tracker;
-		std::vector<blob_modifier*> modifiers;
+		blob_modifier &modifier;
 		scorer_t &scorer;
 		float gap;
 		int ballid;
