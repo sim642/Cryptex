@@ -16,7 +16,9 @@
 #include <util/delay.h>
 #include <avr/interrupt.h>
 #include <avr/eeprom.h>
-//#include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include "usb_serial.h"
 
 #define bit_get(p,m) ((p) & (m))
@@ -37,8 +39,6 @@
 #define ENCA PD0
 #define ENCB PD1
 #define BALL PB0
-
-int atoi(const char * str);
 
 union doublebyte
 {
@@ -114,6 +114,17 @@ void backward(uint8_t pwm)
 	currentPWM = -pwm;
 }
 
+void reset_pid()
+{
+	err = 0;
+	err_prev = 0;
+	intgrl = 0;
+	der = 0;
+	sp = 0;
+	sp_pid = 0;
+	forward(0);
+}
+
 void pid()
 {
 	err_prev = err;
@@ -138,7 +149,7 @@ void pid()
 		if (pwm > 255) pwm = 255;
 
 		prevStallCount = stallCount;
-		if ((speed < 5 && currentPWM == 255 || speed > -5 && currentPWM == -255) && stallCount < stallErrorLimit)
+		if (((speed < 5 && currentPWM == 255) || (speed > -5 && currentPWM == -255)) && stallCount < stallErrorLimit)
 		{
 			stallCount++;
 		}
@@ -184,17 +195,6 @@ void pid()
 		}
 	}
 	//OCR1AL = (pwm >= 0) ? pwm : -pwm;
-}
-
-void reset_pid()
-{
-	err = 0;
-	err_prev = 0;
-	intgrl = 0;
-	der = 0;
-	sp = 0;
-	sp_pid = 0;
-	forward(0);
 }
 
 //TODO implement UART

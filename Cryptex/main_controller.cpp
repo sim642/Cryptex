@@ -1,7 +1,16 @@
 #include "main_controller.hpp"
+#include "global.hpp"
+#include "logger.hpp"
 #include <string>
+#include <stdexcept>
 
 using namespace std;
+
+void assume_coilgun()
+{
+	if (!global::coilgun)
+		throw runtime_error("attempt to use disabled coilun");
+}
 
 main_controller::main_controller(device_controller *new_controller) : controller(new_controller)
 {
@@ -10,31 +19,46 @@ main_controller::main_controller(device_controller *new_controller) : controller
 
 main_controller::~main_controller()
 {
-
+	dribbler(0);
 }
 
 void main_controller::kick_override(const bool& state)
 {
+	assume_coilgun();
+	LOG("main", "kick override", state);
 	controller->send("ko", state);
 }
 
 void main_controller::charge_override(const bool &state)
 {
+	assume_coilgun();
+	LOG("main", "charge override", state);
 	controller->send("co", state);
 }
 
 void main_controller::kick()
 {
+	assume_coilgun();
+	LOG("main", "kick");
 	controller->send("k");
 }
 
-void main_controller::kick(const int &ms)
+void main_controller::kick(const int &us)
 {
-	controller->send("k", ms);
+	assume_coilgun();
+	LOG("main", "kick", us);
+	controller->send("k", us); // MainMod takes us
+}
+
+void main_controller::kick(const double &ms)
+{
+	kick(static_cast<int>(ms * 1000));
 }
 
 void main_controller::charge()
 {
+	assume_coilgun();
+	LOG("main", "charge");
 	controller->send("c");
 }
 
@@ -52,7 +76,8 @@ bool main_controller::button(const int &num)
 
 void main_controller::dribbler(const int& speed)
 {
-	controller->send("dm", speed);
+	if (global::dribbler)
+		controller->send("dm", speed);
 }
 
 bool main_controller::io(const int &num)

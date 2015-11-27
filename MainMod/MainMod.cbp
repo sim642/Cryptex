@@ -31,6 +31,7 @@
 			</Environment>
 		</Build>
 		<Compiler>
+			<Add option="-Wextra" />
 			<Add option="-Wall" />
 			<Add option="-mmcu=atmega32u4" />
 			<Add option="-DF_CPU=16000000UL" />

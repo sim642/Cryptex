@@ -5,6 +5,9 @@
 #include <boost/asio.hpp>
 #include "serial_device.hpp"
 #include <string>
+#include <thread>
+#include <mutex>
+#include <atomic>
 
 class rs485_dongle : public device_manager
 {
@@ -18,6 +21,7 @@ class rs485_dongle : public device_manager
 		std::string read_line(const int &id);
 
 	private:
+		void receiver();
 		virtual device_controller* request(const int &id);
 		std::string read_line();
 		static device_controller::recv_t parse_recv(const std::string &line);
@@ -25,6 +29,13 @@ class rs485_dongle : public device_manager
 		boost::asio::io_service &io;
 		boost::asio::serial_port port;
 		serial_stream stream;
+		std::mutex stream_mut;
+		boost::asio::streambuf buf;
+
+		std::thread thr;
+		std::atomic_bool thr_running;
+		std::vector<std::string> lines;
+		std::mutex lines_mut;
 };
 
 #endif // RS485_DONGLE_H

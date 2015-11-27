@@ -1,5 +1,6 @@
 #include "comms.h"
 #include <avr/interrupt.h>
+#include <stdio.h>
 #include "pins.h"
 #include "eeprom.h"
 #include "util.h"

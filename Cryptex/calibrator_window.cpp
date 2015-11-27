@@ -30,7 +30,7 @@ void calibrator_window::calibrate(const std::string &color, const std::string &p
 
 	blob_finder blobber(color);
 	if (param)
-		blobber.load_params(params);
+		blobber.detector.load_params(params);
 
 	string channels = "HSV";
 	blob_finder::bounds_t limits(179, 255, 255);
@@ -41,11 +41,10 @@ void calibrator_window::calibrate(const std::string &color, const std::string &p
 	}
 	cv::createTrackbar("struct_size", win_color, &blobber.struct_size, 25);
 
-	// TODO: params trackbars
-	int minArea = blobber.params.minArea;
+	int minarea = blobber.detector.area.first;
 	if (param)
 	{
-		cv::createTrackbar("areamin", win_params, &minArea, 1000);
+		cv::createTrackbar("minarea", win_params, &minarea, 10000);
 	}
 
 	while (1)
@@ -62,14 +61,19 @@ void calibrator_window::calibrate(const std::string &color, const std::string &p
 		cv::imshow(win_color, masked);
 		if (param)
 		{
-			blobber.params.minArea = minArea;
-			blobber.init_detector();
+			blobber.detector.area.first = minarea;
 
-			vector<cv::KeyPoint> keypoints;
-			blobber.detect(mask, keypoints);
+			blobs_t blobs;
+			blobber.detect(mask, blobs);
 
 			cv::Mat key_img;
-			cv::drawKeypoints(mask, keypoints, key_img, cv::Scalar(255, 0, 255), cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS);
+			cv::cvtColor(mask, key_img, CV_GRAY2BGR);
+			for (auto &b : blobs)
+			{
+				cv::circle(key_img, b.center, b.radius, cv::Scalar(255, 0, 255));
+				cv::rectangle(key_img, b.rect, cv::Scalar(255, 255, 0));
+			}
+
 			cv::imshow(win_params, key_img);
 		}
 
@@ -90,5 +94,5 @@ calibrate_quit:
 
 	blobber.save_color(color);
 	if (param)
-		blobber.save_params(params);
+		blobber.detector.save_params(params);
 }

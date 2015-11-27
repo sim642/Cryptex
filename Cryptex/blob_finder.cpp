@@ -1,12 +1,12 @@
 #include "blob_finder.hpp"
 #include <vector>
+#include <algorithm>
 #include "global.hpp"
+#include "math.hpp"
 
 using namespace std;
 
-const cv::KeyPoint blob_finder::none(-1, -1, -1);
-
-blob_finder::blob_finder()
+blob_finder::blob_finder() : opening(false)
 {
 
 }
@@ -19,7 +19,7 @@ blob_finder::blob_finder(const std::string &color_name) : blob_finder()
 blob_finder::blob_finder(const std::string &color_name, const std::string &params_name) : blob_finder()
 {
 	load_color(color_name);
-	load_params(params_name);
+	detector.load_params(params_name);
 }
 
 blob_finder::~blob_finder()
@@ -49,25 +49,6 @@ void blob_finder::set_color(const bounds_t &new_lower, const bounds_t &new_upper
 	upper = new_upper;
 }
 
-void blob_finder::load_params(const std::string &params_name)
-{
-	cv::FileStorage fs(global::calib_filename(params_name), cv::FileStorage::READ);
-	params.read(fs.root());
-	init_detector();
-}
-
-void blob_finder::save_params(const std::string &params_name)
-{
-	cv::FileStorage fs(global::calib_filename(params_name), cv::FileStorage::WRITE);
-	params.write(fs);
-}
-
-void blob_finder::set_params(const cv::SimpleBlobDetector::Params &new_params)
-{
-	params = new_params;
-	init_detector();
-}
-
 void blob_finder::threshold(const cv::Mat &frame, cv::Mat &mask)
 {
 	cv::Mat hsv;
@@ -76,50 +57,70 @@ void blob_finder::threshold(const cv::Mat &frame, cv::Mat &mask)
 	cv::inRange(hsv, cv::Scalar(lower), cv::Scalar(upper), mask);
 
 	auto structuring = cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(struct_size, struct_size));
-	cv::dilate(mask, mask, structuring);
-	cv::erode(mask, mask, structuring);
+
+	cv::morphologyEx(mask, mask, opening ? cv::MORPH_OPEN : cv::MORPH_CLOSE, structuring);
 }
 
-void blob_finder::detect(const cv::Mat &mask, std::vector<cv::KeyPoint> &keypoints)
+void blob_finder::detect(const cv::Mat &mask, blobs_t &blobs)
 {
-	detector->detect(mask, keypoints);
+	detector.detect(mask, blobs);
+
+	for (auto &b : blobs)
+	{
+		b.rel = cam2rel(b.center, mask.size());
+		auto pol = rect2pol(b.rel);
+		b.dist = pol.x;
+		b.angle = pol.y;
+	}
 }
 
-cv::KeyPoint blob_finder::largest(const cv::Mat &frame)
+void blob_finder::detect_frame(const cv::Mat& frame, blobs_t& blobs)
 {
 	cv::Mat mask;
 	threshold(frame, mask);
-
-	vector<cv::KeyPoint> keypoints;
-	detect(mask, keypoints);
-
-	auto largest = max_element(keypoints.begin(), keypoints.end(), [](const cv::KeyPoint &lhs, const cv::KeyPoint &rhs)
-	{
-		return lhs.size < rhs.size;
-	});
-
-	if (largest != keypoints.end())
-		return *largest;
-	else
-		return none;
+	detect(mask, blobs);
 }
 
-boost::optional<blob_finder::factordist_t> blob_finder::factordist(const cv::Mat &frame, const cv::KeyPoint& largest)
+boost::optional<blob> blob_finder::largest(const blobs_t &blobs)
 {
-	if (largest.size >= 0.f) // if blob found
+	auto largest = max_element(blobs.begin(), blobs.end(), [](const blob &lhs, const blob &rhs)
 	{
-		int diff = frame.cols / 2 - largest.pt.x;
-		float factor = float(diff) / (frame.cols / 2);
+		return lhs.radius < rhs.radius;
+	});
 
-		float dist = (frame.rows - largest.pt.y) / float(frame.rows);
-
-		return make_pair(factor, dist);
-	}
+	if (largest != blobs.end())
+		return *largest;
 	else
 		return boost::none;
 }
 
-void blob_finder::init_detector()
+void blob_finder::angle_filter_out(blobs_t& bs1, blobs_t &bs2, float angle, float delta)
 {
-	detector = cv::SimpleBlobDetector::create(params);
+	vector<bool> keep1(bs1.size(), true), keep2(bs2.size(), true);
+
+	for (unsigned int i = 0; i < bs1.size(); i++)
+	{
+		for (unsigned int j = 0; j < bs2.size(); j++)
+		{
+			auto d = bs2[j].center - bs1[i].center;
+			float deg = rad2deg(vec_angle(d));
+			if (fabs(deg - angle) < delta || fabs(deg - (-180 + angle)) < delta)
+				keep1[i] = keep2[j] = false;
+		}
+	}
+
+	blobs_t nbs1, nbs2;
+	for (unsigned int i = 0; i < bs1.size(); i++)
+	{
+		if (keep1[i])
+			nbs1.push_back(bs1[i]);
+	}
+	for (unsigned int j = 0; j < bs2.size(); j++)
+	{
+		if (keep2[j])
+			nbs2.push_back(bs2[j]);
+	}
+
+	bs1 = move(nbs1);
+	bs2 = move(nbs2);
 }

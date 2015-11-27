@@ -8,10 +8,12 @@ class module
 		{
 			exit = -1,
 			menu = 0,
+			config,
 			calibrator,
 			player,
 			test,
-			psmove
+			psmove,
+			camera
 		};
 
 		module();

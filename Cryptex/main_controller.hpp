@@ -12,7 +12,8 @@ class main_controller
 		void kick_override(const bool &state);
 		void charge_override(const bool &state);
 		void kick();
-		void kick(const int &ms);
+		void kick(const int &us);
+		void kick(const double &ms);
 		void charge();
 
 		bool ball();

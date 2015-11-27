@@ -4,20 +4,38 @@
 #include <util/delay.h>
 #include <avr/interrupt.h>
 
+#include <stdio.h>
+#include <stdlib.h>
 #include <stdbool.h>
 #include "pins.h"
 #include "eeprom.h"
 #include "comms.h"
 #include "util.h"
 
-#define KICKTIME 5 // ms
+#define KICKTIME 5000 // us
+#define DISCHARGECYCLES 75
+#define DISCHARGETIME 800 // us
+#define DISCHARGEWAIT 200 // ms
 #define FAILSAFE 100 // ticks
 
 
-int atoi(const char * str);
-
 bool failsafe = true;
-volatile uint8_t failsafe_counter = 0;
+volatile uint16_t failsafe_counter = 0;
+volatile uint16_t discharge_counter = 0;
+
+void discharge(uint8_t cycles)
+{
+	bit_clear(PORTD, BIT(CHARGE));
+
+	uint8_t i;
+	for (i = 0; i < cycles; i++)
+	{
+		bit_set(PORTD, BIT(KICK));
+		_delay_us(DISCHARGETIME);
+		bit_clear(PORTD, BIT(KICK));
+		_delay_ms(DISCHARGEWAIT);
+	}
+}
 
 char response[16];
 
@@ -76,6 +94,12 @@ void parse_and_execute_command(char *buf, bool usart)
 		par1 = atoi(command + 2);
 		eeprom_update_byte(EEPROM_INTRPL, par1);
 	}
+	else if (strpref(command, "dm"))
+	{
+		// dribbler motor
+		par1 = atoi(command + 2);
+		OCR3AL = par1;
+	}
 	else if (strpref(command, "ko"))
 	{
 		// kick override
@@ -99,8 +123,13 @@ void parse_and_execute_command(char *buf, bool usart)
 		bit_clear(PORTD, BIT(CHARGE));
 
 		bit_set(PORTD, BIT(KICK));
-		_delay_ms(par1);
+		_delay_us(par1);
 		bit_clear(PORTD, BIT(KICK));
+
+		if (eeprom_read_byte(EEPROM_SINGLE))
+		{
+			bit_set(PORTD, BIT(CHARGE));
+		}
 	}
 	else if (streq(command, "c"))
 	{
@@ -108,6 +137,16 @@ void parse_and_execute_command(char *buf, bool usart)
 		bit_clear(PORTD, BIT(KICK));
 
 		bit_set(PORTD, BIT(CHARGE));
+	}
+	else if (strpref(command, "d"))
+	{
+		// discharge
+		if (streq(command, "d"))
+			par1 = DISCHARGECYCLES;
+		else
+			par1 = atoi(command + 1);
+
+		discharge(par1);
 	}
 	else if (streq(command, "bl"))
 	{
@@ -153,17 +192,23 @@ void parse_and_execute_command(char *buf, bool usart)
 		sprintf(response, "io%d:%d", par1, state);
 		reply_func(response);
 	}
-	else if (strpref(command, "dm"))
-	{
-		// dribbler motor
-		par1 = atoi(command + 2);
-		OCR3AL = par1;
-	}
 	else if (strpref(command, "fs"))
 	{
 		// set failsafe
 		par1 = atoi(command + 2);
 		failsafe = par1;
+	}
+	else if (strpref(command, "au"))
+	{
+		// set automation
+		par1 = atoi(command + 2);
+		eeprom_update_byte(EEPROM_AUTOMAT, par1);
+	}
+	else if (strpref(command, "ss"))
+	{
+		// set single shot
+		par1 = atoi(command + 2);
+		eeprom_update_byte(EEPROM_SINGLE, par1);
 	}
 	else if (streq(command, "p"))
 	{
@@ -182,11 +227,12 @@ ISR(TIMER0_COMPA_vect)
 	//bit_flip(PORTF, BIT(LED2R));
 
 	failsafe_counter++;
+	discharge_counter++;
 }
 
 ISR(PCINT0_vect)
 {
-	if (bit_get(PINB, BIT(DONE)) == 0) // DONE changed to LOW
+	if (eeprom_read_byte(EEPROM_AUTOMAT) && bit_get(PINB, BIT(DONE)) == 0) // DONE changed to LOW
 	{
 		bit_clear(PORTD, BIT(CHARGE));
 
@@ -281,13 +327,21 @@ int main(void)
 		if (failsafe && (failsafe_counter >= FAILSAFE))
 		{
 			// failsafe triggered
-			bit_clear(PORTD, BIT(CHARGE));
-			//bit_set(PORTD, BIT(KICK));
-			bit_clear(PORTD, BIT(KICK));
-			OCR3AL = 0;
+			bit_clear(PORTF, BIT(LED1R));
 
-			failsafe_counter = 0;
+			if (discharge_counter >= (DISCHARGEWAIT * 100 / 1600))
+			{
+				bit_clear(PORTD, BIT(CHARGE));
+				bit_set(PORTD, BIT(KICK));
+				_delay_us(DISCHARGETIME);
+				bit_clear(PORTD, BIT(KICK));
+				discharge_counter = 0;
+			}
+
+			OCR3AL = 0;
 		}
+		else
+			bit_set(PORTF, BIT(LED1R));
 
 		if (usb_serial_available())
 		{

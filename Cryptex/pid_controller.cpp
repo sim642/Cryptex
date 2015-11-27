@@ -31,3 +31,10 @@ double pid_controller::step(double error)
 
 	return out;
 }
+
+void pid_controller::set(double nKp, double nKi, double nKd)
+{
+	Kp = nKp;
+	Ki = nKi;
+	Kd = nKd;
+}
