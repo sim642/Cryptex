@@ -85,13 +85,19 @@ module::type player_module::run(const module::type &prev_module)
 	blob_finder baller("oranz", "ball");
 	ball_targeter::scorer_t scorer = [](const blob &b)
 	{
-		if (b.borderdist < 0.7f)
+		/*if (b.borderdist < 0.7f)
 			return numeric_limits<float>::max();
 		else
-			return b.dist + fabs(b.angle) / 100;
+			return b.dist + fabs(b.angle) / 100;*/
+
+		if (b.borderdist < 0.7f || b.goaldist < 1.2f)
+			return numeric_limits<float>::max();
+		else
+			return b.dist + fabs(b.angle) / 100.f;
+		//return b.borderdist;
 	};
 	merge_modifier ballmodifier;
-	ball_targeter balls(baller, 50, ballmodifier, scorer, 0.1f);
+	ball_targeter balls(baller, 100, ballmodifier, scorer, 0.2f);
 
 	LOG("player", "waiting team selection button...");
 	bool team = m.button(btn_team);
