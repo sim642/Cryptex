@@ -4,7 +4,6 @@
 #include "serial_device.hpp"
 #include <thread>
 #include <mutex>
-#include <atomic>
 #include <string>
 #include <vector>
 #include <tuple>
@@ -31,7 +30,6 @@ class srf_dongle
 		std::mutex stream_mut;
 
 		std::thread thr;
-		std::atomic_bool thr_running;
 
 		std::vector<std::string> recvd;
 		std::mutex recvd_mut;

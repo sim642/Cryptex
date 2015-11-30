@@ -6,15 +6,14 @@
 
 using namespace std;
 
-srf_dongle::srf_dongle(boost::asio::io_service &io, const std::string &dev) : port(io, dev), stream(port), thr(bind(&srf_dongle::receiver, this)), thr_running(true)
+srf_dongle::srf_dongle(boost::asio::io_service &io, const std::string &dev) : port(io, dev), stream(port), thr(bind(&srf_dongle::receiver, this))
 {
 	port.set_option(boost::asio::serial_port_base::baud_rate(9600));
 }
 
 srf_dongle::~srf_dongle()
 {
-	thr_running = false;
-	thr.join();
+
 }
 
 void srf_dongle::send(std::string raw)
@@ -69,7 +68,7 @@ std::tuple<char, char, std::string> srf_dongle::recv_parsed()
 
 void srf_dongle::receiver()
 {
-	while (thr_running)
+	while (1)
 	{
 		char ch;
 
