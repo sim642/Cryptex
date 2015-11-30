@@ -30,7 +30,7 @@ module::type menu_module::run(const module::type &prev_module)
 		}
 
 		cout << "> ";
-		int selection;
+		unsigned int selection;
 		if ((cin >> selection) && (selection >= 1 && selection <= modules.size()))
 			return modules[selection - 1].second;
 		else
