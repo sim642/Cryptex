@@ -232,7 +232,11 @@ module::type player_module::run(const module::type &prev_module)
 					break;
 				}
 
+				borders.detect(frame);
+				goals.update(frame);
 				auto ball = balls.update(frame);
+				borders.draw(display);
+				goals.draw(display);
 				balls.draw(display);
 
 				if (state == BallFind && ball)
