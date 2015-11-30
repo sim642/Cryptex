@@ -44,6 +44,8 @@ inline T clamp(T val, range_t<T> range)
 	return std::min(range.second, std::max(range.first, val));
 }
 
+float ease_nexpn(float t, const cv::Point2f &p);
+
 template<typename T>
 inline float vec_angle(const cv::Point_<T> &vec)
 {

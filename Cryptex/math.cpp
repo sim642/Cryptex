@@ -45,6 +45,11 @@ cv::Point2f pol2rect(const cv::Point2f &pol)
 	return pol.x * cv::Point2f(cos(deg2rad(pol.y)), sin(deg2rad(pol.y)));
 }
 
+float ease_nexpn(float t, const cv::Point2f &p)
+{
+	return -expm1(log1p(1 - p.y) / p.x * t);
+}
+
 float dist_line_point(const cv::Point2f &a, const cv::Vec2f &n, const cv::Point2f &p)
 {
 	/// https://en.wikipedia.org/wiki/Distance_from_a_point_to_a_line#Vector_formulation

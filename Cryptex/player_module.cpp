@@ -248,7 +248,7 @@ module::type player_module::run(const module::type &prev_module)
 					d.rotate(max(5.f, 30 - get_statestart() / 2.f * 10));
 				else if (state == BallDrive)
 				{
-					d.omni(speed_pid.step(ball->dist), angle_pid.step(ball->angle), rotate_pid.step(ball->angle));
+					d.omni(ease_nexpn(get_statestart(), cv::Point2f(0.5, 0.75)) * speed_pid.step(ball->dist), angle_pid.step(ball->angle), rotate_pid.step(ball->angle));
 
 					m.dribbler(ball->dist < 0.5 ? dribblerspeed : 0);
 					if (ball->dist < 0.28)
