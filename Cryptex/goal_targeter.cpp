@@ -46,6 +46,9 @@ void goal_targeter::draw(cv::Mat& display)
 
 	for (auto &b : goals2)
 		cv::rectangle(display, b.rect, cv::Scalar(0, 255, 255), 1);
+
+	for (auto &b : enemys)
+		cv::rectangle(display, b.rect, cv::Scalar(0, 0, 255), 1);
 }
 
 void goal_targeter::modify(blob& b)
