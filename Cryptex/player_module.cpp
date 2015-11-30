@@ -90,7 +90,8 @@ module::type player_module::run(const module::type &prev_module)
 		else
 			return b.dist + fabs(b.angle) / 100;*/
 
-		if (b.borderdist < 0.7f || b.goaldist < 1.2f)
+		//if (b.borderdist < 0.7f || b.goaldist < 1.2f)
+		if (b.borderdist < 0.5f || b.goaldist < 0.3f || b.enemydist < 0.5f)
 			return numeric_limits<float>::max();
 		else
 			return b.dist + fabs(b.angle) / 100.f;
@@ -140,9 +141,13 @@ module::type player_module::run(const module::type &prev_module)
 		//angle_pid.set(0.1);
 		//rotate_pid.set(1.5);
 
-		speed_pid.set(110, 0, 0.2);
+		/*speed_pid.set(110, 0, 0.2);
 		angle_pid.set(0);
-		rotate_pid.set(2.5, 0.5, 0.15);
+		rotate_pid.set(2.5, 0.5, 0.15);*/
+
+		speed_pid.set(90, 0, 0);
+		angle_pid.set(0);
+		rotate_pid.set(2.5, 0.05, 0.0);
 	};
 
 	transitions[BallGrab] = [&](state_t prev_state)
@@ -166,7 +171,8 @@ module::type player_module::run(const module::type &prev_module)
 		rotate_pid.set(2, 0.7, 0.15);*/
 
 		speed_pid.set(1.5);
-		rotate_pid.set(1.5, 0, 0.22);
+		//rotate_pid.set(1.5, 0, 0.22);
+		rotate_pid.set(1.0, 0, 0.05);
 	};
 
 	if (global::coilgun)
@@ -245,13 +251,14 @@ module::type player_module::run(const module::type &prev_module)
 					SET_STATE(BallFind)
 
 				if (state == BallFind)
-					d.rotate(max(5.f, 30 - get_statestart() / 2.f * 10));
+					d.rotate(max(5.f, 25 - get_statestart() / 1.75f * 10));
 				else if (state == BallDrive)
 				{
-					d.omni(ease_nexpn(get_statestart(), cv::Point2f(0.5, 0.75)) * speed_pid.step(ball->dist), angle_pid.step(ball->angle), rotate_pid.step(ball->angle));
+					//d.omni(ease_nexpn(get_statestart(), cv::Point2f(0.5, 0.75)) * speed_pid.step(ball->dist), angle_pid.step(ball->angle), rotate_pid.step(ball->angle));
+					d.omni(speed_pid.step(ball->dist), angle_pid.step(ball->angle), rotate_pid.step(ball->angle));
 
-					m.dribbler(ball->dist < 0.5 ? dribblerspeed : 0);
-					if (ball->dist < 0.28)
+					m.dribbler(ball->dist < 0.7 ? dribblerspeed : 0);
+					if (ball->dist < 0.30)
 						SET_STATE(BallGrab)
 				}
 
