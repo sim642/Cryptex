@@ -67,7 +67,7 @@ module::type test_module::run(const module::type &prev_module)
 		blobs_t balls;
 		baller.detect_frame(frame, balls);
 
-		border_detector::lines_t lines;
+		lines_t lines;
 		borders.detect(frame, lines);
 
 		cout << border_detector::dist_closest(lines, cv::Point2f(0, 0)) << endl;

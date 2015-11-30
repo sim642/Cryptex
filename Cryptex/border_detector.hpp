@@ -10,9 +10,6 @@
 class border_detector : public blob_modifier
 {
 	public:
-		typedef std::pair<cv::Vec2f, cv::Vec2f> line_t;
-		typedef std::vector<line_t> lines_t;
-
 		border_detector(blob_finder &nblobber);
 		virtual ~border_detector();
 
