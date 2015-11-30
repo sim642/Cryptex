@@ -298,10 +298,11 @@ module::type player_module::run(const module::type &prev_module)
 				{
 					goals.draw(display);
 
-					auto goalleft = cam2rel(goal->rect.tl() + cv::Point(0, goal->rect.height), frame.size());
-					auto goalright = cam2rel(goal->rect.br(), frame.size());
-					float goalleftangle = rect2pol(goalleft).y;
-					float goalrightangle = rect2pol(goalright).y;
+					auto goalline = goal_targeter::blob2line(*goal, frame.size());
+					goalline = lengthen(goalline, 0.05f);
+
+					float goalleftangle = rect2pol(goalline.first).y;
+					float goalrightangle = rect2pol(goalline.second).y;
 
 					if (goalleftangle > 0 && goalrightangle < 0)
 					{
@@ -309,7 +310,7 @@ module::type player_module::run(const module::type &prev_module)
 						baller.detect_frame(frame, balls);
 
 						bool good = true;
-						auto goalpoint = (goalleft + goalright) / 2;
+						auto goalpoint = midpoint(goalline);
 						for (auto &ball : balls)
 						{
 							if (dist_lineseg_point({0.f, 0.f}, {0.f, goalpoint.y}, ball.rel) < 0.1f)
