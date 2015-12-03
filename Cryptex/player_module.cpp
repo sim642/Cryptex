@@ -91,7 +91,7 @@ module::type player_module::run(const module::type &prev_module)
 			return b.dist + fabs(b.angle) / 100;*/
 
 		//if (b.borderdist < 0.7f || b.goaldist < 1.2f)
-		if (b.borderdist < 0.5f || b.goaldist < 0.3f || b.enemydist < 0.5f)
+		if (b.borderdist < 0.4f || b.goaldist < 0.2f || b.enemydist < 0.3f)
 			return numeric_limits<float>::max();
 		else
 			return b.dist + fabs(b.angle) / 100.f;
@@ -147,7 +147,7 @@ module::type player_module::run(const module::type &prev_module)
 
 		speed_pid.set(90, 0, 0);
 		angle_pid.set(0);
-		rotate_pid.set(2.5, 0.05, 0.0);
+		rotate_pid.set(1.5, 0, 0.0);
 	};
 
 	transitions[BallGrab] = [&](state_t prev_state)
@@ -172,7 +172,8 @@ module::type player_module::run(const module::type &prev_module)
 
 		speed_pid.set(1.5);
 		//rotate_pid.set(1.5, 0, 0.22);
-		rotate_pid.set(1.0, 0, 0.05);
+		//rotate_pid.set(1.0, 0, 0.05);
+		rotate_pid.set(0.3, 0.05, 0.01);
 	};
 
 	if (global::coilgun)
@@ -257,8 +258,8 @@ module::type player_module::run(const module::type &prev_module)
 					//d.omni(ease_nexpn(get_statestart(), cv::Point2f(0.5, 0.75)) * speed_pid.step(ball->dist), angle_pid.step(ball->angle), rotate_pid.step(ball->angle));
 					d.omni(speed_pid.step(ball->dist), angle_pid.step(ball->angle), rotate_pid.step(ball->angle));
 
-					m.dribbler(ball->dist < 0.7 ? dribblerspeed : 0);
-					if (ball->dist < 0.30)
+					m.dribbler(ball->dist < 0.8 ? dribblerspeed : 0);
+					if (ball->dist < 0.27)
 						SET_STATE(BallGrab)
 				}
 
@@ -291,9 +292,9 @@ module::type player_module::run(const module::type &prev_module)
 				else
 				{
 					if (goalside == half::left)
-						d.omni(50, -45, 37);
+						d.omni(35, -45, 27);
 					else
-						d.omni(50, 45, -37);
+						d.omni(35, 45, -27);
 				}
 
 				break;
