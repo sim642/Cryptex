@@ -36,7 +36,8 @@ const std::map<player_module::state_t, std::string> player_module::state_name =
 	{BallGrab, "BallGrab"},
 	{GoalFind, "GoalFind"},
 	{GoalAim, "GoalAim"},
-	{GoalDrive, "GoalDrive"}
+	{GoalDrive, "GoalDrive"},
+	{AreaEmpty, "AreaEmpty"}
 };
 
 player_module::player_module() : state(Undefined)
@@ -237,7 +238,12 @@ module::type player_module::run(const module::type &prev_module)
 					SET_STATE(BallFind)
 
 				if (state == BallFind)
-					d.rotate(max(5.f, 25 - get_statestart() / 1.75f * 10));
+				{
+					if (get_statestart() > 5.f)
+						SET_STATE(AreaEmpty)
+					else
+						d.rotate(max(5.f, 25 - get_statestart() / 1.75f * 10));
+				}
 				else if (state == BallDrive)
 				{
 					d.omni(ease_nexpn(get_statestart(), cv::Point2f(1.0, 0.75)) * speed_pid.step(ball->dist), angle_pid.step(ball->angle), rotate_pid.step(ball->angle));
@@ -382,6 +388,21 @@ module::type player_module::run(const module::type &prev_module)
 				else
 					SET_STATE(GoalFind)
 
+				break;
+			}
+
+			case AreaEmpty:
+			{
+				borders.detect(frame);
+				float dist = borders.dist_closest(cv::Point2f(0, 0)); // my distance
+				if (dist > 2.f)
+				{
+					d.straight(100);
+					this_thread::sleep_for(chrono::milliseconds(750));
+					SET_STATE(BallFind)
+				}
+				else
+					d.rotate(20);
 				break;
 			}
 		}
