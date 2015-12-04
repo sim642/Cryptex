@@ -1,0 +1,6 @@
+%YAML:1.0
+mincanny: 0
+maxcanny: 255
+thres: 40
+length: 50
+gap: 100

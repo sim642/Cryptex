@@ -8,6 +8,7 @@ menu_module::menu_module()
 {
 	modules.push_back(make_pair("config", module::type::config));
 	modules.push_back(make_pair("calibrator", module::type::calibrator));
+	modules.push_back(make_pair("linecalibrator", module::type::linecalibrator));
 	modules.push_back(make_pair("camera", module::type::camera));
 	modules.push_back(make_pair("player", module::type::player));
 	modules.push_back(make_pair("test", module::type::test));

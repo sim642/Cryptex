@@ -9,6 +9,7 @@
 #include "test_module.hpp"
 #include "psmove_module.hpp"
 #include "camera_module.hpp"
+#include "linecalibrator_module.hpp"
 
 using namespace std;
 
@@ -35,6 +36,7 @@ int main()
 	modules[module::type::test] = new test_module();
 	modules[module::type::psmove] = new psmove_module();
 	modules[module::type::camera] = new camera_module();
+	modules[module::type::linecalibrator] = new linecalibrator_module();
 
 	module::type next_module = module::type::menu;
 	module::type prev_module = module::type::exit;

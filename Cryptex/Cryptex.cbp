@@ -84,6 +84,8 @@
 		<Unit filename="global.hpp" />
 		<Unit filename="goal_targeter.cpp" />
 		<Unit filename="goal_targeter.hpp" />
+		<Unit filename="linecalibrator_module.cpp" />
+		<Unit filename="linecalibrator_module.hpp" />
 		<Unit filename="logger.cpp" />
 		<Unit filename="logger.hpp" />
 		<Unit filename="main.cpp" />

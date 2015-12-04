@@ -112,7 +112,7 @@ module::type player_module::run(const module::type &prev_module)
 	half goalside = half::right;
 
 	blob_finder borderer("valge");
-	border_detector borders(borderer);
+	border_detector borders(borderer, "border");
 	ballmodifier.add_modifier(borders);
 
 	cv::namedWindow("Remote");
