@@ -224,21 +224,6 @@ module::type player_module::run(const module::type &prev_module)
 				/*if (m.ball())
 					SET_STATE(GoalFind)*/
 
-				//if (borders.detect(frame))
-				if (false)
-				{
-					m.dribbler(0);
-					//d.omni(50, 150, -15);
-					//d.omni(80, 180, 0);
-					//d.rotate(-50);
-					//this_thread::sleep_for(chrono::milliseconds(200));
-					d.rotate(20);
-					this_thread::sleep_for(chrono::milliseconds(500));
-
-					LOG("player", "border");
-					break;
-				}
-
 				borders.detect(frame);
 				goals.update(frame);
 				auto ball = balls.update(frame);
@@ -255,8 +240,7 @@ module::type player_module::run(const module::type &prev_module)
 					d.rotate(max(5.f, 25 - get_statestart() / 1.75f * 10));
 				else if (state == BallDrive)
 				{
-					//d.omni(ease_nexpn(get_statestart(), cv::Point2f(0.5, 0.75)) * speed_pid.step(ball->dist), angle_pid.step(ball->angle), rotate_pid.step(ball->angle));
-					d.omni(speed_pid.step(ball->dist), angle_pid.step(ball->angle), rotate_pid.step(ball->angle));
+					d.omni(ease_nexpn(get_statestart(), cv::Point2f(1.0, 0.75)) * speed_pid.step(ball->dist), angle_pid.step(ball->angle), rotate_pid.step(ball->angle));
 
 					m.dribbler(ball->dist < 0.8 ? dribblerspeed : 0);
 					if (ball->dist < 0.27)

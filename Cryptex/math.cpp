@@ -47,7 +47,8 @@ cv::Point2f pol2rect(const cv::Point2f &pol)
 
 float ease_nexpn(float t, const cv::Point2f &p)
 {
-	return -expm1(log1p(1 - p.y) / p.x * t);
+	//return 1 - exp(-(log(1 - p.y) / -p.x) * t);
+	return -expm1((log1p(-p.y) / p.x) * t);
 }
 
 float dist_line_point(const cv::Point2f &a, const cv::Vec2f &n, const cv::Point2f &p)
