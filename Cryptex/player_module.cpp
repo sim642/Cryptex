@@ -5,6 +5,9 @@
 #include "logger.hpp"
 
 #include "rs485_dongle.hpp"
+#include "serial_scanner.hpp"
+#include "serial_controller.hpp"
+#include "merge_manager.hpp"
 #include "global.hpp"
 #include "driver.hpp"
 #include "main_controller.hpp"
@@ -70,9 +73,16 @@ module::type player_module::run(const module::type &prev_module)
 	boost::asio::io_service io;
 
 	rs485_dongle dongle(io, "/dev/ttyUSB0");
+	//serial_scanner scanner(io);
+	//scanner.add_device("/dev/ttyACM1");
+	//merge_manager manager;
+	//manager.add_manager(&dongle);
+	//manager.add_manager(&scanner);
+	serial_controller mcontrol(io, "/dev/ttyACM1");
 
 	driver d(dongle);
-	main_controller m(dongle[device_id::main]);
+	//main_controller m(manager[device_id::main]);
+	main_controller m(&mcontrol);
 
 	cv::VideoCapture capture(global::video_id);
 	if (!capture.isOpened())
@@ -187,6 +197,7 @@ module::type player_module::run(const module::type &prev_module)
 		framestart = chrono::high_resolution_clock::now();
 
 		m.ping();
+		//cout << m.ball() << flush;
 
 		if (global::referee)
 		{
@@ -222,8 +233,8 @@ module::type player_module::run(const module::type &prev_module)
 			case BallFind:
 			case BallDrive:
 			{
-				/*if (m.ball())
-					SET_STATE(GoalFind)*/
+				if (m.ball())
+					SET_STATE(GoalFind)
 
 				borders.detect(frame);
 				goals.update(frame);
@@ -292,8 +303,8 @@ module::type player_module::run(const module::type &prev_module)
 
 			case GoalAim:
 			{
-				/*if (!m.ball())
-					SET_STATE(BallFind)*/
+				if (!m.ball())
+					SET_STATE(BallFind)
 
 				auto goal = goals.update(frame);
 				if (goal)
