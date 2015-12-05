@@ -33,7 +33,7 @@ void calibrator_window::calibrate(const std::string &color, const std::string &p
 		blobber.detector.load_params(params);
 
 	string channels = "HSV";
-	blob_finder::bounds_t limits(179, 255, 255);
+	blob_finder::bounds_t limits(180, 256, 256);
 	for (size_t i = 0; i < channels.size(); i++)
 	{
 		cv::createTrackbar(string(1, channels[i]) + "min", win_color, &blobber.lower[i], limits[i]);
