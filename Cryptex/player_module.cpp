@@ -107,7 +107,7 @@ module::type player_module::run(const module::type &prev_module)
 	LOG("player", "attacking", team_str);
 	blob_finder goaler(team_str, "goal");
 	blob_finder goaler2(team ? "sinine" : "kollane", "goal");
-	goal_targeter goals(goaler, goaler2, 50);
+	goal_targeter goals(goaler, goaler2, 45);
 	ballmodifier.add_modifier(goals);
 	half goalside = half::right;
 
