@@ -53,6 +53,13 @@ inline float vec_angle(const cv::Point_<T> &vec)
 }
 
 template<typename T>
+inline float vec_angle(const cv::Point_<T> &vec1, const cv::Point_<T> &vec2)
+{
+	/// v1 * v2 = |v1||v2|cos a
+	return acos(vec1.dot(vec2) / (cv::norm(vec1) * cv::norm(vec2)));
+}
+
+template<typename T>
 inline cv::Point_<T> scale_to(const cv::Point_<T> &vec, T len)
 {
 	return (len * cv::norm(vec)) * vec;

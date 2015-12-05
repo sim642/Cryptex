@@ -92,7 +92,7 @@ module::type player_module::run(const module::type &prev_module)
 			return b.dist + fabs(b.angle) / 100;*/
 
 		//if (b.borderdist < 0.7f || b.goaldist < 1.2f)
-		if (b.borderdist < 0.4f || b.goaldist < 0.2f || b.enemydist < 0.3f)
+		if (b.borderdist < 0.f || b.goaldist < 0.2f || b.enemydist < 0.3f)
 			return numeric_limits<float>::max();
 		else
 			return b.dist + fabs(b.angle) / 100.f;

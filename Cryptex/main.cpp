@@ -15,15 +15,15 @@ using namespace std;
 
 int main()
 {
-	global::env = "301";
+	global::env = "ttu2";
 	global::video_id = 0;
 
-	global::referee = true;
+	global::referee = false;
 	global::field = 'A';
 	global::id = 'A';
 
-	global::dribbler = true;
-	global::coilgun = true;
+	global::dribbler = false;
+	global::coilgun = false;
 
 	global::camera = "pseye";
 	global::load_camera();
