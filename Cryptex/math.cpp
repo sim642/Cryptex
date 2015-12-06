@@ -88,7 +88,7 @@ line_t lengthen(const line_t &line, float dl)
 	auto diff = line.second - line.first;
 	auto p = line.first + scale_to(diff, -dl);
 	auto d = lengthen(diff, 2 * dl);
-	return line_t(p, d);
+	return line_t(p, p + d);
 }
 
 cv::Point2f midpoint(const line_t& line)
