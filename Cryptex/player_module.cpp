@@ -164,7 +164,7 @@ module::type player_module::run(const module::type &prev_module)
 		angle_pid.set(0);
 		//rotate_pid.set(1.5, 0.4, 0.15);
 		//rotate_pid.set(1.7, 0.35, 0.15);
-		rotate_pid.set(1.40, 0.2, 0.1);
+		rotate_pid.set(1.40, 0.25, 0.1);
 	};
 
 	transitions[BallGrab] = [&](state_t prev_state)
