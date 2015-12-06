@@ -156,9 +156,15 @@ module::type player_module::run(const module::type &prev_module)
 		angle_pid.set(0);
 		rotate_pid.set(2.5, 0.5, 0.15);*/
 
-		speed_pid.set(90, 0, 0);
+		/*speed_pid.set(90, 0, 0);
 		angle_pid.set(0);
-		rotate_pid.set(1.5, 0, 0.0);
+		rotate_pid.set(1.5, 0, 0.0);*/
+
+		speed_pid.set(100, 0, 1.0);
+		angle_pid.set(0);
+		//rotate_pid.set(1.5, 0.4, 0.15);
+		//rotate_pid.set(1.7, 0.35, 0.15);
+		rotate_pid.set(1.40, 0.2, 0.1);
 	};
 
 	transitions[BallGrab] = [&](state_t prev_state)
@@ -184,7 +190,8 @@ module::type player_module::run(const module::type &prev_module)
 		speed_pid.set(1.5);
 		//rotate_pid.set(1.5, 0, 0.22);
 		//rotate_pid.set(1.0, 0, 0.05);
-		rotate_pid.set(0.3, 0.05, 0.01);
+		//rotate_pid.set(0.3, 0.05, 0.015);
+		rotate_pid.set(0.5, 0.1, 0.12);
 	};
 
 	if (global::coilgun)
@@ -253,14 +260,14 @@ module::type player_module::run(const module::type &prev_module)
 					if (get_statestart() > 5.f)
 						SET_STATE(AreaEmpty)
 					else
-						d.rotate(max(5.f, 25 - get_statestart() / 1.75f * 10));
+						d.rotate(max(3.f, 20 - get_statestart() / 1.75f * 10));
 				}
 				else if (state == BallDrive)
 				{
-					d.omni(ease_nexpn(get_statestart(), cv::Point2f(1.0, 0.75)) * speed_pid.step(ball->dist), angle_pid.step(ball->angle), rotate_pid.step(ball->angle));
+					d.omni(ease_nexpn(get_statestart(), cv::Point2f(0.75, 0.75)) * speed_pid.step(ball->dist), angle_pid.step(ball->angle), rotate_pid.step(ball->angle));
 
 					m.dribbler(ball->dist < 0.8 ? dribblerspeed : 0);
-					if (ball->dist < 0.27)
+					if (ball->dist < 0.28)
 						SET_STATE(BallGrab)
 				}
 
@@ -270,13 +277,14 @@ module::type player_module::run(const module::type &prev_module)
 			case BallGrab:
 			{
 				d.straight(50);
+				m.dribbler(dribblerspeed);
 
 				if (m.ball())
 				{
-					this_thread::sleep_for(chrono::milliseconds(250));
+					this_thread::sleep_for(chrono::milliseconds(350));
 					SET_STATE(GoalFind)
 				}
-				else if (get_statestart() > 0.65f)
+				else if (get_statestart() > 1.f)
 					SET_STATE(BallFind)
 
 				break;
@@ -284,8 +292,10 @@ module::type player_module::run(const module::type &prev_module)
 
 			case GoalFind:
 			{
-				if (!m.ball())
-					SET_STATE(BallFind)
+				/*if (!m.ball())
+					SET_STATE(BallFind)*/
+
+				m.dribbler(dribblerspeed);
 
 				auto goal = goals.update(frame);
 				if (goal)
@@ -293,9 +303,9 @@ module::type player_module::run(const module::type &prev_module)
 				else
 				{
 					if (goalside == half::left)
-						d.omni(35, -45, 27);
+						d.omni(25, -45, 19);
 					else
-						d.omni(35, 45, -27);
+						d.omni(25, 45, -19);
 				}
 
 				break;
@@ -405,6 +415,8 @@ module::type player_module::run(const module::type &prev_module)
 			case AreaEmpty:
 			{
 				borders.detect(frame);
+				borders.draw(display);
+
 				float dist = borders.dist_closest(cv::Point2f(0, 0)); // my distance
 				if (dist > 2.f)
 				{
