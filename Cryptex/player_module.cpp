@@ -78,7 +78,7 @@ module::type player_module::run(const module::type &prev_module)
 	//merge_manager manager;
 	//manager.add_manager(&dongle);
 	//manager.add_manager(&scanner);
-	serial_controller mcontrol(io, "/dev/ttyACM1");
+	serial_controller mcontrol(io, "/dev/ttyACM0");
 
 	driver d(dongle);
 	//main_controller m(manager[device_id::main]);
@@ -90,7 +90,7 @@ module::type player_module::run(const module::type &prev_module)
 
 	//psmove move;
 
-	srf_dongle srf(io, "/dev/ttyACM0");
+	srf_dongle srf(io, "/dev/ttyACM1");
 	referee_controller referee(srf);
 
 	blob_finder baller("oranz", "ball");
