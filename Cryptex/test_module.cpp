@@ -36,6 +36,8 @@ test_module::~test_module()
 
 module::type test_module::run(const module::type &prev_module)
 {
+	cv::VideoCapture capture(global::video_id);
+
 	vector<string> files =
 	{
 		"my_front_view.jpg",
@@ -48,40 +50,42 @@ module::type test_module::run(const module::type &prev_module)
 	for (auto &file : files)
 		images.push_back(cv::imread("pics/" + file));
 
-	cv::namedWindow("walls");
+	cv::namedWindow("borders");
 
-	blob_finder baller("oranz", "ball");
-	blob_finder blobber("valge");
-	blobber.opening = true;
-	border_detector borders(blobber);
+	blob_finder col1("col1"), col2("col2");
 
 	int i = 0;
 	while (1)
 	{
 		cv::Mat frame;
-		images[i].copyTo(frame);
+		//images[i].copyTo(frame);
+		capture >> frame;
 
 		cv::Mat display;
 		frame.copyTo(display);
 
-		blobs_t balls;
-		baller.detect_frame(frame, balls);
+		/*cv::Mat mask1, mask2;
+		col1.threshold(frame, mask1);
+		col2.threshold(frame, mask2);
 
-		lines_t lines;
-		borders.detect(frame, lines);
+		cv::Sobel(mask1, mask1, -1, 1, 1);
+		cv::Sobel(mask2, mask2, -1, 1, 1);
 
-		cout << border_detector::dist_closest(lines, cv::Point2f(0, 0)) << endl;
+		cv::threshold(mask1, mask1, 128, 255, cv::THRESH_BINARY);
+		cv::threshold(mask2, mask2, 128, 255, cv::THRESH_BINARY);
 
-		for (auto &ball : balls)
-		{
-			cout << border_detector::dist_closest(lines, ball.rel) << "\t";
-		}
-		cout << endl;
+		cv::Mat combo;
+		cv::bitwise_and(mask1, mask2, combo);*/
 
+		cv::Mat mask1;
+		col1.threshold(frame, mask1);
+		cv::blur(mask1, mask1, cv::Size(5, 5));
 
-		borders.draw(display);
+		cv::Mat sobel1;
+		cv::Sobel(mask1, sobel1, -1, 1, 1);
+		cv::dilate(sobel1, sobel1, cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(3, 3)));
 
-		cv::imshow("walls", display);
+		cv::imshow("borders", sobel1);
 
 		char key = cv::waitKey(1000 / 30);
 		switch (key)
