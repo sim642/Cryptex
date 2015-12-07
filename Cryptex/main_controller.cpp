@@ -1,6 +1,7 @@
 #include "main_controller.hpp"
 #include "global.hpp"
 #include "logger.hpp"
+#include "math.hpp"
 #include <string>
 #include <stdexcept>
 
@@ -77,7 +78,7 @@ bool main_controller::button(const int &num)
 void main_controller::dribbler(const int& speed)
 {
 	if (global::dribbler)
-		controller->send("dm", speed);
+		controller->send("dm", clamp(speed, {0, 255}));
 }
 
 bool main_controller::io(const int &num)

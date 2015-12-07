@@ -3,6 +3,7 @@
 #include <boost/filesystem.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 #include <iostream>
+#include "logger.hpp"
 
 using namespace std;
 
@@ -27,7 +28,7 @@ void serial_scanner::add_device(const std::string &dev)
 	serial_controller *controller = new serial_controller(io, dev);
 
 	int id = controller->id();
-	cout << dev << " : " << id << endl;
+	LOG("serial_scanner", "detected", dev, "as ID", id);
 	controllers[id] = controller;
 }
 
@@ -38,7 +39,7 @@ void serial_scanner::scan_devices(const std::string &tty)
 	{
 		if (boost::algorithm::starts_with(it->path().filename().string(), tty))
 		{
-			cout << it->path().string() << endl;
+			LOG("serial_scanner", "found", it->path().string());
 			add_device(it->path().string());
 		}
 	}

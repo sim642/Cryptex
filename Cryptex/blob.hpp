@@ -17,7 +17,7 @@ struct blob
 	float dist, angle;
 
 	// other attribues
-	float borderdist;
+	float borderdist, enemydist, goaldist;
 	float score;
 };
 

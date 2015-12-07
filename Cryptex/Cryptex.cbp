@@ -55,6 +55,8 @@
 		<Unit filename="blob_detector.hpp" />
 		<Unit filename="blob_finder.cpp" />
 		<Unit filename="blob_finder.hpp" />
+		<Unit filename="blob_modifier.cpp" />
+		<Unit filename="blob_modifier.hpp" />
 		<Unit filename="blob_targeter.cpp" />
 		<Unit filename="blob_targeter.hpp" />
 		<Unit filename="blob_tracker.cpp" />
@@ -82,6 +84,8 @@
 		<Unit filename="global.hpp" />
 		<Unit filename="goal_targeter.cpp" />
 		<Unit filename="goal_targeter.hpp" />
+		<Unit filename="linecalibrator_module.cpp" />
+		<Unit filename="linecalibrator_module.hpp" />
 		<Unit filename="logger.cpp" />
 		<Unit filename="logger.hpp" />
 		<Unit filename="main.cpp" />
@@ -93,6 +97,8 @@
 		<Unit filename="menu_module.hpp" />
 		<Unit filename="merge_manager.cpp" />
 		<Unit filename="merge_manager.hpp" />
+		<Unit filename="merge_modifier.cpp" />
+		<Unit filename="merge_modifier.hpp" />
 		<Unit filename="module.cpp" />
 		<Unit filename="module.hpp" />
 		<Unit filename="motor_controller.cpp" />

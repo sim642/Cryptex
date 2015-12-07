@@ -29,7 +29,8 @@ class player_module : public module
 			BallGrab,
 			GoalFind,
 			GoalAim,
-			GoalDrive
+			GoalDrive,
+			AreaEmpty
 		};
 		static const std::map<state_t, std::string> state_name;
 

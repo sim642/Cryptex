@@ -85,7 +85,10 @@ module::type camera_module::run(const module::type &prev_module)
 		switch (key)
 		{
 			case 'q':
+			{
+				global::save_camera();
 				return module::type::menu;
+			}
 		}
 	}
 

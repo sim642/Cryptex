@@ -3,14 +3,9 @@
 
 using namespace std;
 
-ball_targeter::ball_targeter(blob_finder &finder, int maxdist, scorer_t &nscorer, float ngap) : blob_targeter(finder), tracker(maxdist), borderer(boost::none), scorer(nscorer), gap(ngap), ballid(0)
+ball_targeter::ball_targeter(blob_finder &finder, int maxdist, blob_modifier &nmodifier, scorer_t &nscorer, float ngap) : blob_targeter(finder), tracker(maxdist), modifier(nmodifier), scorer(nscorer), gap(ngap), ballid(0)
 {
 
-}
-
-ball_targeter::ball_targeter(blob_finder &finder, int maxdist, border_detector &nborderer, scorer_t &nscorer, float ngap) : ball_targeter(finder, maxdist, nscorer, ngap)
-{
-	borderer = nborderer;
 }
 
 ball_targeter::~ball_targeter()
@@ -24,15 +19,8 @@ boost::optional<blob> ball_targeter::update(const cv::Mat& frame)
 	finder.detect_frame(frame, balls);
 	tracker.update(balls);
 
-	if (borderer)
-	{
-		borderer->detect(frame);
-		for (auto &p : tracker.get_all())
-		{
-			blob &b = p.second;
-			b.borderdist = borderer->dist_closest(b.rel);
-		}
-	}
+	for (auto &p : tracker.get_all())
+		modifier.modify(p.second);
 
 	for (auto &p : tracker.get_all())
 	{
@@ -48,6 +36,8 @@ boost::optional<blob> ball_targeter::update(const cv::Mat& frame)
 		else if (!bestid)
 			ballid = bestid;
 	}
+	else if (ballid && tracker[ballid]->score > 1000.f)
+		ballid = 0;
 
 	return tracker[ballid];
 }
@@ -70,4 +60,3 @@ void ball_targeter::draw(cv::Mat &display)
 		cv::putText(display, to_string(b.score), b.center + cv::Point2f(0, 15), cv::FONT_HERSHEY_PLAIN, 1, cv::Scalar(255, 0, 0), 1);
 	}
 }
-

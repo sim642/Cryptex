@@ -13,7 +13,8 @@ class module
 			player,
 			test,
 			psmove,
-			camera
+			camera,
+			linecalibrator
 		};
 
 		module();

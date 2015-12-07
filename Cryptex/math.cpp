@@ -14,6 +14,11 @@ cv::Point2f cam2rel(const cv::Point2f &cam, const cv::Size2i &size)
 	return cv::Point2f(dx, dy);
 }
 
+line_t cam2rel(const line_t& cam, const cv::Size2i& size)
+{
+	return line_t(cam2rel(cam.first, size), cam2rel(cam.second, size));
+}
+
 cv::Point2f rel2cam(const cv::Point2f &rel, const cv::Size2i &size)
 {
 	float phi = rad2deg(atan(rel.x / global::h));
@@ -25,6 +30,11 @@ cv::Point2f rel2cam(const cv::Point2f &rel, const cv::Size2i &size)
 	return cv::Point2f(x, y);
 }
 
+line_t rel2cam(const line_t& rel, const cv::Size2i& size)
+{
+	return line_t(rel2cam(rel.first, size), rel2cam(rel.second, size));
+}
+
 cv::Point2f rect2pol(const cv::Point2f &rect)
 {
 	return cv::Point2f(cv::norm(rect), rad2deg(vec_angle(rect)));
@@ -33,6 +43,12 @@ cv::Point2f rect2pol(const cv::Point2f &rect)
 cv::Point2f pol2rect(const cv::Point2f &pol)
 {
 	return pol.x * cv::Point2f(cos(deg2rad(pol.y)), sin(deg2rad(pol.y)));
+}
+
+float ease_nexpn(float t, const cv::Point2f &p)
+{
+	//return 1 - exp(-(log(1 - p.y) / -p.x) * t);
+	return -expm1((log1p(-p.y) / p.x) * t);
 }
 
 float dist_line_point(const cv::Point2f &a, const cv::Vec2f &n, const cv::Point2f &p)
@@ -60,4 +76,22 @@ float dist_lineseg_point(const cv::Point2f &a, const cv::Point2f &b, const cv::P
 		return cv::norm(b - p);
 	else
 		return cv::norm((a + t * nn) - p);
+}
+
+cv::Point2f lengthen(const cv::Point2f &p, float dl)
+{
+	return (1.f + dl / cv::norm(p)) * p;
+}
+
+line_t lengthen(const line_t &line, float dl)
+{
+	auto diff = line.second - line.first;
+	auto p = line.first + scale_to(diff, -dl);
+	auto d = lengthen(diff, 2 * dl);
+	return line_t(p, p + d);
+}
+
+cv::Point2f midpoint(const line_t& line)
+{
+	return (line.first + line.second) / 2.f;
 }
