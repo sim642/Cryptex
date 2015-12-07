@@ -322,7 +322,7 @@ module::type player_module::run(const module::type &prev_module)
 					goals.draw(display);
 
 					auto goalline = goal_targeter::blob2line(*goal, frame.size());
-					goalline = lengthen(goalline, 0.05f);
+					goalline = lengthen(goalline, -0.15f);
 
 					float goalleftangle = rect2pol(goalline.first).y;
 					float goalrightangle = rect2pol(goalline.second).y;
@@ -336,7 +336,10 @@ module::type player_module::run(const module::type &prev_module)
 						auto goalpoint = midpoint(goalline);
 						for (auto &ball : balls)
 						{
-							if (dist_lineseg_point({0.f, 0.f}, {0.f, goalpoint.y}, ball.rel) < 0.1f)
+							//auto dist = dist_lineseg_point({0.f, 0.f}, {0.f, goalpoint.y}, ball.rel);
+							auto dist = dist_line_point(cv::Point2f(0.f, 0.f), cv::Vec2f(1.f, 0.f), ball.rel);
+							//cout << dist << "\t";
+							if (dist < 0.1f)
 							{
 								good = false;
 								break;

@@ -18,12 +18,12 @@ int main()
 	global::env = "ttu2";
 	global::video_id = 0;
 
-	global::referee = false;
+	global::referee = true;
 	global::field = 'A';
 	global::id = 'A';
 
-	global::dribbler = false;
-	global::coilgun = false;
+	global::dribbler = true;
+	global::coilgun = true;
 
 	global::camera = "pseye";
 	global::load_camera();
