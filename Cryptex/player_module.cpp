@@ -230,6 +230,18 @@ module::type player_module::run(const module::type &prev_module)
 		cv::Mat display;
 		frame.copyTo(display);
 
+		/*auto goal = goals.update(frame);
+		if (goal)
+		{
+			goals.draw(display);
+
+			auto goalline = goal_targeter::blob2line(*goal, frame.size());
+			cout << "1. " << goalline.first << " " << goalline.second << endl;
+			goalline = lengthen(goalline, -0.15f);
+			cout << "2. " << goalline.first << " " << goalline.second << endl;
+		}*/
+
+
 #define SET_STATE(state)	{ \
 								set_state(state, "play"); \
 								break; \
@@ -322,7 +334,9 @@ module::type player_module::run(const module::type &prev_module)
 					goals.draw(display);
 
 					auto goalline = goal_targeter::blob2line(*goal, frame.size());
+					cout << "1. " << goalline.first << " " << goalline.second << endl;
 					goalline = lengthen(goalline, -0.15f);
+					cout << "2. " << goalline.first << " " << goalline.second << endl;
 
 					float goalleftangle = rect2pol(goalline.first).y;
 					float goalrightangle = rect2pol(goalline.second).y;
@@ -331,6 +345,11 @@ module::type player_module::run(const module::type &prev_module)
 					{
 						blobs_t balls;
 						baller.detect_frame(frame, balls);
+						goals.update(frame);
+
+						cout << goalleftangle << " " << goalrightangle << endl;
+
+						cv::imwrite("pics/shoot.jpg", display);
 
 						bool good = true;
 						auto goalpoint = midpoint(goalline);
@@ -340,6 +359,16 @@ module::type player_module::run(const module::type &prev_module)
 							auto dist = dist_line_point(cv::Point2f(0.f, 0.f), cv::Vec2f(1.f, 0.f), ball.rel);
 							//cout << dist << "\t";
 							if (dist < 0.1f)
+							{
+								good = false;
+								break;
+							}
+						}
+
+						for (auto &enemy : goals.enemys)
+						{
+							auto line = goal_targeter::blob2line(enemy, frame.size());
+							if (line.first.y < 0 && line.second.y > 0)
 							{
 								good = false;
 								break;
