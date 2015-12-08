@@ -15,7 +15,7 @@ using namespace std;
 
 int main()
 {
-	global::env = "test";
+	global::env = "ttu2";
 	global::video_id = 0;
 
 	global::referee = true;

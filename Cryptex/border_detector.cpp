@@ -6,14 +6,15 @@ using namespace std;
 
 border_detector::border_detector(blob_finder &nblobber) : blobber(nblobber)
 {
-	blobber.opening = true;
+	//blobber.opening = true;
 	default_lines();
 }
 
 border_detector::border_detector(blob_finder &nblobber, const std::string &lines_name) : blobber(nblobber)
 {
-	blobber.opening = true;
-	load_lines(lines_name);
+	//blobber.opening = true;
+	//load_lines(lines_name);
+	default_lines();
 }
 
 border_detector::~border_detector()
@@ -24,9 +25,9 @@ border_detector::~border_detector()
 void border_detector::default_lines()
 {
 	cannythres = {0, 255};
-	linethres = 30;
-	linelength = 50;
-	linegap = 100;
+	linethres = 50;
+	linelength = 160;
+	linegap = 17;
 }
 
 void border_detector::load_lines(const std::string& lines_name)
@@ -80,7 +81,10 @@ float border_detector::dist_closest(const lines_t& borders, const cv::Point2f& p
 	float mindist = numeric_limits<float>::max();
 	for (auto &border : borders)
 	{
-		mindist = min(mindist, dist_line_point(border.first, border.second, p));
+		auto l = border.second - border.first;
+		auto b = p - border.first;
+		auto cross = l.x * b.y - l.y * b.x;
+		mindist = min(mindist, dist_line_point(border.first, border.second, p) * -sign(cross));
 	}
 	return mindist;
 }
@@ -95,6 +99,7 @@ void border_detector::draw(cv::Mat &display)
 	for (auto &l : lines)
 	{
 		cv::line(display, cv::Point(l[0], l[1]), cv::Point(l[2], l[3]), cv::Scalar(255, 0, 0), 3, CV_AA);
+		cv::circle(display, cv::Point(l[0], l[1]), 3, cv::Scalar(0, 0, 255));
 	}
 }
 

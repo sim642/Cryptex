@@ -112,11 +112,11 @@ void blob_finder::angle_filter_out(blobs_t& bs1, blobs_t &bs2, blobs_t &os, floa
 	blobs_t nbs1, nbs2, nos;
 	for (unsigned int i = 0; i < bs1.size(); i++)
 	{
-		(keep1[i] ? nbs1 : os).push_back(bs1[i]);
+		(keep1[i] ? nbs1 : nos).push_back(bs1[i]);
 	}
 	for (unsigned int j = 0; j < bs2.size(); j++)
 	{
-		(keep2[j] ? nbs2 : os).push_back(bs2[j]);
+		(keep2[j] ? nbs2 : nos).push_back(bs2[j]);
 	}
 
 	bs1 = move(nbs1);
