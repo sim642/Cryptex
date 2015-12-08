@@ -65,6 +65,11 @@ float dist_line_point(const cv::Point2f& a, const cv::Point2f& b, const cv::Poin
 	return cv::norm((a + t * nn) - p);
 }
 
+float sdist_line_point(const cv::Point2f& a, const cv::Point2f& b, const cv::Point2f& p)
+{
+	return dist_line_point(a, b, p) * sign(vec_sangle(b - a, p - a));
+}
+
 float dist_lineseg_point(const cv::Point2f &a, const cv::Point2f &b, const cv::Point2f &p)
 {
 	/// http://www.geometrictools.com/Documentation/DistancePointLine.pdf

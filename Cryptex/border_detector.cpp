@@ -81,10 +81,7 @@ float border_detector::dist_closest(const lines_t& borders, const cv::Point2f& p
 	float mindist = numeric_limits<float>::max();
 	for (auto &border : borders)
 	{
-		auto l = border.second - border.first;
-		auto b = p - border.first;
-		auto cross = l.x * b.y - l.y * b.x;
-		mindist = min(mindist, dist_line_point(border.first, border.second, p) * -sign(cross));
+		mindist = min(mindist, -sdist_line_point(border.first, border.second, p));
 	}
 	return mindist;
 }
