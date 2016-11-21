@@ -4,6 +4,7 @@
 #include <boost/algorithm/string/classification.hpp>
 #include <chrono>
 #include <thread>
+#include <vector>
 
 using namespace std;
 

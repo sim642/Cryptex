@@ -74,7 +74,7 @@ module::type camera_module::run(const module::type &prev_module)
 		{
 			for (float dy = -3.f; dy <= 3.f; dy += delta)
 			{
-				auto pos = rel2cam({dx, dy}, frame.size());
+				auto pos = rel2cam(cv::Point2f{dx, dy}, frame.size());
 				cv::circle(display, pos, 2.f, cv::Scalar(0, 0, 255));
 			}
 		}
