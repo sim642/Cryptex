@@ -93,7 +93,8 @@ multi_camera load_multi_camera()
 	boost::algorithm::split(parts, global::cams, boost::algorithm::is_any_of(","));
 
 	multi_camera cams;
+	cams.reserve(parts.size());
 	for (auto &name : parts)
-		cams.emplace_back(name);
+		cams.push_back(new camera(name));
 	return cams;
 }

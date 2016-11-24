@@ -255,9 +255,10 @@ module::type player_module::run(const module::type &prev_module)
 				if (m.ball())
 					SET_STATE(GoalFind)
 
-				borders.detect(frame);
+				/*borders.detect(frame);
 				goals.update(frame);
-				auto ball = balls.update(frame);
+				auto ball = balls.update(frame);*/
+				boost::optional<blob> ball = boost::none;
 				borders.draw(display);
 				goals.draw(display);
 				balls.draw(display);
@@ -344,7 +345,7 @@ module::type player_module::run(const module::type &prev_module)
 					if (goalleftangle > 0 && goalrightangle < 0)
 					{
 						blobs_t balls;
-						baller.detect_frame(frame, balls);
+						//baller.detect_frame(frame, balls);
 						goals.update(frame);
 
 						cout << goalleftangle << " " << goalrightangle << endl;
@@ -446,7 +447,7 @@ module::type player_module::run(const module::type &prev_module)
 
 			case AreaEmpty:
 			{
-				borders.detect(frame);
+				//borders.detect(frame);
 				borders.draw(display);
 
 				float dist = borders.dist_closest(cv::Point2f(0, 0)); // my distance

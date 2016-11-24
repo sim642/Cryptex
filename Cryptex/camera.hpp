@@ -4,6 +4,7 @@
 #include <opencv2/opencv.hpp>
 #include <vector>
 #include "math.hpp"
+#include <boost/ptr_container/ptr_vector.hpp>
 
 class camera
 {
@@ -37,7 +38,7 @@ class camera
 		float hfov, vfov, h, alpha, theta;
 };
 
-typedef std::vector<camera> multi_camera;
+typedef boost::ptr_vector<camera> multi_camera;
 
 multi_camera load_multi_camera();
 
