@@ -27,10 +27,7 @@ module::type calibrator_module::run(const module::type &prev_module)
 	if (!capture.isOpened())
 		throw runtime_error("capture could not be opened");*/
 
-	multi_camera cams;
-	cams.push_back(camera(2));
-	cams.push_back(camera(1));
-
+	multi_camera cams = global::load_multi_camera();
 	calibrator_window calibrator(cams);
 
 	string line;

@@ -41,4 +41,12 @@ namespace global
 		fs << "h" << h;
 		fs << "alpha" << alpha;
 	}
+
+	multi_camera load_multi_camera()
+	{
+		multi_camera cams;
+		cams.push_back(::camera(2));
+		cams.push_back(::camera(1));
+		return cams;
+	}
 }

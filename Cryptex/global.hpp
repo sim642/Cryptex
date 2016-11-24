@@ -2,6 +2,7 @@
 #define GLOBAL_H
 
 #include <string>
+#include "camera.hpp"
 
 namespace global
 {
@@ -19,6 +20,8 @@ namespace global
 
 	void load_camera();
 	void save_camera();
+
+	multi_camera load_multi_camera();
 }
 
 #endif // GLOBAL_H
