@@ -67,7 +67,7 @@ void blob_finder::detect(const camera &cam, const cv::Mat &mask, blobs_t &blobs)
 
 	for (auto &b : blobs)
 	{
-		b.rel = cam.cam2rel(b.center, mask.size());
+		b.rel = cam.cam2rel(b.center);
 		auto pol = rect2pol(b.rel);
 		b.dist = pol.x;
 		b.angle = pol.y;

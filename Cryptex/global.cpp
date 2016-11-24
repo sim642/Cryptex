@@ -22,6 +22,11 @@ namespace global
 		return "./calibs/" + env + "/" + name + "." + ext;
 	}
 
+	std::string camera_filename(const std::string &name, const std::string &ext)
+	{
+		return "./calibs/" + name + "." + ext;
+	}
+
 	void load_camera()
 	{
 		system(("v4l2ctrl -l calibs/" + camera + ".v4l2").c_str()); // load camera config

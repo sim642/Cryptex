@@ -17,6 +17,7 @@ namespace global
 
 	std::string calib_filename(const std::string &name, const std::string &ext = "yml");
 	std::string env_filename(const std::string &name, const std::string &ext = "yml");
+	std::string camera_filename(const std::string &name, const std::string &ext = "yml");
 
 	void load_camera();
 	void save_camera();
