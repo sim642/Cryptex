@@ -21,8 +21,8 @@ boost::optional<blob> goal_targeter::update(const cv::Mat& frame)
 	/*cv::Mat framelow;
 	cv::resize(frame, framelow, cv::Size(), scalelow, scalelow, CV_INTER_AREA);*/
 
-	finder.detect_frame(frame, goals);
-	finder2.detect_frame(frame, goals2);
+	/*finder.detect_frame(frame, goals);
+	finder2.detect_frame(frame, goals2);*/
 
 	blob_finder::angle_filter_out(goals, goals2, enemys, 90, delta);
 
