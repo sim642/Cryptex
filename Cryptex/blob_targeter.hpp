@@ -11,7 +11,7 @@ class blob_targeter
 		blob_targeter(blob_finder &nfinder);
 		virtual ~blob_targeter();
 
-		virtual boost::optional<blob> update(const cv::Mat &frame);
+		virtual boost::optional<blob> update(const multi_camera &cams);
 		virtual void reset();
 
 		virtual void draw(cv::Mat &display);

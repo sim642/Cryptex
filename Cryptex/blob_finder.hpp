@@ -8,6 +8,7 @@
 #include <vector>
 #include <boost/optional.hpp>
 #include <utility>
+#include "camera.hpp"
 
 class calibrator_window;
 
@@ -25,9 +26,9 @@ class blob_finder
 		void save_color(const std::string &color_name);
 		void set_color(const bounds_t &new_lower, const bounds_t &new_upper);
 
-		void threshold(const cv::Mat &frame, cv::Mat &mask);
-		void detect(const cv::Mat &mask, blobs_t &blobs);
-		void detect_frame(const cv::Mat &frame, blobs_t &blobs);
+		void threshold(const camera &cam, cv::Mat &mask);
+		/*void detect(const cv::Mat &mask, blobs_t &blobs);*/
+		void detect_frame(const multi_camera &cams, blobs_t &blobs);
 		static boost::optional<blob> largest(const blobs_t &blobs);
 
 		static void angle_filter_out(blobs_t &bs1, blobs_t &bs2, blobs_t &os, float angle, float delta);

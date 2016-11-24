@@ -83,11 +83,6 @@ inline cv::Point_<T> scale_to(const cv::Point_<T> &vec, T len)
 	return (len * cv::norm(vec)) * vec;
 }
 
-cv::Point2f cam2rel(const cv::Point2f &cam, const cv::Size2i &size);
-line_t cam2rel(const line_t &cam, const cv::Size2i &size);
-cv::Point2f rel2cam(const cv::Point2f &rel, const cv::Size2i &size);
-line_t rel2cam(const line_t &rel, const cv::Size2i &size);
-
 cv::Point2f rect2pol(const cv::Point2f &rect);
 cv::Point2f pol2rect(const cv::Point2f &pol);
 

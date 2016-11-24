@@ -13,10 +13,10 @@ ball_targeter::~ball_targeter()
 
 }
 
-boost::optional<blob> ball_targeter::update(const cv::Mat& frame)
+boost::optional<blob> ball_targeter::update(const multi_camera& cams)
 {
 	blobs_t balls;
-	finder.detect_frame(frame, balls);
+	finder.detect_frame(cams, balls);
 	tracker.update(balls);
 
 	for (auto &p : tracker.get_all())

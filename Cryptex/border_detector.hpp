@@ -20,8 +20,8 @@ class border_detector : public blob_modifier
 		void load_lines(const std::string &lines_name);
 		void save_lines(const std::string &lines_name);
 
-		void detect(const cv::Mat &frame);
-		void detect(const cv::Mat &frame, lines_t &borders);
+		void detect(const multi_camera &cams);
+		void detect(const multi_camera &cams, lines_t &borders);
 
 		static float dist_closest(const lines_t &borders, const cv::Point2f &p);
 		float dist_closest(const cv::Point2f &p);
