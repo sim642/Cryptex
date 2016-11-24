@@ -46,7 +46,7 @@ cv::Point2f camera::cam2rel(const cv::Point2f &cam) const
 	float psi = hfov * (0.5f - cam.x / size.width);
 	float dy = sqrt(sqr(h) + sqr(dx)) * tan(deg2rad(psi));
 
-	return cv::Point2f(dx, dy);
+	return rotate(cv::Point2f(dx, dy), theta);
 }
 
 line_t camera::cam2rel(const line_t& cam) const
@@ -54,8 +54,10 @@ line_t camera::cam2rel(const line_t& cam) const
 	return line_t(cam2rel(cam.first), cam2rel(cam.second));
 }
 
-cv::Point2f camera::rel2cam(const cv::Point2f &rel) const
+cv::Point2f camera::rel2cam(const cv::Point2f &rel2) const
 {
+	cv::Point2f rel = rotate(rel2, -theta);
+
 	float phi = rad2deg(atan(rel.x / h));
 	float y = (0.5f - (phi - alpha) / vfov) * size.height;
 

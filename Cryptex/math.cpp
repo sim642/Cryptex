@@ -13,6 +13,13 @@ cv::Point2f pol2rect(const cv::Point2f &pol)
 	return pol.x * cv::Point2f(cos(deg2rad(pol.y)), sin(deg2rad(pol.y)));
 }
 
+cv::Point2f rotate(const cv::Point2f &vec, float deg)
+{
+	cv::Point2f pol = rect2pol(vec);
+	pol.y += deg;
+	return pol2rect(pol);
+}
+
 float ease_nexpn(float t, const cv::Point2f &p)
 {
 	//return 1 - exp(-(log(1 - p.y) / -p.x) * t);
