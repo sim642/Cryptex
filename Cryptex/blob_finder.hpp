@@ -27,7 +27,7 @@ class blob_finder
 		void set_color(const bounds_t &new_lower, const bounds_t &new_upper);
 
 		void threshold(const camera &cam, cv::Mat &mask);
-		/*void detect(const cv::Mat &mask, blobs_t &blobs);*/
+		void detect(const camera &cam, const cv::Mat &mask, blobs_t &blobs);
 		void detect_frame(const multi_camera &cams, blobs_t &blobs);
 		static boost::optional<blob> largest(const blobs_t &blobs);
 

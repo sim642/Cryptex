@@ -61,18 +61,18 @@ void blob_finder::threshold(const camera &cam, cv::Mat &mask)
 	cv::morphologyEx(mask, mask, opening ? cv::MORPH_OPEN : cv::MORPH_CLOSE, structuring);
 }
 
-/*void blob_finder::detect(const cv::Mat &mask, blobs_t &blobs)
+void blob_finder::detect(const camera &cam, const cv::Mat &mask, blobs_t &blobs)
 {
 	detector.detect(mask, blobs);
 
 	for (auto &b : blobs)
 	{
-		b.rel = cam2rel(b.center, mask.size());
+		b.rel = cam.cam2rel(b.center, mask.size());
 		auto pol = rect2pol(b.rel);
 		b.dist = pol.x;
 		b.angle = pol.y;
 	}
-}*/
+}
 
 void blob_finder::detect_frame(const multi_camera& cams, blobs_t& blobs)
 {
@@ -81,26 +81,10 @@ void blob_finder::detect_frame(const multi_camera& cams, blobs_t& blobs)
 	for (auto &cam : cams)
 	{
 		cv::Mat mask;
-
-		cv::Mat hsv;
-		cv::cvtColor(cam.frame, hsv, CV_BGR2HSV);
-
-		cv::inRange(hsv, cv::Scalar(lower), cv::Scalar(upper), mask);
-
-		auto structuring = cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(struct_size, struct_size));
-
-		cv::morphologyEx(mask, mask, opening ? cv::MORPH_OPEN : cv::MORPH_CLOSE, structuring);
+		threshold(cam, mask);
 
 		blobs_t blobs2;
-		detector.detect(mask, blobs2);
-
-		for (auto &b : blobs2)
-		{
-			b.rel = cam.cam2rel(b.center, mask.size());
-			auto pol = rect2pol(b.rel);
-			b.dist = pol.x;
-			b.angle = pol.y;
-		}
+		detect(cam, mask, blobs2);
 
 		std::copy(blobs2.begin(), blobs2.end(), std::back_inserter(blobs));
 	}
