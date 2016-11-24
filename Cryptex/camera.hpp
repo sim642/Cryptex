@@ -8,11 +8,13 @@
 class camera
 {
 	public:
-		camera(int new_id);
+		camera(const std::string &new_name, bool open_now = true);
 		virtual ~camera();
 
-		void load_camera(const std::string &name);
-		void save_camera(const std::string &name);
+		bool open();
+
+		void load_camera();
+		void save_camera();
 
 		void update();
 
@@ -26,7 +28,9 @@ class camera
 		friend class camera_module;
 
 	private:
-		int id;
+		const std::string name;
+
+		std::string path;
 		cv::VideoCapture capture;
 
 		cv::Size2i size;

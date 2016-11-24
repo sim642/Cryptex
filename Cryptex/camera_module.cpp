@@ -28,7 +28,7 @@ void mousecb(int event, int x, int y, int flags, void *userdata)
 	{
 		auto rel = cam.cam2rel(cv::Point2f(x, y));
 		auto pol = rect2pol(rel);
-		cout << rel << " " << pol << " " << cv::norm(rel - prev) << endl;
+		cout << rel << "\t" << pol << "\t" << cv::norm(rel - prev) << endl;
 
 		prev = rel;
 	}
@@ -36,9 +36,20 @@ void mousecb(int event, int x, int y, int flags, void *userdata)
 
 module::type camera_module::run(const module::type &prev_module)
 {
-	camera cam(2);
-	std::string name = "pseyef";
-	cam.load_camera(name);
+	string name;
+	cout << "camera: ";
+	cin >> name;
+
+	camera cam(name, false);
+
+	string path;
+	cout << "path [" << cam.path << "]: ";
+	cin.ignore(numeric_limits<streamsize>::max(), '\n');
+	getline(cin, path);
+	if (!path.empty())
+		cam.path = path;
+
+	cam.open();
 
 	cv::namedWindow("camera");
 
@@ -82,7 +93,7 @@ module::type camera_module::run(const module::type &prev_module)
 		{
 			case 'q':
 			{
-				cam.save_camera(name);
+				cam.save_camera();
 				return module::type::menu;
 			}
 		}

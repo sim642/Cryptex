@@ -50,8 +50,8 @@ namespace global
 	multi_camera load_multi_camera()
 	{
 		multi_camera cams;
-		cams.push_back(::camera(2));
-		cams.push_back(::camera(1));
+		cams.push_back(::camera("/dev/video2"));
+		cams.push_back(::camera("/dev/video1"));
 		return cams;
 	}
 }

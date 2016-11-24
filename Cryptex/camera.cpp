@@ -2,9 +2,11 @@
 #include "global.hpp"
 #include "math.hpp"
 
-camera::camera(int new_id) : id(new_id), capture(id)
+camera::camera(const std::string &new_name, bool open_now) : name(new_name)
 {
-
+	load_camera();
+	if (open_now)
+		open();
 }
 
 camera::~camera()
@@ -12,7 +14,12 @@ camera::~camera()
 
 }
 
-void camera::load_camera(const std::string &name)
+bool camera::open()
+{
+	return capture.open(path);
+}
+
+void camera::load_camera()
 {
 	cv::FileStorage fs(global::camera_filename(name), cv::FileStorage::READ);
 	fs["hfov"] >> hfov;
@@ -20,9 +27,10 @@ void camera::load_camera(const std::string &name)
 	fs["h"] >> h;
 	fs["alpha"] >> alpha;
 	fs["theta"] >> theta;
+	fs["path"] >> path;
 }
 
-void camera::save_camera(const std::string &name)
+void camera::save_camera()
 {
 	cv::FileStorage fs(global::camera_filename(name), cv::FileStorage::WRITE);
 	fs << "hfov" << hfov;
@@ -30,6 +38,7 @@ void camera::save_camera(const std::string &name)
 	fs << "h" << h;
 	fs << "alpha" << alpha;
 	fs << "theta" << theta;
+	fs << "path" << path;
 }
 
 void camera::update()
