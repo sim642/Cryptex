@@ -60,7 +60,8 @@ void goal_targeter::modify(blob& b)
 line_t goal_targeter::blob2line(const blob& b, const cv::Size2i &size)
 {
 	//return cam2rel(line_t(b.rect.tl() + cv::Point(0, b.rect.height), b.rect.br()), size);
-	return cam2rel(line_t(b.rect.tl() + cv::Point(0, b.rect.height), b.rect.tl() + cv::Point(b.rect.width, b.rect.height)), size);
+	//return cam2rel(line_t(b.rect.tl() + cv::Point(0, b.rect.height), b.rect.tl() + cv::Point(b.rect.width, b.rect.height)), size);
+	return line_t();
 }
 
 float goal_targeter::dist_closest(const blobs_t& bs, const cv::Point2f& p)

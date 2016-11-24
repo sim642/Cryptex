@@ -21,7 +21,7 @@ camera_module::~camera_module()
 
 void mousecb(int event, int x, int y, int flags, void *userdata)
 {
-	static cv::Point2f prev(0, 0);
+	/*static cv::Point2f prev(0, 0);
 
 	cv::Size &framesize = *static_cast<cv::Size*>(userdata);
 	if (event == cv::EVENT_LBUTTONUP)
@@ -31,12 +31,12 @@ void mousecb(int event, int x, int y, int flags, void *userdata)
 		cout << rel << " " << pol << " " << cv::norm(rel - prev) << endl;
 
 		prev = rel;
-	}
+	}*/
 }
 
 module::type camera_module::run(const module::type &prev_module)
 {
-	cv::VideoCapture capture(global::video_id);
+	/*cv::VideoCapture capture(global::video_id);
 
 	cv::namedWindow("camera");
 
@@ -90,7 +90,7 @@ module::type camera_module::run(const module::type &prev_module)
 				return module::type::menu;
 			}
 		}
-	}
+	}*/
 
 	return module::type::menu;
 }

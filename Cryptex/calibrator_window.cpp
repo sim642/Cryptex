@@ -5,7 +5,7 @@
 
 using namespace std;
 
-calibrator_window::calibrator_window(cv::VideoCapture &new_capture) : capture(new_capture)
+calibrator_window::calibrator_window(multi_camera &new_cams) : cams(new_cams)
 {
 
 }
@@ -47,19 +47,26 @@ void calibrator_window::calibrate(const std::string &color, const std::string &p
 		cv::createTrackbar("minarea", win_params, &minarea, 10000);
 	}
 
+	cams[0].update();
+
 	while (1)
 	{
-		cv::Mat frame;
-		capture >> frame;
+		cv::Mat masked(cams[0].frame.size().height, cams[0].frame.size().width * cams.size(), CV_8UC3, cv::Scalar(0, 0, 0));
 
-		cv::Mat mask;
-		blobber.threshold(frame, mask);
+		for (int i = 0; i < cams.size(); i++)
+		{
+			auto &cam = cams[i];
 
-		cv::Mat masked;
-		frame.copyTo(masked, mask);
+			cam.update();
+
+			cv::Mat mask;
+			blobber.threshold(cam, mask);
+
+			cam.frame.copyTo(masked(cv::Rect(i * cam.frame.size().width, 0, cam.frame.size().width, cam.frame.size().height)), mask);
+		}
 
 		cv::imshow(win_color, masked);
-		if (param)
+		/*if (param)
 		{
 			blobber.detector.area.first = minarea;
 
@@ -75,7 +82,7 @@ void calibrator_window::calibrate(const std::string &color, const std::string &p
 			}
 
 			cv::imshow(win_params, key_img);
-		}
+		}*/
 
 		char key = cv::waitKey(1000 / 60);
 		switch (key)

@@ -3,6 +3,7 @@
 
 #include <opencv2/opencv.hpp>
 #include <vector>
+#include "math.hpp"
 
 class camera
 {

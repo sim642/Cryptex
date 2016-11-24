@@ -8,12 +8,12 @@
 class calibrator_window
 {
 	public:
-		calibrator_window(cv::VideoCapture &new_capture);
+		calibrator_window(multi_camera &new_cams);
 		virtual ~calibrator_window();
 
 		void calibrate(const std::string &color, const std::string &params);
 	private:
-		cv::VideoCapture capture;
+		multi_camera &cams;
 };
 
 #endif // CALIBRATOR_WINDOW_H
