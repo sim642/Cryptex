@@ -39,4 +39,6 @@ class camera
 
 typedef std::vector<camera> multi_camera;
 
+multi_camera load_multi_camera();
+
 #endif // CAMERA_H

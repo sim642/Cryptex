@@ -20,6 +20,8 @@ class border_detector : public blob_modifier
 		void load_lines(const std::string &lines_name);
 		void save_lines(const std::string &lines_name);
 
+		void detect(const camera &cam);
+		void detect(const camera &cam, lines_t &borders);
 		void detect(const multi_camera &cams);
 		void detect(const multi_camera &cams, lines_t &borders);
 

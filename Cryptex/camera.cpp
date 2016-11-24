@@ -80,3 +80,12 @@ line_t camera::rel2cam(const line_t& rel) const
 {
 	return line_t(rel2cam(rel.first), rel2cam(rel.second));
 }
+
+
+multi_camera load_multi_camera()
+{
+	multi_camera cams;
+	cams.push_back(::camera("front_test"));
+	cams.push_back(::camera("back_test"));
+	return cams;
+}

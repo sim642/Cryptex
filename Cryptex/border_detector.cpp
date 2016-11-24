@@ -13,8 +13,7 @@ border_detector::border_detector(blob_finder &nblobber) : blobber(nblobber)
 border_detector::border_detector(blob_finder &nblobber, const std::string &lines_name) : blobber(nblobber)
 {
 	//blobber.opening = true;
-	//load_lines(lines_name);
-	default_lines();
+	load_lines(lines_name);
 }
 
 border_detector::~border_detector()
@@ -51,6 +50,30 @@ void border_detector::save_lines(const std::string& lines_name)
 	fs << "length" << linelength;
 	fs << "gap" << linegap;
 }
+void border_detector::detect(const camera &cam)
+{
+	lines_t oborders;
+	detect(cam, oborders);
+}
+
+void border_detector::detect(const camera &cam, lines_t &oborders)
+{
+	lines.clear();
+	borders.clear();
+
+	cv::Mat mask;
+	blobber.threshold(cam, mask);
+
+	cv::Canny(mask, canny, cannythres.first, cannythres.second);
+
+	cv::HoughLinesP(canny, lines, 1, CV_PI / 180, linethres, linelength, linegap);
+	for (auto &line : lines)
+	{
+		borders.push_back(line_t(cam.cam2rel(cv::Point2f(line[0], line[1])), cam.cam2rel(cv::Point2f(line[2], line[3]))));
+	}
+
+	oborders = borders;
+}
 
 void border_detector::detect(const multi_camera &cams)
 {
@@ -75,7 +98,6 @@ void border_detector::detect(const multi_camera &cams, lines_t &oborders)
 		{
 			borders.push_back(line_t(cam.cam2rel(cv::Point2f(line[0], line[1])), cam.cam2rel(cv::Point2f(line[2], line[3]))));
 		}
-
 	}
 
 	oborders = borders;
