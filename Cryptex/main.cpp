@@ -28,6 +28,8 @@ int main()
 	global::camera = "pseye";
 	global::load_camera();
 
+	global::cams = "front,back";
+
 	map<module::type, module*> modules;
 	modules[module::type::menu] = new menu_module();
 	modules[module::type::config] = new config_module();

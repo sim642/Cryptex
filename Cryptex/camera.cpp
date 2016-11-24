@@ -1,6 +1,11 @@
 #include "camera.hpp"
 #include "global.hpp"
 #include "math.hpp"
+#include <vector>
+#include <boost/algorithm/string/split.hpp>
+#include <boost/algorithm/string/classification.hpp>
+
+using namespace std;
 
 camera::camera(const std::string &new_name, bool open_now) : name(new_name)
 {
@@ -84,8 +89,11 @@ line_t camera::rel2cam(const line_t& rel) const
 
 multi_camera load_multi_camera()
 {
+	vector<string> parts;
+	boost::algorithm::split(parts, global::cams, boost::algorithm::is_any_of(","));
+
 	multi_camera cams;
-	cams.push_back(::camera("front_test"));
-	cams.push_back(::camera("back_test"));
+	for (auto &name : parts)
+		cams.emplace_back(name);
 	return cams;
 }

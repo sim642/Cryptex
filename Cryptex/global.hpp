@@ -2,7 +2,6 @@
 #define GLOBAL_H
 
 #include <string>
-#include "camera.hpp"
 
 namespace global
 {
@@ -14,6 +13,8 @@ namespace global
 
 	extern std::string camera;
 	extern float hfov, vfov, h, alpha;
+
+	extern std::string cams;
 
 	std::string calib_filename(const std::string &name, const std::string &ext = "yml");
 	std::string env_filename(const std::string &name, const std::string &ext = "yml");

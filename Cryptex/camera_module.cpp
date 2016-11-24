@@ -6,6 +6,7 @@
 
 #include "global.hpp"
 #include "math.hpp"
+#include "camera.hpp"
 
 using namespace std;
 
