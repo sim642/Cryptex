@@ -41,7 +41,7 @@ module::type camera_module::run(const module::type &prev_module)
 	cout << "camera: ";
 	cin >> name;
 
-	camera cam(name, false);
+	camera cam(-1, name, false);
 
 	string path;
 	cout << "path [" << cam.path << "]: ";

@@ -14,7 +14,7 @@ class blob_targeter
 		virtual boost::optional<blob> update(const multi_camera &cams);
 		virtual void reset();
 
-		virtual void draw(cv::Mat &display);
+		virtual void draw(cv::Mat &multi_display, const multi_camera &cams);
 
 	protected:
 		blob_finder &finder;

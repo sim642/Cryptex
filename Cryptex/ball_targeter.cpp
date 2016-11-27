@@ -48,12 +48,14 @@ void ball_targeter::reset()
 	ballid = 0;
 }
 
-void ball_targeter::draw(cv::Mat &display)
+void ball_targeter::draw(cv::Mat &multi_display, const multi_camera &cams)
 {
 	for (auto &p : tracker.get_all())
 	{
 		int id = p.first;
 		const blob &b = p.second;
+
+		auto display = display4cam(multi_display, cams, b.cam);
 
 		cv::circle(display, b.center, b.radius, cv::Scalar(0, 255, id == ballid ? 255 : 0), 2);
 		cv::putText(display, to_string(id), b.center, cv::FONT_HERSHEY_PLAIN, 1, cv::Scalar(0, 0, 255), 1);

@@ -9,7 +9,7 @@
 class camera
 {
 	public:
-		camera(const std::string &new_name, bool open_now = true);
+		camera(size_t new_i, const std::string &new_name, bool open_now = true);
 		virtual ~camera();
 
 		bool open();
@@ -28,6 +28,8 @@ class camera
 
 		friend class camera_module;
 
+		const size_t i;
+
 	private:
 		const std::string name;
 
@@ -41,5 +43,7 @@ class camera
 typedef boost::ptr_vector<camera> multi_camera;
 
 multi_camera load_multi_camera();
+
+cv::Mat display4cam(cv::Mat &multi_display, const multi_camera &cams, size_t i);
 
 #endif // CAMERA_H

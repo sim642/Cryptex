@@ -7,6 +7,7 @@
 struct blob
 {
 	// frame attributes
+	size_t cam;
 	float area;
 	cv::Point2f center;
 	float radius;

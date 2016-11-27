@@ -29,6 +29,7 @@ class border_detector : public blob_modifier
 		float dist_closest(const cv::Point2f &p);
 
 		void draw(cv::Mat &display);
+		void draw(cv::Mat &multi_display, const multi_camera &cams);
 
 		virtual void modify(blob &b);
 

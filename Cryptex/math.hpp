@@ -7,7 +7,12 @@
 template<typename T>
 using range_t = std::pair<T, T>;
 
-typedef std::pair<cv::Point2f, cv::Point2f> line_t;
+struct line_t
+{
+	cv::Point2f first;
+	cv::Point2f second;
+	size_t cam;
+};
 typedef std::vector<line_t> lines_t;
 
 

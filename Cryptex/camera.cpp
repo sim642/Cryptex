@@ -7,7 +7,7 @@
 
 using namespace std;
 
-camera::camera(const std::string &new_name, bool open_now) : name(new_name)
+camera::camera(size_t new_i, const std::string &new_name, bool open_now) : i(new_i), name(new_name)
 {
 	load_camera();
 	if (open_now)
@@ -65,7 +65,7 @@ cv::Point2f camera::cam2rel(const cv::Point2f &cam) const
 
 line_t camera::cam2rel(const line_t& cam) const
 {
-	return line_t(cam2rel(cam.first), cam2rel(cam.second));
+	return line_t{cam2rel(cam.first), cam2rel(cam.second), cam.cam};
 }
 
 cv::Point2f camera::rel2cam(const cv::Point2f &rel2) const
@@ -83,7 +83,7 @@ cv::Point2f camera::rel2cam(const cv::Point2f &rel2) const
 
 line_t camera::rel2cam(const line_t& rel) const
 {
-	return line_t(rel2cam(rel.first), rel2cam(rel.second));
+	return line_t{rel2cam(rel.first), rel2cam(rel.second), rel.cam};
 }
 
 
@@ -94,7 +94,13 @@ multi_camera load_multi_camera()
 
 	multi_camera cams;
 	cams.reserve(parts.size());
-	for (auto &name : parts)
-		cams.push_back(new camera(name));
+	for (size_t i = 0; i < parts.size(); i++)
+		cams.push_back(new camera(i, parts[i]));
 	return cams;
+}
+
+cv::Mat display4cam(cv::Mat &multi_display, const multi_camera &cams, size_t i)
+{
+	auto &cam = cams[i];
+	return multi_display(cv::Rect(i * cam.frame.size().width, 0, cam.frame.size().width, cam.frame.size().height));
 }

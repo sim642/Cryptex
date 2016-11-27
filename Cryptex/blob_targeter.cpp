@@ -22,7 +22,7 @@ void blob_targeter::reset()
 
 }
 
-void blob_targeter::draw(cv::Mat &display)
+void blob_targeter::draw(cv::Mat &multi_display, const multi_camera &cams)
 {
 
 }

@@ -84,9 +84,11 @@ module::type player_module::run(const module::type &prev_module)
 	//main_controller m(manager[device_id::main]);
 	main_controller m(&mcontrol);
 
-	cv::VideoCapture capture(global::video_id);
+	/*cv::VideoCapture capture(global::video_id);
 	if (!capture.isOpened())
-		throw runtime_error("capture could not be opened");
+		throw runtime_error("capture could not be opened");*/
+
+	multi_camera cams = load_multi_camera();
 
 	//psmove move;
 
@@ -121,7 +123,7 @@ module::type player_module::run(const module::type &prev_module)
 	ballmodifier.add_modifier(goals);
 	half goalside = half::right;
 
-	blob_finder borderer("valge");
+	blob_finder borderer("must");
 	border_detector borders(borderer, "border");
 	ballmodifier.add_modifier(borders);
 
@@ -224,11 +226,10 @@ module::type player_module::run(const module::type &prev_module)
 			}
 		}
 
-		cv::Mat frame;
-		capture >> frame;
+		for (auto &cam : cams)
+			cam.update();
 
-		cv::Mat display;
-		frame.copyTo(display);
+		cv::Mat multi_display(cams[0].frame.size().height, cams[0].frame.size().width * cams.size(), CV_8UC3, cv::Scalar(0, 0, 0));
 
 		/*auto goal = goals.update(frame);
 		if (goal)
@@ -255,13 +256,13 @@ module::type player_module::run(const module::type &prev_module)
 				if (m.ball())
 					SET_STATE(GoalFind)
 
-				/*borders.detect(frame);
-				goals.update(frame);
-				auto ball = balls.update(frame);*/
-				boost::optional<blob> ball = boost::none;
-				borders.draw(display);
-				goals.draw(display);
-				balls.draw(display);
+				borders.detect(cams);
+				goals.update(cams);
+				auto ball = balls.update(cams);
+				//boost::optional<blob> ball = boost::none;
+				borders.draw(multi_display, cams);
+				goals.draw(multi_display, cams);
+				balls.draw(multi_display, cams);
 
 				if (state == BallFind && ball)
 					SET_STATE(BallDrive)
@@ -310,7 +311,7 @@ module::type player_module::run(const module::type &prev_module)
 
 				m.dribbler(dribblerspeed);
 
-				auto goal = goals.update(frame);
+				auto goal = goals.update(cams);
 				if (goal)
 					SET_STATE(GoalAim)
 				else
@@ -329,12 +330,12 @@ module::type player_module::run(const module::type &prev_module)
 				if (!m.ball())
 					SET_STATE(BallFind)
 
-				auto goal = goals.update(frame);
+				auto goal = goals.update(cams);
 				if (goal)
 				{
-					goals.draw(display);
+					goals.draw(multi_display, cams);
 
-					auto goalline = goal_targeter::blob2line(*goal, frame.size());
+					auto goalline = goal_targeter::blob2line(*goal, cams);
 					cout << "1. " << goalline.first << " " << goalline.second << endl;
 					goalline = lengthen(goalline, -0.15f);
 					cout << "2. " << goalline.first << " " << goalline.second << endl;
@@ -345,12 +346,12 @@ module::type player_module::run(const module::type &prev_module)
 					if (goalleftangle > 0 && goalrightangle < 0)
 					{
 						blobs_t balls;
-						//baller.detect_frame(frame, balls);
-						goals.update(frame);
+						baller.detect_frame(cams, balls);
+						goals.update(cams);
 
 						cout << goalleftangle << " " << goalrightangle << endl;
 
-						cv::imwrite("pics/shoot.jpg", display);
+						cv::imwrite("pics/shoot.jpg", multi_display);
 
 						bool good = true;
 						auto goalpoint = midpoint(goalline);
@@ -368,7 +369,7 @@ module::type player_module::run(const module::type &prev_module)
 
 						for (auto &enemy : goals.enemys)
 						{
-							auto line = goal_targeter::blob2line(enemy, frame.size());
+							auto line = goal_targeter::blob2line(enemy, cams);
 							if (line.first.y < 0 && line.second.y > 0)
 							{
 								good = false;
@@ -424,10 +425,10 @@ module::type player_module::run(const module::type &prev_module)
 				if (!m.ball())
 					SET_STATE(BallFind)
 
-				auto goal = goals.update(frame);
+				auto goal = goals.update(cams);
 				if (goal)
 				{
-					goals.draw(display);
+					goals.draw(multi_display, cams);
 
 					d.omni(100, 0, rotate_pid.step(goal->angle));
 
@@ -447,8 +448,8 @@ module::type player_module::run(const module::type &prev_module)
 
 			case AreaEmpty:
 			{
-				//borders.detect(frame);
-				borders.draw(display);
+				borders.detect(cams);
+				borders.draw(multi_display, cams);
 
 				float dist = borders.dist_closest(cv::Point2f(0, 0)); // my distance
 				if (dist > 2.f)
@@ -465,9 +466,9 @@ module::type player_module::run(const module::type &prev_module)
 
 		int dt = chrono::duration_cast<chrono::milliseconds>(chrono::high_resolution_clock::now() - framestart).count();
 		float fps = 1000.f / dt;
-		cv::putText(display, to_string(fps), cv::Point(10, 30), cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(255, 255, 255));
+		cv::putText(multi_display, to_string(fps), cv::Point(10, 30), cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(255, 255, 255));
 
-		imshow("Remote", display);
+		cv::imshow("Remote", multi_display);
 
 		char key = cv::waitKey(max(1, 1000 / 60 - dt));
 		switch (key)
