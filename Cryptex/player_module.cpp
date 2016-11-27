@@ -16,6 +16,9 @@
 #include "srf_dongle.hpp"
 #include "referee_controller.hpp"
 
+#include "mbed_main_controller.hpp"
+#include "mbed_driver.hpp"
+
 #include <opencv2/highgui.hpp>
 #include <opencv2/video.hpp>
 #include "blob_finder.hpp"
@@ -72,17 +75,20 @@ module::type player_module::run(const module::type &prev_module)
 {
 	boost::asio::io_service io;
 
-	rs485_dongle dongle(io, "/dev/ttyUSB0");
+	//rs485_dongle dongle(io, "/dev/ttyUSB0");
 	//serial_scanner scanner(io);
 	//scanner.add_device("/dev/ttyACM1");
 	//merge_manager manager;
 	//manager.add_manager(&dongle);
 	//manager.add_manager(&scanner);
-	serial_controller mcontrol(io, "/dev/ttyACM0");
+	//serial_controller mcontrol(io, "/dev/ttyACM0");
 
-	driver d(dongle);
+	mbed_main_controller m(io, "/dev/ttyACM24");
+	mbed_driver d(m);
+
+	//driver d(dongle);
 	//main_controller m(manager[device_id::main]);
-	main_controller m(&mcontrol);
+	//main_controller m(&mcontrol);
 
 	/*cv::VideoCapture capture(global::video_id);
 	if (!capture.isOpened())
@@ -92,8 +98,8 @@ module::type player_module::run(const module::type &prev_module)
 
 	//psmove move;
 
-	srf_dongle srf(io, "/dev/ttyACM1");
-	referee_controller referee(srf);
+	/*srf_dongle srf(io, "/dev/ttyACM1");
+	referee_controller referee(srf);*/
 
 	blob_finder baller("oranz", "ball");
 	ball_targeter::scorer_t scorer = [](const blob &b)
@@ -208,7 +214,7 @@ module::type player_module::run(const module::type &prev_module)
 		m.ping();
 		//cout << m.ball() << flush;
 
-		if (global::referee)
+		/*if (global::referee)
 		{
 			switch (referee.poll()) // only one per cycle
 			{
@@ -224,12 +230,19 @@ module::type player_module::run(const module::type &prev_module)
 					d.stop();
 					break;
 			}
-		}
+		}*/
 
 		for (auto &cam : cams)
 			cam.update();
 
 		cv::Mat multi_display(cams[0].frame.size().height, cams[0].frame.size().width * cams.size(), CV_8UC3, cv::Scalar(0, 0, 0));
+
+		for (size_t i = 0; i < cams.size(); i++)
+		{
+			auto &cam = cams[i];
+			auto display = display4cam(multi_display, cams, i);
+			cam.frame.copyTo(display);
+		}
 
 		/*auto goal = goals.update(frame);
 		if (goal)
