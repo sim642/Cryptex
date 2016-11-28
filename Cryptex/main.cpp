@@ -23,7 +23,7 @@ int main()
 	global::id = 'A';
 
 	global::dribbler = false;
-	global::coilgun = false;
+	global::coilgun = true;
 
 	global::camera = "pseye";
 	global::load_camera();

@@ -40,8 +40,10 @@ test_module::~test_module()
 module::type test_module::run(const module::type &prev_module)
 {
 	boost::asio::io_service io;
-	mbed_main_controller m(io, "/dev/ttyACM24");
+	mbed_main_controller m(io, "/dev/ttyACM25");
 	mbed_driver d(m);
+
+	m.charge();
 
 	while (1)
 	{

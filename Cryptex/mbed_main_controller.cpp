@@ -4,6 +4,7 @@
 #include "math.hpp"
 #include <string>
 #include <stdexcept>
+#include <thread>
 
 using namespace std;
 
@@ -34,21 +35,21 @@ void mbed_main_controller::charge_override(const bool &state)
 {
 	assume_coilgun();
 	LOG("main", "charge override", state);
-	//controller->send("co", state);
+	stream << "c" << (state ? 1 : 0) << "\n" << flush;
 }
 
 void mbed_main_controller::kick()
 {
 	assume_coilgun();
 	LOG("main", "kick");
-	//controller->send("k");
+	stream << "k\n" << flush;
 }
 
 void mbed_main_controller::kick(const int &us)
 {
 	assume_coilgun();
 	LOG("main", "kick", us);
-	//controller->send("k", us); // MainMod takes us
+	stream << "k" << us << "\n" << flush;
 }
 
 void mbed_main_controller::kick(const double &ms)
@@ -60,7 +61,9 @@ void mbed_main_controller::charge()
 {
 	assume_coilgun();
 	LOG("main", "charge");
-	//controller->send("c");
+	stream << "c1\n" << flush;
+	this_thread::sleep_for(chrono::milliseconds(1000));
+	stream << "c0\n" << flush;
 }
 
 bool mbed_main_controller::ball()
@@ -79,8 +82,9 @@ bool mbed_main_controller::button(const int &num)
 
 void mbed_main_controller::dribbler(const int& speed)
 {
-	/*if (global::dribbler)
-		controller->send("dm", clamp(speed, {0, 255}));*/
+	if (global::dribbler)
+		//controller->send("dr", clamp(speed, {0, 255}));
+		stream << "d" << (speed > 0 ? 1 : 0) << "\n" << flush;
 }
 
 bool mbed_main_controller::io(const int &num)
