@@ -6,6 +6,7 @@
 
 #include "global.hpp"
 #include "math.hpp"
+#include "camera.hpp"
 
 using namespace std;
 
@@ -23,12 +24,12 @@ void mousecb(int event, int x, int y, int flags, void *userdata)
 {
 	static cv::Point2f prev(0, 0);
 
-	cv::Size &framesize = *static_cast<cv::Size*>(userdata);
+	camera &cam = *static_cast<camera*>(userdata);
 	if (event == cv::EVENT_LBUTTONUP)
 	{
-		auto rel = cam2rel(cv::Point2f(x, y), framesize);
+		auto rel = cam.cam2rel(cv::Point2f(x, y));
 		auto pol = rect2pol(rel);
-		cout << rel << " " << pol << " " << cv::norm(rel - prev) << endl;
+		cout << rel << "\t" << pol << "\t" << cv::norm(rel - prev) << endl;
 
 		prev = rel;
 	}
@@ -36,45 +37,52 @@ void mousecb(int event, int x, int y, int flags, void *userdata)
 
 module::type camera_module::run(const module::type &prev_module)
 {
-	cv::VideoCapture capture(global::video_id);
+	string name;
+	cout << "camera: ";
+	cin >> name;
+
+	camera cam(-1, name, false);
+
+	string path;
+	cout << "path [" << cam.path << "]: ";
+	cin.ignore(numeric_limits<streamsize>::max(), '\n');
+	getline(cin, path);
+	if (!path.empty())
+		cam.path = path;
+
+	cam.open();
 
 	cv::namedWindow("camera");
 
-	int hfov = global::hfov * 10, vfov = global::vfov * 10, h = global::h * 1000, alpha = global::alpha * 10;
+	int hfov = cam.hfov * 10, vfov = cam.vfov * 10, h = cam.h * 1000, alpha = cam.alpha * 10, theta = cam.theta * 10;
 
 	cv::createTrackbar("hfov", "camera", &hfov, 1000);
 	cv::createTrackbar("vfov", "camera", &vfov, 1000);
 	cv::createTrackbar("h", "camera", &h, 1000);
 	cv::createTrackbar("alpha", "camera", &alpha, 900);
+	cv::createTrackbar("theta", "camera", &theta, 3600);
 
-	cv::Size framesize;
-	{
-		cv::Mat frame;
-		capture >> frame;
-		framesize = frame.size();
-	}
-
-	cv::setMouseCallback("camera", &mousecb, &framesize);
+	cv::setMouseCallback("camera", &mousecb, &cam);
 
 	while (1)
 	{
-		cv::Mat frame;
-		capture >> frame;
+		cam.update();
 
 		cv::Mat display;
-		frame.copyTo(display);
+		cam.frame.copyTo(display);
 
-		global::hfov = hfov / 10.f;
-		global::vfov = vfov / 10.f;
-		global::h = h / 1000.f;
-		global::alpha = alpha / 10.f;
+		cam.hfov = hfov / 10.f;
+		cam.vfov = vfov / 10.f;
+		cam.h = h / 1000.f;
+		cam.alpha = alpha / 10.f;
+		cam.theta = theta / 10.f;
 
 		float delta = 0.1f;
-		for (float dx = 0.f; dx <= 10.f; dx += delta)
+		for (float dx = -10.f; dx <= 10.f; dx += delta)
 		{
-			for (float dy = -3.f; dy <= 3.f; dy += delta)
+			for (float dy = -10.f; dy <= 10.f; dy += delta)
 			{
-				auto pos = rel2cam(cv::Point2f{dx, dy}, frame.size());
+				auto pos = cam.rel2cam(cv::Point2f{dx, dy});
 				cv::circle(display, pos, 2.f, cv::Scalar(0, 0, 255));
 			}
 		}
@@ -86,7 +94,7 @@ module::type camera_module::run(const module::type &prev_module)
 		{
 			case 'q':
 			{
-				global::save_camera();
+				cam.save_camera();
 				return module::type::menu;
 			}
 		}

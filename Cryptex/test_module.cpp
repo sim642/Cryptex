@@ -77,7 +77,7 @@ module::type test_module::run(const module::type &prev_module)
 		cv::Mat combo;
 		cv::bitwise_and(mask1, mask2, combo);*/
 
-		cv::Mat mask1;
+		/*cv::Mat mask1;
 		col1.threshold(frame, mask1);
 		cv::blur(mask1, mask1, cv::Size(5, 5));
 
@@ -103,7 +103,7 @@ module::type test_module::run(const module::type &prev_module)
 					i = key - '1';
 				}
 				break;
-		}
+		}*/
 	}
 
 	return module::type::menu;

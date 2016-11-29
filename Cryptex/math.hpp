@@ -7,7 +7,12 @@
 template<typename T>
 using range_t = std::pair<T, T>;
 
-typedef std::pair<cv::Point2f, cv::Point2f> line_t;
+struct line_t
+{
+	cv::Point2f first;
+	cv::Point2f second;
+	size_t cam;
+};
 typedef std::vector<line_t> lines_t;
 
 
@@ -83,13 +88,9 @@ inline cv::Point_<T> scale_to(const cv::Point_<T> &vec, T len)
 	return (len * cv::norm(vec)) * vec;
 }
 
-cv::Point2f cam2rel(const cv::Point2f &cam, const cv::Size2i &size);
-line_t cam2rel(const line_t &cam, const cv::Size2i &size);
-cv::Point2f rel2cam(const cv::Point2f &rel, const cv::Size2i &size);
-line_t rel2cam(const line_t &rel, const cv::Size2i &size);
-
 cv::Point2f rect2pol(const cv::Point2f &rect);
 cv::Point2f pol2rect(const cv::Point2f &pol);
+cv::Point2f rotate(const cv::Point2f &vec, float deg);
 
 float dist_line_point(const cv::Point2f &a, const cv::Vec2f &n, const cv::Point2f &p);
 float dist_line_point(const cv::Point2f &a, const cv::Point2f &b, const cv::Point2f &p);

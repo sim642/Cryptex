@@ -15,18 +15,20 @@ using namespace std;
 
 int main()
 {
-	global::env = "ttu2";
+	global::env = "test";
 	global::video_id = 0;
 
-	global::referee = true;
+	global::referee = false;
 	global::field = 'A';
 	global::id = 'A';
 
-	global::dribbler = true;
-	global::coilgun = true;
+	global::dribbler = false;
+	global::coilgun = false;
 
 	global::camera = "pseye";
 	global::load_camera();
+
+	global::cams = "front,back";
 
 	map<module::type, module*> modules;
 	modules[module::type::menu] = new menu_module();

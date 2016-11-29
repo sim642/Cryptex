@@ -23,6 +23,8 @@ config_module::config_module()
 	choices.push_back(make_tuple("vfov", var_type::float_t, &global::vfov));
 	choices.push_back(make_tuple("h", var_type::float_t, &global::h));
 	choices.push_back(make_tuple("alpha", var_type::float_t, &global::alpha));
+
+	choices.push_back(make_tuple("cams", var_type::string_t, &global::cams));
 }
 
 config_module::~config_module()

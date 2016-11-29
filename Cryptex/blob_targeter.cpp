@@ -10,10 +10,10 @@ blob_targeter::~blob_targeter()
 
 }
 
-boost::optional<blob> blob_targeter::update(const cv::Mat& frame)
+boost::optional<blob> blob_targeter::update(const multi_camera& cams)
 {
 	blobs_t blobs;
-	finder.detect_frame(frame, blobs);
+	finder.detect_frame(cams, blobs);
 	return blob_finder::largest(blobs);
 }
 
@@ -22,7 +22,7 @@ void blob_targeter::reset()
 
 }
 
-void blob_targeter::draw(cv::Mat &display)
+void blob_targeter::draw(cv::Mat &multi_display, const multi_camera &cams)
 {
 
 }

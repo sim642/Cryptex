@@ -6,6 +6,7 @@
 #include <vector>
 #include <string>
 #include "math.hpp"
+#include "camera.hpp"
 
 class calibrator_window;
 

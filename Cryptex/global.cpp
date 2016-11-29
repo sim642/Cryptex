@@ -12,6 +12,8 @@ namespace global
 	std::string camera;
 	float hfov, vfov, h, alpha;
 
+	std::string cams;
+
 	std::string calib_filename(const std::string &name, const std::string &ext)
 	{
 		return "./calibs/" + name + "." + ext;
@@ -20,6 +22,11 @@ namespace global
 	std::string env_filename(const std::string &name, const std::string &ext)
 	{
 		return "./calibs/" + env + "/" + name + "." + ext;
+	}
+
+	std::string camera_filename(const std::string &name, const std::string &ext)
+	{
+		return "./calibs/" + name + "." + ext;
 	}
 
 	void load_camera()

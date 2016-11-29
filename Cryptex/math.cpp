@@ -3,38 +3,6 @@
 
 using namespace std;
 
-cv::Point2f cam2rel(const cv::Point2f &cam, const cv::Size2i &size)
-{
-	float phi = global::vfov * (0.5f - cam.y / size.height) + global::alpha;
-	float dx = global::h * tan(deg2rad(phi));
-
-	float psi = global::hfov * (0.5f - cam.x / size.width);
-	float dy = sqrt(sqr(global::h) + sqr(dx)) * tan(deg2rad(psi));
-
-	return cv::Point2f(dx, dy);
-}
-
-line_t cam2rel(const line_t& cam, const cv::Size2i& size)
-{
-	return line_t(cam2rel(cam.first, size), cam2rel(cam.second, size));
-}
-
-cv::Point2f rel2cam(const cv::Point2f &rel, const cv::Size2i &size)
-{
-	float phi = rad2deg(atan(rel.x / global::h));
-	float y = (0.5f - (phi - global::alpha) / global::vfov) * size.height;
-
-	float psi = rad2deg(atan(rel.y / sqrt(sqr(global::h) + sqr(rel.x))));
-	float x = (0.5f - psi / global::hfov) * size.width;
-
-	return cv::Point2f(x, y);
-}
-
-line_t rel2cam(const line_t& rel, const cv::Size2i& size)
-{
-	return line_t(rel2cam(rel.first, size), rel2cam(rel.second, size));
-}
-
 cv::Point2f rect2pol(const cv::Point2f &rect)
 {
 	return cv::Point2f(cv::norm(rect), rad2deg(vec_angle(rect)));
@@ -43,6 +11,13 @@ cv::Point2f rect2pol(const cv::Point2f &rect)
 cv::Point2f pol2rect(const cv::Point2f &pol)
 {
 	return pol.x * cv::Point2f(cos(deg2rad(pol.y)), sin(deg2rad(pol.y)));
+}
+
+cv::Point2f rotate(const cv::Point2f &vec, float deg)
+{
+	cv::Point2f pol = rect2pol(vec);
+	pol.y += deg;
+	return pol2rect(pol);
 }
 
 float ease_nexpn(float t, const cv::Point2f &p)
@@ -93,7 +68,7 @@ line_t lengthen(const line_t &line, float dl)
 	auto diff = line.second - line.first;
 	auto p = line.first + scale_to(diff, -dl);
 	auto d = lengthen(diff, 2 * dl);
-	return line_t(p, p + d);
+	return line_t{p, p + d, line.cam};
 }
 
 cv::Point2f midpoint(const line_t& line)
