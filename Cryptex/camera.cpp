@@ -4,6 +4,7 @@
 #include <vector>
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/classification.hpp>
+#include "logger.hpp"
 
 using namespace std;
 
@@ -21,7 +22,8 @@ camera::~camera()
 
 bool camera::open()
 {
-	return capture.open(path);
+	LOG("camera", "opening ", path);
+	return capture.open(path, cv::CAP_V4L);
 }
 
 void camera::load_camera()
@@ -95,7 +97,9 @@ multi_camera load_multi_camera()
 	multi_camera cams;
 	cams.reserve(parts.size());
 	for (size_t i = 0; i < parts.size(); i++)
+	{
 		cams.push_back(new camera(i, parts[i]));
+	}
 	return cams;
 }
 
