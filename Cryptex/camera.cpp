@@ -23,6 +23,7 @@ camera::~camera()
 bool camera::open()
 {
 	LOG("camera", "opening ", path);
+	system(("v4l2ctrl -d " + path + " -l calibs/" + global::camera + ".v4l2").c_str()); // load camera config
 	return capture.open(path, cv::CAP_V4L);
 }
 

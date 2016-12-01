@@ -22,6 +22,7 @@ mbed_main_controller::mbed_main_controller(boost::asio::io_service &io, const st
 mbed_main_controller::~mbed_main_controller()
 {
 	dribbler(0);
+	stream << "e\n" << flush;
 }
 
 void mbed_main_controller::kick_override(const bool& state)
@@ -62,14 +63,15 @@ void mbed_main_controller::charge()
 	assume_coilgun();
 	LOG("main", "charge");
 	stream << "c1\n" << flush;
-	this_thread::sleep_for(chrono::milliseconds(1000));
-	stream << "c0\n" << flush;
 }
 
 bool mbed_main_controller::ball()
 {
 	//return stoi(controller->send_recv("bl", "bl").second);
-	return false;
+	stream << "i\n" << flush;
+	int i = 0;
+	stream >> i;
+	return i;
 }
 
 bool mbed_main_controller::button(const int &num)
@@ -84,7 +86,8 @@ void mbed_main_controller::dribbler(const int& speed)
 {
 	if (global::dribbler)
 		//controller->send("dr", clamp(speed, {0, 255}));
-		stream << "d" << (speed > 0 ? 1 : 0) << "\n" << flush;
+		//stream << "d" << (speed > 0 ? 1 : 0) << "\n" << flush;
+		stream << "d" << (speed > 0 ? 45 : 0) << "\n" << flush;
 }
 
 bool mbed_main_controller::io(const int &num)
@@ -98,4 +101,5 @@ bool mbed_main_controller::io(const int &num)
 void mbed_main_controller::ping()
 {
 	//controller->send("p");
+	stream << "f1\n" << flush;
 }

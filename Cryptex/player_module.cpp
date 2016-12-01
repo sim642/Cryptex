@@ -83,7 +83,7 @@ module::type player_module::run(const module::type &prev_module)
 	//manager.add_manager(&scanner);
 	//serial_controller mcontrol(io, "/dev/ttyACM0");
 
-	mbed_main_controller m(io, "/dev/ttyACM24");
+	mbed_main_controller m(io, "/dev/ttyACM1");
 	mbed_driver d(m);
 
 	//driver d(dongle);
@@ -98,8 +98,8 @@ module::type player_module::run(const module::type &prev_module)
 
 	//psmove move;
 
-	/*srf_dongle srf(io, "/dev/ttyACM1");
-	referee_controller referee(srf);*/
+	srf_dongle srf(io, "/dev/ttyACM0");
+	referee_controller referee(srf);
 
 	blob_finder baller("oranz", "ball");
 	ball_targeter::scorer_t scorer = [](const blob &b)
@@ -120,7 +120,10 @@ module::type player_module::run(const module::type &prev_module)
 	ball_targeter balls(baller, 100, ballmodifier, scorer, 0.2f);
 
 	LOG("player", "waiting team selection button...");
-	bool team = m.button(btn_team);
+	//bool team = m.button(btn_team);
+	bool team = true;
+	cout << "goal (1-kollane, 0-sinine): ";
+	cin >> team;
 	string team_str = team ? "kollane" : "sinine";
 	LOG("player", "attacking", team_str);
 	blob_finder goaler(team_str, "goal");
@@ -145,6 +148,8 @@ module::type player_module::run(const module::type &prev_module)
 
 	transitions[BallFind] = [&](state_t prev_state)
 	{
+        if (global::coilgun)
+            m.charge();
 		m.dribbler(0);
 	};
 
@@ -168,11 +173,13 @@ module::type player_module::run(const module::type &prev_module)
 		angle_pid.set(0);
 		rotate_pid.set(1.5, 0, 0.0);*/
 
-		speed_pid.set(100, 0, 1.0);
+		//speed_pid.set(100, 0, 1.0); // vs roadkill out
+		speed_pid.set(120, 0, 1.0);
 		angle_pid.set(0);
 		//rotate_pid.set(1.5, 0.4, 0.15);
 		//rotate_pid.set(1.7, 0.35, 0.15);
-		rotate_pid.set(1.40, 0.25, 0.1);
+		//rotate_pid.set(1.40, 0.25, 0.05); // vs roadkill out
+		rotate_pid.set(1.50, 0.25, 0.06);
 	};
 
 	transitions[BallGrab] = [&](state_t prev_state)
@@ -195,15 +202,15 @@ module::type player_module::run(const module::type &prev_module)
 		/*speed_pid.set(1.5);
 		rotate_pid.set(2, 0.7, 0.15);*/
 
-		speed_pid.set(1.5);
+		speed_pid.set(1.2);
 		//rotate_pid.set(1.5, 0, 0.22);
 		//rotate_pid.set(1.0, 0, 0.05);
 		//rotate_pid.set(0.3, 0.05, 0.015);
-		rotate_pid.set(0.5, 0.1, 0.12);
+		rotate_pid.set(0.4, 0.1, 0.05);
 	};
 
-	if (global::coilgun)
-		m.charge();
+	/*if (global::coilgun)
+		m.charge();*/
 	auto kickit = kicks.begin();
 
 	chrono::high_resolution_clock::time_point framestart;
@@ -214,7 +221,7 @@ module::type player_module::run(const module::type &prev_module)
 		m.ping();
 		//cout << m.ball() << flush;
 
-		/*if (global::referee)
+		if (global::referee)
 		{
 			switch (referee.poll()) // only one per cycle
 			{
@@ -230,7 +237,7 @@ module::type player_module::run(const module::type &prev_module)
 					d.stop();
 					break;
 			}
-		}*/
+		}
 
 		for (auto &cam : cams)
 			cam.update();
@@ -342,6 +349,8 @@ module::type player_module::run(const module::type &prev_module)
 			{
 				if (!m.ball())
 					SET_STATE(BallFind)
+
+                m.dribbler(dribblerspeed);
 
 				auto goal = goals.update(cams);
 				if (goal)
@@ -528,8 +537,16 @@ module::type player_module::run(const module::type &prev_module)
 				break;
 
 			case 'k':
-				m.kick();
+				m.kick(1000);
 				break;
+
+            case 'x':
+                m.dribbler(0);
+                break;
+
+            case 'z':
+                m.dribbler(dribblerspeed);
+                break;
 
 			/*case '1':
 				set_state(Start);

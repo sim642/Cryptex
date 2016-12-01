@@ -24,14 +24,15 @@ referee_controller::poll_t referee_controller::poll()
 		string cmd;
 		tie(field, target, cmd) = srf_data;
 
-		LOG("referee", field, target, cmd);
+		//LOG("referee", field, target, cmd);
+		LOG("referee", ">", field, "< >", target, "< >", cmd, "<");
 
 		if (field == global::field && (target == global::id || target == 'X'))
 		{
-			if (target == global::id)
+			/*if (target == global::id)
 			{
 				dongle.send(field, target, "ACK");
-			}
+			}*/
 
 			if (cmd == "START")
 			{
