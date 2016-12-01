@@ -16,7 +16,7 @@ void mbed_main_controller::assume_coilgun()
 
 mbed_main_controller::mbed_main_controller(boost::asio::io_service &io, const std::string &dev) : port(io, dev), stream(port)
 {
-	port.set_option(boost::asio::serial_port_base::baud_rate(9600));
+	port.set_option(boost::asio::serial_port_base::baud_rate(115200));
 }
 
 mbed_main_controller::~mbed_main_controller()
