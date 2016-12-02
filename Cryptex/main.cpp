@@ -18,7 +18,7 @@ int main()
 	global::env = "301";
 	global::video_id = 0;
 
-	global::referee = true;
+	global::referee = false;
 	global::field = 'A';
 	global::id = 'A';
 
@@ -28,7 +28,7 @@ int main()
 	global::camera = "pseye";
 	global::load_camera();
 
-	global::cams = "front";
+	global::cams = "front,back";
 
 	map<module::type, module*> modules;
 	modules[module::type::menu] = new menu_module();

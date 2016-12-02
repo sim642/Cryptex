@@ -44,7 +44,8 @@ obj/
 *.pdf
 *.PDF
 *.xcf
-*.png
+#*.png
+
 
 # Recordings
 *.avi

@@ -6,3 +6,4 @@ h: 1.7499999701976776e-01
 alpha: 6.9900001525878906e+01
 theta: 0.
 path: /dev/video0
+mask_path: "./pics/front-mask_.png"

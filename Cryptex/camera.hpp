@@ -20,6 +20,7 @@ class camera
 		void update();
 
 		cv::Mat frame;
+		cv::Mat frame_raw;
 
 		cv::Point2f cam2rel(const cv::Point2f &cam) const;
 		line_t cam2rel(const line_t &cam) const;
@@ -35,6 +36,8 @@ class camera
 
 		std::string path;
 		cv::VideoCapture capture;
+		std::string mask_path;
+		cv::Mat mask;
 
 		cv::Size2i size;
 		float hfov, vfov, h, alpha, theta;

@@ -50,6 +50,13 @@ module::type camera_module::run(const module::type &prev_module)
 	if (!path.empty())
 		cam.path = path;
 
+	string mask_path;
+	cout << "mask_path [" << cam.mask_path << "]: ";
+	//cin.ignore(numeric_limits<streamsize>::max(), '\n');
+	getline(cin, mask_path);
+	if (!mask_path.empty())
+		cam.mask_path = mask_path;
+
 	cam.open();
 
 	cv::namedWindow("camera");

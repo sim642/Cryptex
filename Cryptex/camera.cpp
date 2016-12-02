@@ -23,6 +23,9 @@ camera::~camera()
 bool camera::open()
 {
 	LOG("camera", "opening ", path);
+
+	mask = cv::imread(mask_path, cv::IMREAD_GRAYSCALE);
+
 	system(("v4l2ctrl -d " + path + " -l calibs/" + global::camera + ".v4l2").c_str()); // load camera config
 	return capture.open(path, cv::CAP_V4L);
 }
@@ -36,6 +39,7 @@ void camera::load_camera()
 	fs["alpha"] >> alpha;
 	fs["theta"] >> theta;
 	fs["path"] >> path;
+	fs["mask_path"] >> mask_path;
 }
 
 void camera::save_camera()
@@ -47,11 +51,13 @@ void camera::save_camera()
 	fs << "alpha" << alpha;
 	fs << "theta" << theta;
 	fs << "path" << path;
+	fs << "mask_path" << mask_path;
 }
 
 void camera::update()
 {
-	capture >> frame;
+	capture >> frame_raw;
+	frame_raw.copyTo(frame, mask);
 	size = frame.size();
 }
 
