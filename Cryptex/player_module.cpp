@@ -83,7 +83,7 @@ module::type player_module::run(const module::type &prev_module)
 	//manager.add_manager(&scanner);
 	//serial_controller mcontrol(io, "/dev/ttyACM0");
 
-	mbed_main_controller m(io, "/dev/ttyACM0");
+	mbed_main_controller m(io, "/dev/ttyACM1");
 	mbed_driver d(m);
 
 	//driver d(dongle);
@@ -98,7 +98,7 @@ module::type player_module::run(const module::type &prev_module)
 
 	//psmove move;
 
-	srf_dongle srf(io, "/dev/ttyACM1");
+	srf_dongle srf(io, "/dev/ttyACM0");
 	referee_controller referee(srf);
 
 	blob_finder baller("oranz", "ball");
@@ -179,7 +179,7 @@ module::type player_module::run(const module::type &prev_module)
 		//rotate_pid.set(1.5, 0.4, 0.15);
 		//rotate_pid.set(1.7, 0.35, 0.15);
 		//rotate_pid.set(1.40, 0.25, 0.05); // vs roadkill out
-		rotate_pid.set(0.8, 0.1, 0.0);
+		rotate_pid.set(0.8, 0.0, 0.1);
 	};
 
 	transitions[BallGrab] = [&](state_t prev_state)
@@ -202,7 +202,7 @@ module::type player_module::run(const module::type &prev_module)
 		/*speed_pid.set(1.5);
 		rotate_pid.set(2, 0.7, 0.15);*/
 
-		speed_pid.set(1.2);
+		speed_pid.set(1.5);
 		//rotate_pid.set(1.5, 0, 0.22);
 		//rotate_pid.set(1.0, 0, 0.05);
 		//rotate_pid.set(0.3, 0.05, 0.015);
@@ -300,8 +300,8 @@ module::type player_module::run(const module::type &prev_module)
 				{
 					d.omni(ease_nexpn(get_statestart(), cv::Point2f(0.75, 0.75)) * speed_pid.step(ball->dist), angle_pid.step(ball->angle), rotate_pid.step(ball->angle));
 
-					m.dribbler(ball->dist < 0.6 ? dribblerspeed : 0);
-					if (ball->dist < 0.28 && abs(ball->angle) < 10)
+					m.dribbler(ball->dist < 0.5 ? dribblerspeed : 0);
+					if (ball->dist < 0.29 && abs(ball->angle) < 7)
 						SET_STATE(BallGrab)
 				}
 
@@ -310,15 +310,15 @@ module::type player_module::run(const module::type &prev_module)
 
 			case BallGrab:
 			{
-				d.straight(50);
+				d.straight(40);
 				m.dribbler(dribblerspeed);
 
 				if (m.ball())
 				{
-					this_thread::sleep_for(chrono::milliseconds(400));
+					this_thread::sleep_for(chrono::milliseconds(350));
 					SET_STATE(GoalFind)
 				}
-				else if (get_statestart() > 0.7f)
+				else if (get_statestart() > 0.5f)
 					SET_STATE(BallFind)
 
 				break;
@@ -332,14 +332,20 @@ module::type player_module::run(const module::type &prev_module)
 				m.dribbler(dribblerspeed);
 
 				auto goal = goals.update(cams);
-				if (goal)
+				if (goal && abs(goal->angle) < 45)
 					SET_STATE(GoalAim)
 				else
 				{
 					if (goalside == half::left)
-						d.omni(25, -60, 25);
+					{
+						//d.omni(25, -60, 25);
+						d.omni(45, -80, 40);
+                    }
 					else
-						d.omni(25, 60, -25);
+					{
+						//d.omni(25, 60, -25);
+						d.omni(45, 80, -40);
+                    }
 				}
 
 				break;
@@ -434,7 +440,7 @@ module::type player_module::run(const module::type &prev_module)
 						}
 					}
 					else
-						d.omni(speed_pid.step(fabs(goal->angle)), sign(goal->angle) * (-45), rotate_pid.step(goal->angle));
+						d.omni(speed_pid.step(fabs(goal->angle)), sign(goal->angle) * (-80), rotate_pid.step(goal->angle));
 				}
 				else
 					SET_STATE(GoalFind)

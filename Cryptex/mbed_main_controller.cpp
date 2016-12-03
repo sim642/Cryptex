@@ -17,6 +17,7 @@ void mbed_main_controller::assume_coilgun()
 mbed_main_controller::mbed_main_controller(boost::asio::io_service &io, const std::string &dev) : port(io, dev), stream(port)
 {
 	port.set_option(boost::asio::serial_port_base::baud_rate(115200));
+	failsafe(true);
 }
 
 mbed_main_controller::~mbed_main_controller()
@@ -102,4 +103,9 @@ void mbed_main_controller::ping()
 {
 	//controller->send("p");
 	stream << "f1\n" << flush;
+}
+
+void mbed_main_controller::failsafe(const bool &state)
+{
+    stream << "f" << state << "\n" << flush;
 }

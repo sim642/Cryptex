@@ -28,6 +28,8 @@ class mbed_main_controller
 
 		void ping();
 
+		void failsafe(const bool &state);
+
 		friend class mbed_driver;
 
 	private:

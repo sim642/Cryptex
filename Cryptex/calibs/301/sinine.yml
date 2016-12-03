@@ -1,5 +1,5 @@
 %YAML:1.0
 ---
-lower: [ 45, 171, 0, 0 ]
-upper: [ 69, 254, 173, 0 ]
-struct_size: 6
+lower: [ 60, 171, 38, 0 ]
+upper: [ 76, 255, 173, 0 ]
+struct_size: 5
