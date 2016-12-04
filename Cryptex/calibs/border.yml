@@ -2,6 +2,6 @@
 ---
 mincanny: 0
 maxcanny: 255
-thres: 80
-length: 111
+thres: 53
+length: 91
 gap: 34

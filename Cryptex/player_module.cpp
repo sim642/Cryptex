@@ -131,7 +131,7 @@ module::type player_module::run(const module::type &prev_module)
 	goal_targeter goals(goaler, goaler2, 45);
 	ballmodifier.add_modifier(goals);
 	half goalside = half::right;
-	float lastrotate = 0;
+	float lastrotate = 1;
 
 	blob_finder borderer("must");
 	blob_finder borderer2("valge");
@@ -176,7 +176,7 @@ module::type player_module::run(const module::type &prev_module)
 		rotate_pid.set(1.5, 0, 0.0);*/
 
 		//speed_pid.set(100, 0, 1.0); // vs roadkill out
-		speed_pid.set(70, 0, 1.8);
+		speed_pid.set(70, 0, 2.5);
 		angle_pid.set(0);
 		//rotate_pid.set(1.5, 0.4, 0.15);
 		//rotate_pid.set(1.7, 0.35, 0.15);
@@ -296,14 +296,14 @@ module::type player_module::run(const module::type &prev_module)
 					if (get_statestart() > 5.f)
 						SET_STATE(AreaEmpty)
 					else
-						d.rotate(sign(lastrotate) * max(3.f, 20 - get_statestart() / 1.75f * 10));
+						d.rotate(sign(lastrotate) * max(3.f, 20 - get_statestart() / 2.5f * 10));
 				}
 				else if (state == BallDrive)
 				{
 					d.omni(ease_nexpn(get_statestart(), cv::Point2f(0.75, 0.75)) * speed_pid.step(ball->dist), angle_pid.step(ball->angle), lastrotate = rotate_pid.step(ball->angle));
 
 					m.dribbler(ball->dist < 1 ? dribblerspeed : 0);
-					if (ball->dist < 0.29 && abs(ball->angle) < 7)
+					if (ball->dist < 0.28 && abs(ball->angle) < 10)
 						SET_STATE(BallGrab)
 				}
 
@@ -312,7 +312,7 @@ module::type player_module::run(const module::type &prev_module)
 
 			case BallGrab:
 			{
-				d.straight(35);
+				d.straight(30);
 				m.dribbler(dribblerspeed);
 
 				if (m.ball())
@@ -396,17 +396,7 @@ module::type player_module::run(const module::type &prev_module)
 							//auto dist = dist_lineseg_point({0.f, 0.f}, {0.f, goalpoint.y}, ball.rel);
 							auto dist = dist_line_point(cv::Point2f(0.f, 0.f), cv::Vec2f(1.f, 0.f), ball.rel);
 							//cout << dist << "\t";
-							if (dist < 0.1f)
-							{
-								good = false;
-								break;
-							}
-						}
-
-						for (auto &enemy : goals.enemys)
-						{
-							auto line = goal_targeter::blob2line(enemy, cams);
-							if (line.first.y < 0 && line.second.y > 0)
+							if (ball.rel.x > 0 && dist < 0.1f)
 							{
 								good = false;
 								break;
