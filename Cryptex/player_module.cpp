@@ -131,9 +131,11 @@ module::type player_module::run(const module::type &prev_module)
 	goal_targeter goals(goaler, goaler2, 45);
 	ballmodifier.add_modifier(goals);
 	half goalside = half::right;
+	float lastrotate = 0;
 
 	blob_finder borderer("must");
-	border_detector borders(borderer, "border");
+	blob_finder borderer2("valge");
+	border_detector borders(borderer, borderer2, "border");
 	ballmodifier.add_modifier(borders);
 
 	cv::namedWindow("Remote");
@@ -174,12 +176,12 @@ module::type player_module::run(const module::type &prev_module)
 		rotate_pid.set(1.5, 0, 0.0);*/
 
 		//speed_pid.set(100, 0, 1.0); // vs roadkill out
-		speed_pid.set(100, 0, 1.0);
+		speed_pid.set(70, 0, 1.8);
 		angle_pid.set(0);
 		//rotate_pid.set(1.5, 0.4, 0.15);
 		//rotate_pid.set(1.7, 0.35, 0.15);
 		//rotate_pid.set(1.40, 0.25, 0.05); // vs roadkill out
-		rotate_pid.set(0.7, 0.0, 0.12);
+		rotate_pid.set(0.45, 0.0, 0.05);
 	};
 
 	transitions[BallGrab] = [&](state_t prev_state)
@@ -202,11 +204,11 @@ module::type player_module::run(const module::type &prev_module)
 		/*speed_pid.set(1.5);
 		rotate_pid.set(2, 0.7, 0.15);*/
 
-		speed_pid.set(1.5);
+		speed_pid.set(0.5);
 		//rotate_pid.set(1.5, 0, 0.22);
 		//rotate_pid.set(1.0, 0, 0.05);
 		//rotate_pid.set(0.3, 0.05, 0.015);
-		rotate_pid.set(0.4, 0.2, 0.05);
+		rotate_pid.set(0.2, 0.4, 0.0);
 	};
 
 	/*if (global::coilgun)
@@ -294,13 +296,13 @@ module::type player_module::run(const module::type &prev_module)
 					if (get_statestart() > 5.f)
 						SET_STATE(AreaEmpty)
 					else
-						d.rotate(max(3.f, 20 - get_statestart() / 1.75f * 10));
+						d.rotate(sign(lastrotate) * max(3.f, 20 - get_statestart() / 1.75f * 10));
 				}
 				else if (state == BallDrive)
 				{
-					d.omni(ease_nexpn(get_statestart(), cv::Point2f(0.75, 0.75)) * speed_pid.step(ball->dist), angle_pid.step(ball->angle), rotate_pid.step(ball->angle));
+					d.omni(ease_nexpn(get_statestart(), cv::Point2f(0.75, 0.75)) * speed_pid.step(ball->dist), angle_pid.step(ball->angle), lastrotate = rotate_pid.step(ball->angle));
 
-					m.dribbler(ball->dist < 0.7 ? dribblerspeed : 0);
+					m.dribbler(ball->dist < 1 ? dribblerspeed : 0);
 					if (ball->dist < 0.29 && abs(ball->angle) < 7)
 						SET_STATE(BallGrab)
 				}
@@ -310,15 +312,15 @@ module::type player_module::run(const module::type &prev_module)
 
 			case BallGrab:
 			{
-				d.straight(40);
+				d.straight(35);
 				m.dribbler(dribblerspeed);
 
 				if (m.ball())
 				{
-					this_thread::sleep_for(chrono::milliseconds(350));
+					this_thread::sleep_for(chrono::milliseconds(400));
 					SET_STATE(GoalFind)
 				}
-				else if (get_statestart() > 0.5f)
+				else if (get_statestart() > 0.7f)
 					SET_STATE(BallFind)
 
 				break;
@@ -334,17 +336,21 @@ module::type player_module::run(const module::type &prev_module)
 				auto goal = goals.update(cams);
 				if (goal && abs(goal->angle) < 45)
 					SET_STATE(GoalAim)
+                else if (get_statestart() > 5.f)
+                {
+                    SET_STATE(AreaEmpty)
+                }
 				else
 				{
 					if (goalside == half::left)
 					{
-						//d.omni(25, -60, 25);
-						d.omni(45, -80, 40);
+						d.omni(25, -60, 25);
+						//d.omni(45, -80, 40);
                     }
 					else
 					{
-						//d.omni(25, 60, -25);
-						d.omni(45, 80, -40);
+						d.omni(25, 60, -25);
+						//d.omni(45, 80, -40);
                     }
 				}
 
@@ -366,7 +372,7 @@ module::type player_module::run(const module::type &prev_module)
 					auto goalline = goal_targeter::blob2line(*goal, cams);
 					cout << "1. " << goalline.first << " " << goalline.second << endl;
 					//goalline = lengthen(goalline, -0.15f);
-					goalline = lengthen_rel(goalline, 1.f / 8);
+					goalline = lengthen_rel(goalline, 1.f / 6);
 					cout << "2. " << goalline.first << " " << goalline.second << endl;
 
 					auto goalpoint = midpoint(goalline);
@@ -416,7 +422,7 @@ module::type player_module::run(const module::type &prev_module)
 							{
 								d.stop();
 
-								//this_thread::sleep_for(chrono::milliseconds(300));
+								this_thread::sleep_for(chrono::milliseconds(300));
 								//m.dribbler(0);
 								this_thread::sleep_for(chrono::milliseconds(150));
 								m.kick(*kickit);
@@ -442,7 +448,7 @@ module::type player_module::run(const module::type &prev_module)
 						}
 					}
 					else
-						d.omni(speed_pid.step(fabs(goalmidangle)), sign(goalmidangle) * (-80), rotate_pid.step(goalmidangle));
+						d.omni(speed_pid.step(fabs(goalmidangle)), sign(goalmidangle) * (-45), rotate_pid.step(goalmidangle));
 				}
 				else
 					SET_STATE(GoalFind)
@@ -482,11 +488,15 @@ module::type player_module::run(const module::type &prev_module)
 				borders.draw(multi_display, cams);
 
 				float dist = borders.dist_closest(cv::Point2f(0, 0)); // my distance
-				if (dist > 2.f)
+				float distf = borders.dist_closest(cv::Point2f(0, 2)); // my distance
+
+				if (get_statestart() > 4.f)
+				{
+                    SET_STATE(BallFind)
+				}
+				else if (dist >= numeric_limits<float>::max() || distf < dist)
 				{
 					d.straight(100);
-					this_thread::sleep_for(chrono::milliseconds(750));
-					SET_STATE(BallFind)
 				}
 				else
 					d.rotate(20);

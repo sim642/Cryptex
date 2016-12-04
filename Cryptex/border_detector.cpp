@@ -4,13 +4,13 @@
 
 using namespace std;
 
-border_detector::border_detector(blob_finder &nblobber) : blobber(nblobber)
+border_detector::border_detector(blob_finder &nblobber, blob_finder &nblobber2) : blobber(nblobber), blobber2(nblobber2)
 {
 	//blobber.opening = true;
 	default_lines();
 }
 
-border_detector::border_detector(blob_finder &nblobber, const std::string &lines_name) : blobber(nblobber)
+border_detector::border_detector(blob_finder &nblobber, blob_finder &nblobber2, const std::string &lines_name) : blobber(nblobber), blobber2(nblobber2)
 {
 	//blobber.opening = true;
 	load_lines(lines_name);
@@ -62,7 +62,7 @@ void border_detector::detect(const camera &cam, lines_t &oborders)
 	borders.clear();
 
 	cv::Mat mask;
-	blobber.threshold(cam, mask);
+	threshold(cam, mask);
 
 	cv::Canny(mask, canny, cannythres.first, cannythres.second);
 
@@ -91,13 +91,16 @@ void border_detector::detect(const multi_camera &cams, lines_t &oborders)
 	for (auto &cam : cams)
 	{
 		cv::Mat mask;
-		blobber.threshold(cam, mask);
+		threshold(cam, mask);
 
 		cv::Canny(mask, canny, cannythres.first, cannythres.second);
 
-		cv::HoughLinesP(canny, lines, 1, CV_PI / 180, linethres, linelength, linegap);
-		for (auto &line : lines)
+		std::vector<cv::Vec4i> lines2;
+		cv::HoughLinesP(canny, lines2, 1, CV_PI / 180, linethres, linelength, linegap);
+
+		for (auto &line : lines2)
 		{
+            lines.push_back(line);
 			borders.push_back(line_t{cam.cam2rel(cv::Point2f(line[0], line[1])),
 			                         cam.cam2rel(cv::Point2f(line[2], line[3])),
 			                         cam.i});
@@ -146,4 +149,17 @@ void border_detector::draw(cv::Mat &multi_display, const multi_camera &cams)
 void border_detector::modify(blob& b)
 {
 	b.borderdist = dist_closest(b.rel);
+}
+
+void border_detector::threshold(const camera &cam, cv::Mat &mask)
+{
+    cv::Mat m1, m2;
+    blobber.threshold(cam, m1);
+    blobber2.threshold(cam, m2);
+
+    cv::dilate(m1, m1, cv::getStructuringElement(CV_SHAPE_ELLIPSE, cv::Size(7, 7)));
+    cv::dilate(m2, m2, cv::getStructuringElement(CV_SHAPE_ELLIPSE, cv::Size(7, 7)));
+
+    cv::bitwise_and(m1, m2, mask);
+    //blobber.threshold(cam, mask);
 }

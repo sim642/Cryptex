@@ -28,8 +28,9 @@ module::type linecalibrator_module::run(const module::type &prev_module)
 	cv::namedWindow("canny");
 
 	blob_finder blobber("must");
+	blob_finder blobber2("valge");
 	//blobber.opening = true;
-	border_detector borders(blobber, "border");
+	border_detector borders(blobber, blobber2, "border");
 
 	cv::createTrackbar("linethres", "lines", &borders.linethres, 500);
 	cv::createTrackbar("linelength", "lines", &borders.linelength, 500);

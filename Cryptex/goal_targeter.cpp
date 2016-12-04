@@ -24,12 +24,12 @@ boost::optional<blob> goal_targeter::update(const multi_camera &cams)
 	finder.detect_frame(cams, goals);
 	finder2.detect_frame(cams, goals2);
 
-	blob_finder::angle_filter_out(goals, goals2, enemys, 90, delta);
+	//blob_finder::angle_filter_out(goals, goals2, enemys, 90, delta);
 
 	mygoals.clear();
 	othergoals.clear();
-	transform(goals.begin(), goals.end(), back_inserter(mygoals), bind(goal_targeter::blob2line, placeholders::_1, cams));
-	transform(goals2.begin(), goals2.end(), back_inserter(othergoals), bind(goal_targeter::blob2line, placeholders::_1, cams));
+	//transform(goals.begin(), goals.end(), back_inserter(mygoals), bind(goal_targeter::blob2line, placeholders::_1, cams));
+	//transform(goals2.begin(), goals2.end(), back_inserter(othergoals), bind(goal_targeter::blob2line, placeholders::_1, cams));
 
 	return target = blob_finder::largest(goals);
 }
