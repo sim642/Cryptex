@@ -67,6 +67,8 @@
 		<Unit filename="calibrator_module.hpp" />
 		<Unit filename="calibrator_window.cpp" />
 		<Unit filename="calibrator_window.hpp" />
+		<Unit filename="camera.cpp" />
+		<Unit filename="camera.hpp" />
 		<Unit filename="camera_module.cpp" />
 		<Unit filename="camera_module.hpp" />
 		<Unit filename="config_module.cpp" />
@@ -93,6 +95,10 @@
 		<Unit filename="main_controller.hpp" />
 		<Unit filename="math.cpp" />
 		<Unit filename="math.hpp" />
+		<Unit filename="mbed_driver.cpp" />
+		<Unit filename="mbed_driver.hpp" />
+		<Unit filename="mbed_main_controller.cpp" />
+		<Unit filename="mbed_main_controller.hpp" />
 		<Unit filename="menu_module.cpp" />
 		<Unit filename="menu_module.hpp" />
 		<Unit filename="merge_manager.cpp" />

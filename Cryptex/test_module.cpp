@@ -22,6 +22,9 @@
 #include "blob_tracker.hpp"
 #include "border_detector.hpp"
 
+#include "mbed_main_controller.hpp"
+#include "mbed_driver.hpp"
+
 using namespace std;
 
 test_module::test_module()
@@ -36,70 +39,26 @@ test_module::~test_module()
 
 module::type test_module::run(const module::type &prev_module)
 {
-	vector<string> files =
-	{
-		"my_front_view.jpg",
-		"close-border.jpg",
-		"mid-border.jpg",
-		"far-border.jpg"
-	};
+	boost::asio::io_service io;
+	mbed_main_controller m(io, "/dev/ttyACM1");
+	mbed_driver d(m);
 
-	vector<cv::Mat> images;
-	for (auto &file : files)
-		images.push_back(cv::imread("pics/" + file));
+	m.failsafe(false);
 
-	cv::namedWindow("walls");
-
-	blob_finder baller("oranz", "ball");
-	blob_finder blobber("valge");
-	blobber.opening = true;
-	border_detector borders(blobber);
-
-	int i = 0;
 	while (1)
 	{
-		cv::Mat frame;
-		images[i].copyTo(frame);
-
-		cv::Mat display;
-		frame.copyTo(display);
-
-		blobs_t balls;
-		baller.detect_frame(frame, balls);
-
-		lines_t lines;
-		borders.detect(frame, lines);
-
-		cout << border_detector::dist_closest(lines, cv::Point2f(0, 0)) << endl;
-
-		for (auto &ball : balls)
-		{
-			cout << border_detector::dist_closest(lines, ball.rel) << "\t";
-		}
-		cout << endl;
+        int speed, angle, rotate;
+        cin >> speed >> angle >> rotate;
 
 
-		borders.draw(display);
+		m.dribbler(1);
+		this_thread::sleep_for(chrono::milliseconds(500));
 
-		cv::imshow("walls", display);
+		d.omni(speed, angle, rotate);
+		this_thread::sleep_for(chrono::milliseconds(5000));
 
-		char key = cv::waitKey(1000 / 30);
-		switch (key)
-		{
-			case 'q':
-				return module::type::menu;
-
-			case 's':
-				cv::imwrite("pics/ss.jpg", display);
-				break;
-
-			default:
-				if (isdigit(key))
-				{
-					i = key - '1';
-				}
-				break;
-		}
+		m.dribbler(0);
+		d.stop();
 	}
 
 	return module::type::menu;

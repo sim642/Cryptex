@@ -12,28 +12,33 @@ class linecalibrator_module;
 class border_detector : public blob_modifier
 {
 	public:
-		border_detector(blob_finder &nblobber);
-		border_detector(blob_finder &nblobber, const std::string &lines_name);
+		border_detector(blob_finder &nblobber, blob_finder &nblobber2);
+		border_detector(blob_finder &nblobber, blob_finder &nblobber2, const std::string &lines_name);
 		virtual ~border_detector();
 
 		void default_lines();
 		void load_lines(const std::string &lines_name);
 		void save_lines(const std::string &lines_name);
 
-		void detect(const cv::Mat &frame);
-		void detect(const cv::Mat &frame, lines_t &borders);
+		void detect(const camera &cam);
+		void detect(const camera &cam, lines_t &borders);
+		void detect(const multi_camera &cams);
+		void detect(const multi_camera &cams, lines_t &borders);
 
 		static float dist_closest(const lines_t &borders, const cv::Point2f &p);
 		float dist_closest(const cv::Point2f &p);
 
 		void draw(cv::Mat &display);
+		void draw(cv::Mat &multi_display, const multi_camera &cams);
 
 		virtual void modify(blob &b);
 
 		friend class linecalibrator_module;
 
 	private:
-		blob_finder &blobber;
+        void threshold(const camera &cam, cv::Mat &mask);
+
+		blob_finder &blobber, &blobber2;
 		range_t<int> cannythres;
 		int linethres, linelength, linegap;
 

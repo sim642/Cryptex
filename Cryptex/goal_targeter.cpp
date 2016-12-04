@@ -16,28 +16,29 @@ goal_targeter::~goal_targeter()
 
 }
 
-boost::optional<blob> goal_targeter::update(const cv::Mat& frame)
+boost::optional<blob> goal_targeter::update(const multi_camera &cams)
 {
 	/*cv::Mat framelow;
 	cv::resize(frame, framelow, cv::Size(), scalelow, scalelow, CV_INTER_AREA);*/
 
-	finder.detect_frame(frame, goals);
-	finder2.detect_frame(frame, goals2);
+	finder.detect_frame(cams, goals);
+	finder2.detect_frame(cams, goals2);
 
-	blob_finder::angle_filter_out(goals, goals2, enemys, 90, delta);
+	//blob_finder::angle_filter_out(goals, goals2, enemys, 90, delta);
 
 	mygoals.clear();
 	othergoals.clear();
-	transform(goals.begin(), goals.end(), back_inserter(mygoals), bind(goal_targeter::blob2line, placeholders::_1, frame.size()));
-	transform(goals2.begin(), goals2.end(), back_inserter(othergoals), bind(goal_targeter::blob2line, placeholders::_1, frame.size()));
+	//transform(goals.begin(), goals.end(), back_inserter(mygoals), bind(goal_targeter::blob2line, placeholders::_1, cams));
+	//transform(goals2.begin(), goals2.end(), back_inserter(othergoals), bind(goal_targeter::blob2line, placeholders::_1, cams));
 
 	return target = blob_finder::largest(goals);
 }
 
-void goal_targeter::draw(cv::Mat& display)
+void goal_targeter::draw(cv::Mat &multi_display, const multi_camera &cams)
 {
 	for (auto &b : goals)
 	{
+		auto display = display4cam(multi_display, cams, b.cam);
 		if (b == *target)
 			cv::rectangle(display, b.rect, cv::Scalar(255, 255, 0), 5);
 		else
@@ -45,10 +46,16 @@ void goal_targeter::draw(cv::Mat& display)
 	}
 
 	for (auto &b : goals2)
+	{
+		auto display = display4cam(multi_display, cams, b.cam);
 		cv::rectangle(display, b.rect, cv::Scalar(0, 255, 255), 1);
+	}
 
 	for (auto &b : enemys)
+	{
+		auto display = display4cam(multi_display, cams, b.cam);
 		cv::rectangle(display, b.rect, cv::Scalar(0, 0, 255), 1);
+	}
 }
 
 void goal_targeter::modify(blob& b)
@@ -57,10 +64,10 @@ void goal_targeter::modify(blob& b)
 	b.goaldist = min(dist_closest(mygoals, b.rel), dist_closest(othergoals, b.rel));
 }
 
-line_t goal_targeter::blob2line(const blob& b, const cv::Size2i &size)
+line_t goal_targeter::blob2line(const blob& b, const multi_camera &cams)
 {
 	//return cam2rel(line_t(b.rect.tl() + cv::Point(0, b.rect.height), b.rect.br()), size);
-	return cam2rel(line_t(b.rect.tl() + cv::Point(0, b.rect.height), b.rect.tl() + cv::Point(b.rect.width, b.rect.height)), size);
+	return cams[b.cam].cam2rel(line_t{b.rect.tl() + cv::Point(0, b.rect.height), b.rect.tl() + cv::Point(b.rect.width, b.rect.height), b.cam});
 }
 
 float goal_targeter::dist_closest(const blobs_t& bs, const cv::Point2f& p)

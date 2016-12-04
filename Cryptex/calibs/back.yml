@@ -1,0 +1,9 @@
+%YAML:1.0
+---
+hfov: 58.
+vfov: 4.2700000762939453e+01
+h: 1.6699999570846558e-01
+alpha: 6.9800003051757812e+01
+theta: 180.
+path: /dev/video1
+mask_path: "./pics/back-mask_.png"

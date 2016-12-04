@@ -11,13 +11,13 @@ class goal_targeter : public blob_targeter, public blob_modifier
 		goal_targeter(blob_finder &finder, blob_finder &nfinder2, float ndelta);
 		virtual ~goal_targeter();
 
-		virtual boost::optional<blob> update(const cv::Mat &frame);
+		virtual boost::optional<blob> update(const multi_camera &cams);
 
-		virtual void draw(cv::Mat &display);
+		virtual void draw(cv::Mat &multi_display, const multi_camera &cams);
 
 		virtual void modify(blob &b);
 
-		static line_t blob2line(const blob &b, const cv::Size2i &size);
+		static line_t blob2line(const blob &b, const multi_camera &cams);
 
 		blobs_t enemys;
 	private:

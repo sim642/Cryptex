@@ -5,7 +5,7 @@
 
 using namespace std;
 
-calibrator_window::calibrator_window(cv::VideoCapture &new_capture) : capture(new_capture)
+calibrator_window::calibrator_window(multi_camera &new_cams) : cams(new_cams)
 {
 
 }
@@ -47,34 +47,53 @@ void calibrator_window::calibrate(const std::string &color, const std::string &p
 		cv::createTrackbar("minarea", win_params, &minarea, 10000);
 	}
 
+	cams[0].update();
+
 	while (1)
 	{
-		cv::Mat frame;
-		capture >> frame;
+		cv::Mat masked(cams[0].frame.size().height, cams[0].frame.size().width * cams.size(), CV_8UC3, cv::Scalar(0, 0, 0));
 
-		cv::Mat mask;
-		blobber.threshold(frame, mask);
+		for (int i = 0; i < cams.size(); i++)
+		{
+			auto &cam = cams[i];
 
-		cv::Mat masked;
-		frame.copyTo(masked, mask);
+			cam.update();
+
+			cv::Mat mask;
+			blobber.threshold(cam, mask);
+
+			cam.frame.copyTo(masked(cv::Rect(i * cam.frame.size().width, 0, cam.frame.size().width, cam.frame.size().height)), mask);
+		}
 
 		cv::imshow(win_color, masked);
 		if (param)
 		{
 			blobber.detector.area.first = minarea;
 
-			blobs_t blobs;
-			blobber.detect(mask, blobs);
+			cv::Mat key_img2(cams[0].frame.size().height, cams[0].frame.size().width * cams.size(), CV_8UC3, cv::Scalar(0, 0, 0));
 
-			cv::Mat key_img;
-			cv::cvtColor(mask, key_img, CV_GRAY2BGR);
-			for (auto &b : blobs)
+			for (int i = 0; i < cams.size(); i++)
 			{
-				cv::circle(key_img, b.center, b.radius, cv::Scalar(255, 0, 255));
-				cv::rectangle(key_img, b.rect, cv::Scalar(255, 255, 0));
+				auto &cam = cams[i];
+
+				auto key_img = key_img2(cv::Rect(i * cam.frame.size().width, 0, cam.frame.size().width, cam.frame.size().height));
+
+				cv::Mat mask;
+				blobber.threshold(cam, mask);
+
+				blobs_t blobs;
+				blobber.detect(cam, mask, blobs);
+
+
+				cv::cvtColor(mask, key_img, CV_GRAY2BGR);
+				for (auto &b : blobs)
+				{
+					cv::circle(key_img, b.center, b.radius, cv::Scalar(255, 0, 255));
+					cv::rectangle(key_img, b.rect, cv::Scalar(255, 255, 0));
+				}
 			}
 
-			cv::imshow(win_params, key_img);
+			cv::imshow(win_params, key_img2);
 		}
 
 		char key = cv::waitKey(1000 / 60);
