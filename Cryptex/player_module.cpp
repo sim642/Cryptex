@@ -179,7 +179,7 @@ module::type player_module::run(const module::type &prev_module)
 		//rotate_pid.set(1.5, 0.4, 0.15);
 		//rotate_pid.set(1.7, 0.35, 0.15);
 		//rotate_pid.set(1.40, 0.25, 0.05); // vs roadkill out
-		rotate_pid.set(0.8, 0.0, 0.1);
+		rotate_pid.set(0.7, 0.0, 0.12);
 	};
 
 	transitions[BallGrab] = [&](state_t prev_state)
@@ -206,7 +206,7 @@ module::type player_module::run(const module::type &prev_module)
 		//rotate_pid.set(1.5, 0, 0.22);
 		//rotate_pid.set(1.0, 0, 0.05);
 		//rotate_pid.set(0.3, 0.05, 0.015);
-		rotate_pid.set(0.4, 0.1, 0.05);
+		rotate_pid.set(0.4, 0.2, 0.05);
 	};
 
 	/*if (global::coilgun)
@@ -300,7 +300,7 @@ module::type player_module::run(const module::type &prev_module)
 				{
 					d.omni(ease_nexpn(get_statestart(), cv::Point2f(0.75, 0.75)) * speed_pid.step(ball->dist), angle_pid.step(ball->angle), rotate_pid.step(ball->angle));
 
-					m.dribbler(ball->dist < 0.5 ? dribblerspeed : 0);
+					m.dribbler(ball->dist < 0.7 ? dribblerspeed : 0);
 					if (ball->dist < 0.29 && abs(ball->angle) < 7)
 						SET_STATE(BallGrab)
 				}
@@ -326,8 +326,8 @@ module::type player_module::run(const module::type &prev_module)
 
 			case GoalFind:
 			{
-				/*if (!m.ball())
-					SET_STATE(BallFind)*/
+				if (!m.ball())
+					SET_STATE(BallFind)
 
 				m.dribbler(dribblerspeed);
 
@@ -365,11 +365,14 @@ module::type player_module::run(const module::type &prev_module)
 
 					auto goalline = goal_targeter::blob2line(*goal, cams);
 					cout << "1. " << goalline.first << " " << goalline.second << endl;
-					goalline = lengthen(goalline, -0.15f);
+					//goalline = lengthen(goalline, -0.15f);
+					goalline = lengthen_rel(goalline, 1.f / 8);
 					cout << "2. " << goalline.first << " " << goalline.second << endl;
 
+					auto goalpoint = midpoint(goalline);
 					float goalleftangle = rect2pol(goalline.first).y;
 					float goalrightangle = rect2pol(goalline.second).y;
+					float goalmidangle = rect2pol(goalpoint).y;
 
 					if (goalleftangle > 0 && goalrightangle < 0)
 					{
@@ -382,7 +385,6 @@ module::type player_module::run(const module::type &prev_module)
 						cv::imwrite("pics/shoot.jpg", multi_display);
 
 						bool good = true;
-						auto goalpoint = midpoint(goalline);
 						for (auto &ball : balls)
 						{
 							//auto dist = dist_lineseg_point({0.f, 0.f}, {0.f, goalpoint.y}, ball.rel);
@@ -440,7 +442,7 @@ module::type player_module::run(const module::type &prev_module)
 						}
 					}
 					else
-						d.omni(speed_pid.step(fabs(goal->angle)), sign(goal->angle) * (-80), rotate_pid.step(goal->angle));
+						d.omni(speed_pid.step(fabs(goalmidangle)), sign(goalmidangle) * (-80), rotate_pid.step(goalmidangle));
 				}
 				else
 					SET_STATE(GoalFind)

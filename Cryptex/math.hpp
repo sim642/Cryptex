@@ -99,6 +99,7 @@ float dist_lineseg_point(const cv::Point2f &a, const cv::Point2f &b, const cv::P
 
 cv::Point2f lengthen(const cv::Point2f &p, float dl);
 line_t lengthen(const line_t &line, float dl);
+line_t lengthen_rel(const line_t &line, float r);
 cv::Point2f midpoint(const line_t &line);
 
 #endif // MATH_H

@@ -71,6 +71,12 @@ line_t lengthen(const line_t &line, float dl)
 	return line_t{p, p + d, line.cam};
 }
 
+line_t lengthen_rel(const line_t &line, float r)
+{
+	auto diff = line.second - line.first;
+	return lengthen(line, -cv::norm(diff) * r);
+}
+
 cv::Point2f midpoint(const line_t& line)
 {
 	return (line.first + line.second) / 2.f;
