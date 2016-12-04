@@ -18,9 +18,9 @@ int main()
 	global::env = "r";
 	global::video_id = 0;
 
-	global::referee = false;
-	global::field = 'A';
-	global::id = 'A';
+	global::referee = true;
+	global::field = 'Q';
+	global::id = 'W';
 
 	global::dribbler = true;
 	global::coilgun = true;

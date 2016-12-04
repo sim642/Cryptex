@@ -18,13 +18,13 @@ srf_dongle::~srf_dongle()
 
 void srf_dongle::send(std::string raw)
 {
-	lock_guard<mutex> lock(stream_mut);
+	//lock_guard<mutex> lock(stream_mut);
 	stream << raw << flush;
 }
 
 void srf_dongle::send(char start, std::string id, std::string cmd)
 {
-	lock_guard<mutex> lock(stream_mut);
+	//lock_guard<mutex> lock(stream_mut);
 	stream << setw(1) << start << setw(2) << id << setw(9) << setfill('-') << left << cmd << flush;
 }
 
