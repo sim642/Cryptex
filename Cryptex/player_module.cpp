@@ -176,12 +176,12 @@ module::type player_module::run(const module::type &prev_module)
 		rotate_pid.set(1.5, 0, 0.0);*/
 
 		//speed_pid.set(100, 0, 1.0); // vs roadkill out
-		speed_pid.set(70, 0, 2.5);
+		speed_pid.set(70, 0, 2.0);
 		angle_pid.set(0);
 		//rotate_pid.set(1.5, 0.4, 0.15);
 		//rotate_pid.set(1.7, 0.35, 0.15);
 		//rotate_pid.set(1.40, 0.25, 0.05); // vs roadkill out
-		rotate_pid.set(0.45, 0.0, 0.05);
+		rotate_pid.set(0.45, 0.1, 0.05);
 	};
 
 	transitions[BallGrab] = [&](state_t prev_state)
@@ -279,7 +279,15 @@ module::type player_module::run(const module::type &prev_module)
 					SET_STATE(GoalFind)
 
 				borders.detect(cams);
-				goals.update(cams);
+				auto goal = goals.update(cams);
+				if (goal)
+				{
+                    if (goal->angle > 0)
+                        goalside = half::left;
+                    else
+                        goalside = half::right;
+				}
+
 				auto ball = balls.update(cams);
 				//boost::optional<blob> ball = boost::none;
 				borders.draw(multi_display, cams);
@@ -303,7 +311,7 @@ module::type player_module::run(const module::type &prev_module)
 					d.omni(ease_nexpn(get_statestart(), cv::Point2f(0.75, 0.75)) * speed_pid.step(ball->dist), angle_pid.step(ball->angle), lastrotate = rotate_pid.step(ball->angle));
 
 					m.dribbler(ball->dist < 1 ? dribblerspeed : 0);
-					if (ball->dist < 0.28 && abs(ball->angle) < 10)
+					if (ball->dist < 0.28 && abs(ball->angle) < 8)
 						SET_STATE(BallGrab)
 				}
 
@@ -312,15 +320,14 @@ module::type player_module::run(const module::type &prev_module)
 
 			case BallGrab:
 			{
-				d.straight(30);
+				d.straight(28);
 				m.dribbler(dribblerspeed);
 
-				if (m.ball())
+				if (m.ball() && get_statestart() > 0.75f)
 				{
-					this_thread::sleep_for(chrono::milliseconds(400));
 					SET_STATE(GoalFind)
 				}
-				else if (get_statestart() > 0.7f)
+				else if (get_statestart() > 1.f)
 					SET_STATE(BallFind)
 
 				break;
